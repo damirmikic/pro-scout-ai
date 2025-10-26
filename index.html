@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Scout AI - Player Analysis</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Use Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for the file input */
+        .file-input-label {
+            cursor: pointer;
+        }
+        /* Simple spinner animation */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left-color: #ffffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Styles for image preview containers */
+        .image-preview-container {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding-bottom: 8px; /* For scrollbar visibility */
+            min-height: 100px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .image-preview-container img {
+            max-height: 200px; /* Smaller for comparison view */
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        /* Larger preview for single player tab */
+        #imagePreviewContainerSingle img {
+            max-height: 300px;
+        }
+
+        /* Custom scrollbar */
+        .image-preview-container::-webkit-scrollbar { height: 8px; }
+        .image-preview-container::-webkit-scrollbar-track { background: #4a5568; border-radius: 4px; }
+        .image-preview-container::-webkit-scrollbar-thumb { background: #718096; border-radius: 4px; }
+        .image-preview-container::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+        /* Tab styles */
+        .tab-button {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #9ca3af; /* gray-400 */
+        }
+        .tab-button.active {
+            color: #38bdf8; /* sky-400 */
+            border-color: #38bdf8;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                color: #000000;
+            }
+            main > *,
+            header,
+            #analysisControls,
+            #reportActions {
+                display: none;
+            }
+            #resultsSection,
+            #resultsSection > * {
+                display: block;
+            }
+            #analysisOutput {
+                color: #000000;
+                white-space: pre-wrap; /* Ensure content wraps for print */
+            }
+            #resultsSection {
+                margin-top: 0;
+                padding: 0;
+                background: none;
+                border: none;
+                box-shadow: none;
+            }
+            h2 { /* Report title */
+                color: #000000;
+            }
+            h3 { /* Section titles */
+                color: #000000;
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+                /* Re-create styles stripped by markdown replace */
+                /* text-blue-300 */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+    
+    <div class="w-full max-w-6xl mx-auto p-6 md:p-8 bg-gray-800 rounded-2xl shadow-2xl">
+        <header class="text-center mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
+                Pro Scout AI
+            </h1>
+            <p class="text-lg text-gray-400 mt-2">Professional-grade player analysis, powered by AI.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="flex border-b border-gray-700 mb-6">
+            <button id="tabSingle" class="tab-button active">Single Player Analysis</button>
+            <button id="tabCompare" class="tab-button">Player Comparison</button>
+        </nav>
+
+        <main>
+            <!-- ======================= -->
+            <!-- SINGLE PLAYER TAB       -->
+            <!-- ======================= -->
+            <div id="contentSingle" class="tab-content active">
+                <!-- Upload Section -->
+                <div class="flex flex-col items-center justify-center bg-gray-700 p-6 rounded-lg border-2 border-dashed border-gray-500 min-h-[24rem]">
+                    <div id="imagePreviewContainerSingle" class="w-full mb-4 image-preview-container">
+                        <!-- Images will be added here dynamically -->
+                    </div>
+                    <div id="uploadPlaceholderSingle" class="text-center text-gray-400">
+                        <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                        <p class="mt-2 font-semibold">Drag & Drop, Paste, or Select Images</p>
+                    </div>
+                    <div class="flex gap-4 mt-4">
+                        <label class="file-input-label px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer">
+                            <span>Select Image(s)</span>
+                            <input type="file" id="imageUploadSingle" accept="image/png, image/jpeg" class="hidden" multiple>
+                        </label>
+                        <button id="clearButtonSingle" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors">
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controls and Text Input -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label for="matchContextSingle" class="mb-2 block font-semibold text-gray-300">Optional: Match Context</label>
+                        <input type="text" id="matchContextSingle" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., vs. Liverpool, 90 mins">
+                    </div>
+                    <div>
+                        <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste Additional Stats</label>
+                        <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================= -->
+            <!-- COMPARISON TAB          -->
+            <!-- ======================= -->
+            <div id="contentCompare" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Player 1 Column -->
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold text-center text-blue-300 mb-4">Player 1</h3>
+                        <div id="imagePreviewContainer1" class="w-full mb-4 image-preview-container"></div>
+                        <div id="uploadPlaceholder1" class="text-center text-gray-400 py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                            <p class="mt-1 text-sm font-semibold">Upload/Paste Player 1 Images</p>
+                        </div>
+                        <div class="flex gap-4 mt-2 justify-center">
+                            <label class="file-input-label px-3 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+                                <span>Select Image(s)</span>
+                                <input type="file" id="imageUpload1" accept="image/png, image/jpeg" class="hidden" multiple>
+                            </label>
+                            <button id="clearButton1" class="hidden px-3 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors text-sm">Clear</button>
+                        </div>
+                        <label for="matchContext1" class="mt-4 mb-2 block font-semibold text-gray-300 text-sm">Context (Optional)</label>
+                        <input type="text" id="matchContext1" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="e.g., vs. Liverpool">
+                        <label for="textStats1" class="mt-4 mb-2 block font-semibold text-gray-300 text-sm">Stats (Optional)</label>
+                        <textarea id="textStats1" rows="4" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Paste Player 1 stats..."></textarea>
+                    </div>
+
+                    <!-- Player 2 Column -->
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
+                        <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
+                        <div id="uploadPlaceholder2" class="text-center text-gray-400 py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                            <p class="mt-1 text-sm font-semibold">Upload/Paste Player 2 Images</p>
+                        </div>
+                        <div class="flex gap-4 mt-2 justify-center">
+                            <label class="file-input-label px-3 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+                                <span>Select Image(s)</span>
+                                <input type="file" id="imageUpload2" accept="image/png, image/jpeg" class="hidden" multiple>
+                            </label>
+                            <button id="clearButton2" class="hidden px-3 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors text-sm">Clear</button>
+                        </div>
+                        <label for="matchContext2" class="mt-4 mb-2 block font-semibold text-gray-300 text-sm">Context (Optional)</label>
+                        <input type="text" id="matchContext2" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="e.g., vs. Chelsea">
+                        <label for="textStats2" class="mt-4 mb-2 block font-semibold text-gray-300 text-sm">Stats (Optional)</label>
+                        <textarea id="textStats2" rows="4" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Paste Player 2 stats..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================= -->
+            <!-- ANALYSIS CONTROLS       -->
+            <!-- ======================= -->
+            <div id="analysisControls" class="mt-6">
+                <button id="analyzeButton" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg id="buttonIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M9 17.25H15M15 17.25v1.007a3 3 0 00.879 2.122L16.5 21M15 17.25v-1.007a3 3 0 01.879-2.122L16.5 15M15 17.25H9M9 15h6M9 15c-1.036 0-1.875-.84-1.875-1.875v-1.25c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875v1.25c0 1.036-.84 1.875-1.875-1.875M9 15v-1.875c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875V15M9 9.75h6c1.036 0 1.875-.84 1.875-1.875v-1.25c0-1.036-.84-1.875-1.875-1.875h-6c-1.036 0-1.875.84-1.875-1.875v1.25c0 1.036.84 1.875 1.875 1.875z" />
+                    </svg>
+                    <span id="buttonText">Analyze Player</span>
+                    <div id="loadingSpinner" class="spinner hidden"></div>
+                </button>
+                
+                <!-- Error Message Box -->
+                <div id="errorMessage" class="hidden mt-4 bg-red-800 border border-red-600 text-red-200 px-4 py-3 rounded-lg" role="alert">
+                    <strong class="font-bold">Error:</strong>
+                    <span class="block sm:inline" id="errorText"></span>
+                </div>
+            </div>
+
+            <!-- ======================= -->
+            <!-- RESULTS SECTION         -->
+            <!-- ======================= -->
+            <div id="resultsSection" class="hidden mt-8 bg-gray-700/50 p-6 rounded-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-100">Scouting Report</h2>
+                    <div id="reportActions" class="flex gap-2">
+                        <button id="copyButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
+                            <svg data-lucide="copy" class="h-4 w-4"><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><rect x="7" y="5" width="6" height="6" rx="1"></rect></svg>
+                            Copy
+                        </button>
+                        <button id="printButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
+                            <svg data-lucide="printer" class="h-4 w-4"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Print
+                        </button>
+                    </div>
+                </div>
+                <div id="analysisOutput" class="text-gray-300 leading-relaxed whitespace-pre-line">
+                    <!-- AI analysis will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Global State ---
+            let activeTab = 'single'; // 'single' or 'compare'
+            // playerData[0] is single player, playerData[1] is player 1, playerData[2] is player 2
+            let playerData = [
+                { images: [], mimes: [] },
+                { images: [], mimes: [] },
+                { images: [], mimes: [] }
+            ];
+
+            // --- DOM Elements ---
+            const tabSingle = document.getElementById('tabSingle');
+            const tabCompare = document.getElementById('tabCompare');
+            const contentSingle = document.getElementById('contentSingle');
+            const contentCompare = document.getElementById('contentCompare');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonIcon = document.getElementById('buttonIcon');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultsSection = document.getElementById('resultsSection');
+            const analysisOutput = document.getElementById('analysisOutput');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const copyButton = document.getElementById('copyButton');
+            const printButton = document.getElementById('printButton');
+
+            // --- Single Player Elements ---
+            const imageUploadSingle = document.getElementById('imageUploadSingle');
+            const imagePreviewContainerSingle = document.getElementById('imagePreviewContainerSingle');
+            const uploadPlaceholderSingle = document.getElementById('uploadPlaceholderSingle');
+            const clearButtonSingle = document.getElementById('clearButtonSingle');
+            const matchContextSingle = document.getElementById('matchContextSingle');
+            const textStatsSingle = document.getElementById('textStatsSingle');
+
+            // --- Player 1 Elements ---
+            const imageUpload1 = document.getElementById('imageUpload1');
+            const imagePreviewContainer1 = document.getElementById('imagePreviewContainer1');
+            const uploadPlaceholder1 = document.getElementById('uploadPlaceholder1');
+            const clearButton1 = document.getElementById('clearButton1');
+            const matchContext1 = document.getElementById('matchContext1');
+            const textStats1 = document.getElementById('textStats1');
+            
+            // --- Player 2 Elements ---
+            const imageUpload2 = document.getElementById('imageUpload2');
+            const imagePreviewContainer2 = document.getElementById('imagePreviewContainer2');
+            const uploadPlaceholder2 = document.getElementById('uploadPlaceholder2');
+            const clearButton2 = document.getElementById('clearButton2');
+            const matchContext2 = document.getElementById('matchContext2');
+            const textStats2 = document.getElementById('textStats2');
+
+            // --- AI Prompts ---
+            const systemPrompt = `You are an expert football (soccer) scout with decades of experience analyzing players at the highest level for a top-tier club. Your task is to analyze the provided image(s) and any optional text data. The images contain a player's heatmap and performance statistics. The text data provides supplementary stats. You must be critical, insightful, and professional. Be mindful that the data might be from a single match, so interpret potential 'cons' with caution (e.g., distinguish between a one-off bad game and a potential persistent flaw if possible).`;
+
+            const singleUserQuery = `Analyze the following image(s) and any provided text statistics for the player.
+Based on all available data (heatmap activity, image stats, and text stats), please provide a full professional scouting report.
+Note the provided match context: {MATCH_CONTEXT}
+
+Structure your analysis with the following clear sections. Use Markdown formatting for headings.
+
+# 1. Likely Position(s)
+Identify the player's most likely position and any secondary positions (e.g., 'Primary: Box-to-Box Midfielder (CM)', 'Secondary: Deep-Lying Playmaker (DLP)'). Justify your choice based on the heatmap(s).
+
+# 2. Key Duties & Tactical Role
+Describe their primary responsibilities and tactical role on the pitch based on the data (e.g., 'Covers ground between both boxes, contributes to both defense and attack, looks to progress the ball...').
+
+# 3. Pros
+Identify 3-5 key strengths visible from the data. Be specific. (e.g., 'High Defensive Work Rate: Indicated by heavy shading in his own half and high tackle/interception numbers.', 'Passing Range: Evident from the high number of long balls completed.').
+
+# 4. Cons & Areas for Improvement
+Identify 3-5 potential weaknesses or areas for improvement. Be critical and constructive. (e.g., 'Final Third Ineffectiveness: Heatmap thins out in the opponent's box, supported by low key passes.', 'Disciplinary Issues: High number of fouls.').
+
+# 5. Full Scouting Summary
+Provide a detailed, narrative summary (2-3 paragraphs) of the player's style, impact, and overall profile. Conclude with a final verdict on their potential level (e.g., 'Solid rotational player for a top-division side', 'High-potential prospect needs refinement', 'Top-class Champions League level player').
+
+# 6. Suggested Similar Player
+Based on the complete analysis (heatmap, stats, role), suggest ONE well-known professional player with a similar playstyle. Briefly justify your choice (1-2 sentences). (e.g., "Style Comparison: N'Golo Kanté. Both players exhibit exceptional work rate, strong defensive positioning, and primarily focus on ball recovery and simple distribution.")
+
+# 7. Suggested Development Plan
+Based on the 'Cons' you identified, suggest 2-3 specific, actionable development points or drills. (e.g., "1. Final Third Decision-Making: Drills focusing on cut-back passes and shooting under pressure.", "2. Weaker Foot Usage: Dedicate 15 minutes post-training to repetitive passing and shooting with weaker foot.").
+`;
+
+            const comparisonUserQuery = `Analyze the provided data for TWO players. Player 1's data is provided first, followed by Player 2's data.
+- Player 1 Context: {MATCH_CONTEXT_1}
+- Player 2 Context: {MATCH_CONTEXT_2}
+
+Provide a professional head-to-head scouting report. Structure your analysis with the following clear sections. Use Markdown formatting for headings.
+
+# 1. Player 1 Profile (Position & Role)
+Briefly identify Player 1's likely position and tactical role based on their data.
+
+# 2. Player 2 Profile (Position & Role)
+Briefly identify Player 2's likely position and tactical role based on their data.
+
+# 3. Head-to-Head Comparison (Strengths)
+Compare the players directly on 3-5 key attributes, stating who has the edge in each. (e.g., 'Work Rate: Player 1 shows superior defensive coverage...', 'Passing: Player 2 appears to be the more creative passer...').
+
+# 4. Head-to-Head Comparison (Weaknesses)
+Compare their primary weaknesses or areas for improvement.
+
+# 5. Final Verdict & Tactical Fit
+Provide a concluding summary. Which player is more impactful? Who has higher potential? What kind of tactical system would each player thrive in?
+`;
+
+            // --- Tab Navigation ---
+            tabSingle.addEventListener('click', () => switchTab('single'));
+            tabCompare.addEventListener('click', () => switchTab('compare'));
+
+            function switchTab(tabName) {
+                activeTab = tabName;
+                if (tabName === 'single') {
+                    tabSingle.classList.add('active');
+                    tabCompare.classList.remove('active');
+                    contentSingle.classList.add('active');
+                    contentCompare.classList.remove('active');
+                    buttonText.textContent = "Analyze Player";
+                } else {
+                    tabSingle.classList.remove('active');
+                    tabCompare.classList.add('active');
+                    contentSingle.classList.remove('active');
+                    contentCompare.classList.add('active');
+                    buttonText.textContent = "Compare Players";
+                }
+                updateAnalyzeButtonState();
+            }
+
+            // --- Event Listeners ---
+            
+            // Single Player
+            imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
+            clearButtonSingle.addEventListener('click', () => clearData(0));
+
+            // Player 1
+            imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
+            clearButton1.addEventListener('click', () => clearData(1));
+            
+            // Player 2
+            imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
+            clearButton2.addEventListener('click', () => clearData(2));
+
+            // Paste event - needs to check active tab
+            window.addEventListener('paste', (event) => {
+                if (activeTab === 'single') {
+                    handleFiles(event.clipboardData.files, 0);
+                } else {
+                    // In compare mode, how to know which one to paste to?
+                    // For now, let's just make it context-insensitive and add to both.
+                    // A better UX would be to paste to the one that's focused, but that's complex.
+                    // Let's assume paste applies to the active tab's inputs.
+                    // This is tricky. Let's just do single-player paste for now.
+                    // User can use "Select Images" for comparison.
+                    // Re-thought: Pasting on the window is ambiguous. I'll attach paste listeners
+                    // to the specific upload zones.
+                }
+            });
+
+            // Analyze Button
+            analyzeButton.addEventListener('click', handleAnalysis);
+
+            // Export Buttons
+            copyButton.addEventListener('click', copyReport);
+            printButton.addEventListener('click', () => window.print());
+
+            // --- File Handling Functions ---
+            function handleFiles(files, playerIndex) {
+                if (!files || files.length === 0) return;
+                
+                const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+                if (imageFiles.length === 0) return;
+
+                if (playerIndex === 0) {
+                    uploadPlaceholderSingle.classList.add('hidden');
+                    clearButtonSingle.classList.remove('hidden');
+                } else if (playerIndex === 1) {
+                    uploadPlaceholder1.classList.add('hidden');
+                    clearButton1.classList.remove('hidden');
+                } else if (playerIndex === 2) {
+                    uploadPlaceholder2.classList.add('hidden');
+                    clearButton2.classList.remove('hidden');
+                }
+
+                for (const file of imageFiles) {
+                    processFile(file, playerIndex);
+                }
+            }
+
+            function processFile(file, playerIndex) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    const parts = dataUrl.split(',');
+                    const mimeTypeRaw = parts[0].match(/:(.*?);/)[1];
+                    
+                    playerData[playerIndex].images.push(parts[1]);
+                    playerData[playerIndex].mimes.push(mimeTypeRaw);
+                    
+                    addImageToPreview(dataUrl, playerIndex);
+                    updateAnalyzeButtonState();
+                    hideError();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function addImageToPreview(dataUrl, playerIndex) {
+                let container;
+                if (playerIndex === 0) container = imagePreviewContainerSingle;
+                else if (playerIndex === 1) container = imagePreviewContainer1;
+                else if (playerIndex === 2) container = imagePreviewContainer2;
+                
+                if (!container) return;
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.alt = "Player data preview";
+                container.appendChild(img);
+            }
+
+            function clearData(playerIndex) {
+                playerData[playerIndex] = { images: [], mimes: [] };
+                
+                if (playerIndex === 0) {
+                    imagePreviewContainerSingle.innerHTML = '';
+                    uploadPlaceholderSingle.classList.remove('hidden');
+                    clearButtonSingle.classList.add('hidden');
+                    textStatsSingle.value = '';
+                    matchContextSingle.value = '';
+                } else if (playerIndex === 1) {
+                    imagePreviewContainer1.innerHTML = '';
+                    uploadPlaceholder1.classList.remove('hidden');
+                    clearButton1.classList.add('hidden');
+                    textStats1.value = '';
+                    matchContext1.value = '';
+                } else if (playerIndex === 2) {
+                    imagePreviewContainer2.innerHTML = '';
+                    uploadPlaceholder2.classList.remove('hidden');
+                    clearButton2.classList.add('hidden');
+                    textStats2.value = '';
+                    matchContext2.value = '';
+                }
+                
+                updateAnalyzeButtonState();
+                resultsSection.classList.add('hidden');
+                hideError();
+            }
+
+            function updateAnalyzeButtonState() {
+                if (activeTab === 'single') {
+                    analyzeButton.disabled = playerData[0].images.length === 0;
+                } else {
+                    // Both players must have at least one image to compare
+                    analyzeButton.disabled = playerData[1].images.length === 0 || playerData[2].images.length === 0;
+                }
+            }
+
+            // --- Analysis & API Call ---
+            function handleAnalysis() {
+                setLoading(true);
+                hideError();
+                resultsSection.classList.add('hidden');
+                
+                const parts = [];
+                let query;
+                
+                if (activeTab === 'single') {
+                    // --- Single Player Analysis ---
+                    const context = matchContextSingle.value || "Not specified";
+                    const stats = textStatsSingle.value;
+                    query = singleUserQuery.replace('{MATCH_CONTEXT}', context);
+                    
+                    parts.push({ text: query });
+                    if (stats.trim() !== "") {
+                        parts.push({ text: "\n\n# Additional Textual Stats:\n" + stats });
+                    }
+                    playerData[0].images.forEach((imgData, i) => {
+                        parts.push({ inlineData: { mimeType: playerData[0].mimes[i], data: imgData } });
+                    });
+                    
+                } else {
+                    // --- Player Comparison Analysis ---
+                    const context1 = matchContext1.value || "Not specified";
+                    const stats1 = textStats1.value;
+                    const context2 = matchContext2.value || "Not specified";
+                    const stats2 = textStats2.value;
+                    
+                    query = comparisonUserQuery
+                        .replace('{MATCH_CONTEXT_1}', context1)
+                        .replace('{MATCH_CONTEXT_2}', context2);
+                        
+                    parts.push({ text: query });
+                    
+                    // Add Player 1 Data
+                    parts.push({ text: "\n\n# --- PLAYER 1 DATA ---" });
+                    if (stats1.trim() !== "") {
+                        parts.push({ text: "\n# Player 1 Additional Textual Stats:\n" + stats1 });
+                    }
+                    playerData[1].images.forEach((imgData, i) => {
+                        parts.push({ inlineData: { mimeType: playerData[1].mimes[i], data: imgData } });
+                    });
+                    
+                    // Add Player 2 Data
+                    parts.push({ text: "\n\n# --- PLAYER 2 DATA ---" });
+                    if (stats2.trim() !== "") {
+                        parts.push({ text: "\n# Player 2 Additional Textual Stats:\n" + stats2 });
+                    }
+                    playerData[2].images.forEach((imgData, i) => {
+                        parts.push({ inlineData: { mimeType: playerData[2].mimes[i], data: imgData } });
+                    });
+                }
+                
+                callGeminiApi(parts);
+            }
+
+            async function callGeminiApi(parts, retryCount = 0) {
+                const apiKey = ""; // API key is handled by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: parts }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                    generationConfig: {
+                        temperature: 0.3,
+                    }
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429 || response.status >= 500) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || "An unknown error occurred.");
+                        }
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        const analysisText = result.candidates[0].content.parts[0].text;
+                        displayResults(analysisText);
+                    } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
+                        throw new Error("Analysis blocked due to safety settings. Try different images or text.");
+                    } else {
+                        throw new Error("Invalid response structure from API. No text generated.");
+                    }
+                    
+                } catch (error) {
+                    if (retryCount < 3 && error.message.includes("HTTP error")) {
+                        const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        callGeminiApi(parts, retryCount + 1);
+                    } else {
+                        showError(`Failed to get analysis: ${error.message}`);
+                    }
+                } finally {
+                    if (retryCount === 0) {
+                         setLoading(false);
+                    }
+                }
+            }
+
+            // --- UI Helper Functions ---
+            function displayResults(text) {
+                // More comprehensive markdown conversion
+                let html = text
+                    .replace(/^# 1. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 2. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 3. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 4. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 5. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 6. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/^# 7. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+
+                analysisOutput.innerHTML = html;
+                resultsSection.classList.remove('hidden');
+                // Re-initialize icons if they are in the results (though they aren't right now)
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+            
+            function copyReport() {
+                const textToCopy = analysisOutput.innerText;
+                // Use a temporary textarea to preserve formatting (like newlines)
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyButton.innerHTML = '<svg data-lucide="check" class="h-4 w-4"></svg> Copied!';
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                    setTimeout(() => {
+                        copyButton.innerHTML = '<svg data-lucide="copy" class="h-4 w-4"></svg> Copy';
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    }, 2000);
+                } catch (err) {
+                    showError('Failed to copy text.');
+                }
+                document.body.removeChild(textArea);
+            }
+
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    analyzeButton.disabled = true;
+                    buttonText.classList.add('hidden');
+                    buttonIcon.classList.add('hidden');
+                    loadingSpinner.classList.remove('hidden');
+                } else {
+                    updateAnalyzeButtonState(); // Re-check if it should be enabled
+                    buttonText.classList.remove('hidden');
+                    buttonIcon.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+            
+            // --- Initialization ---
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.error("Lucide icons script not loaded.");
+            }
+
+            updateAnalyzeButtonState(); // Set initial button state
+        });
+    </script>
+</body>
+</html>
+
+
+
