@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Scout AI - Player Analysis</title>
+    <!-- FAVICON -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle cx='45' cy='45' r='30' stroke='%2338bdf8' stroke-width='10'/%3E%3Cline x1='65' y1='65' x2='85' y2='85' stroke='%239ca3af' stroke-width='12'/%3E%3C/g%3E%3Cg fill='%232dd4bf'%3E%3Crect x='30' y='40' width='8' height='20' rx='2'/%3E%3Crect x='41' y='30' width='8' height='30' rx='2'/%3E%3Crect x='52' y='35' width='8' height='25' rx='2'/%3E%3C/g%3E%3C/svg%3E" type="image/svg+xml">
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Use Inter font */
         body {
@@ -83,6 +87,64 @@
             display: block;
         }
 
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1f2937; /* gray-800 */
+            color: #d1d5db; /* gray-300 */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 50rem;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+        .modal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #38bdf8; /* sky-400 */
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .modal-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .modal-content li {
+            margin-bottom: 0.5rem;
+        }
+
         /* Print styles */
         @media print {
             body {
@@ -92,7 +154,9 @@
             main > *,
             header,
             #analysisControls,
-            #reportActions {
+            #reportActions,
+            #guideButton,
+            .modal-overlay {
                 display: none;
             }
             #resultsSection,
@@ -128,11 +192,15 @@
 <body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
     
     <div class="w-full max-w-6xl mx-auto p-6 md:p-8 bg-gray-800 rounded-2xl shadow-2xl">
-        <header class="text-center mb-4">
+        <header class="text-center mb-4 relative">
             <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
                 Pro Scout AI
             </h1>
             <p class="text-lg text-gray-400 mt-2">Professional-grade player analysis, powered by AI.</p>
+            <button id="guideButton" class="absolute top-0 right-0 flex items-center gap-2 px-3 py-1 bg-gray-700 text-gray-300 rounded-md hover:bg-gray-600 transition-colors text-sm">
+                <svg data-lucide="help-circle" class="h-4 w-4"></svg>
+                How to Use
+            </button>
         </header>
 
         <!-- Tab Navigation -->
@@ -175,7 +243,17 @@
                     <div>
                         <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste Additional Stats</label>
                         <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5..."></textarea>
+                        <button id="visualizeStatsButton" class="mt-2 w-full flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg data-lucide="bar-chart-3" class="h-5 w-5"></svg>
+                            Visualize Text Stats
+                        </button>
                     </div>
+                </div>
+
+                <!-- Stats Visualization Canvas -->
+                <div id="chartContainer" class="hidden mt-6 bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-2">Text Stats Visualization</h3>
+                    <canvas id="statsChart"></canvas>
                 </div>
             </div>
 
@@ -232,6 +310,18 @@
             <!-- ANALYSIS CONTROLS       -->
             <!-- ======================= -->
             <div id="analysisControls" class="mt-6">
+                <!-- API Key Input -->
+                <div class="mb-4">
+                    <label for="apiKey" class="mb-2 block text-sm font-semibold text-gray-400">Optional: Your Gemini API Key</label>
+                    <div class="flex items-center gap-2">
+                        <input type="password" id="apiKey" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your API key (optional)">
+                        <button type="button" id="toggleApiVisibility" class="p-3 bg-gray-600 rounded-lg text-gray-300 hover:bg-gray-500">
+                            <svg data-lucide="eye" id="eyeIcon" class="h-5 w-5"></svg>
+                            <svg data-lucide="eye-off" id="eyeOffIcon" class="h-5 w-5 hidden"></svg>
+                        </button>
+                    </div>
+                </div>
+
                 <button id="analyzeButton" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg id="buttonIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M9 17.25H15M15 17.25v1.007a3 3 0 00.879 2.122L16.5 21M15 17.25v-1.007a3 3 0 01.879-2.122L16.5 15M15 17.25H9M9 15h6M9 15c-1.036 0-1.875-.84-1.875-1.875v-1.25c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875v1.25c0 1.036-.84 1.875-1.875-1.875M9 15v-1.875c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875V15M9 9.75h6c1.036 0 1.875-.84 1.875-1.875v-1.25c0-1.036-.84-1.875-1.875-1.875h-6c-1.036 0-1.875.84-1.875-1.875v1.25c0 1.036.84 1.875 1.875 1.875z" />
@@ -271,6 +361,44 @@
         </main>
     </div>
 
+    <!-- ======================= -->
+    <!-- "HOW TO USE" MODAL      -->
+    <!-- ======================= -->
+    <div id="guideModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl">How to Use Pro Scout AI</h2>
+                <button id="closeGuideModal" class="text-gray-400 hover:text-white">
+                    <svg data-lucide="x" class="h-6 w-6"></svg>
+                </button>
+            </div>
+            
+            <p>Welcome! This app helps you create professional scouting reports by analyzing images (like heatmaps and stat graphics) and text data.</p>
+
+            <h3 class="text-xl">Single Player Analysis (Default Tab)</h3>
+            <ol class="list-decimal pl-6 mb-4">
+                <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/Cmd+V).</li>
+                <li><strong>Add Context (Optional):</strong> In the "Match Context" box, add info like "vs. Man City, 90 mins" to help the AI.</li>
+                <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
+                <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
+                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it in the "Your Gemini API Key" field. If you leave it blank, the app will use the default.</li>
+                <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
+                <li><strong>Get Report:</strong> The AI will generate a full report with 7 sections: Position, Role, Pros, Cons, Summary, Similar Player, and Development Plan.</li>
+                <li><strong>Export:</strong> Use the "Copy" or "Print" (to PDF) buttons to save your report.</li>
+            </ol>
+
+            <h3 class="text-xl">Player Comparison Tab</h3>
+            <ol class="list-decimal pl-6 mb-4">
+                <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
+                <li><strong>Upload for Player 1:</strong> Use the "Player 1" box to upload images and add optional context/stats for your first player.</li>
+                <li><strong>Upload for Player 2:</strong> Use the "Player 2" box to do the same for your second player.</li>
+                <li><strong>Analyze:</strong> Click the "Compare Players" button (it's only enabled when both players have at least one image).</li>
+                <li><strong>Get Report:</strong> The AI will generate a "Head-to-Head" analysis, comparing their profiles, strengths, weaknesses, and tactical fit.</li>
+            </ol>
+        </div>
+    </div>
+
+
     <script>
         // Wait for the DOM to be fully loaded before running the script
         document.addEventListener('DOMContentLoaded', () => {
@@ -283,6 +411,7 @@
                 { images: [], mimes: [] },
                 { images: [], mimes: [] }
             ];
+            let statsChartInstance = null; // To hold the Chart.js instance
 
             // --- DOM Elements ---
             const tabSingle = document.getElementById('tabSingle');
@@ -299,6 +428,13 @@
             const errorText = document.getElementById('errorText');
             const copyButton = document.getElementById('copyButton');
             const printButton = document.getElementById('printButton');
+            const guideButton = document.getElementById('guideButton');
+            const guideModalOverlay = document.getElementById('guideModalOverlay');
+            const closeGuideModal = document.getElementById('closeGuideModal');
+            const apiKeyInput = document.getElementById('apiKey');
+            const toggleApiVisibility = document.getElementById('toggleApiVisibility');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeOffIcon = document.getElementById('eyeOffIcon');
 
             // --- Single Player Elements ---
             const imageUploadSingle = document.getElementById('imageUploadSingle');
@@ -307,6 +443,9 @@
             const clearButtonSingle = document.getElementById('clearButtonSingle');
             const matchContextSingle = document.getElementById('matchContextSingle');
             const textStatsSingle = document.getElementById('textStatsSingle');
+            const visualizeStatsButton = document.getElementById('visualizeStatsButton');
+            const chartContainer = document.getElementById('chartContainer');
+            const statsChartCanvas = document.getElementById('statsChart');
 
             // --- Player 1 Elements ---
             const imageUpload1 = document.getElementById('imageUpload1');
@@ -404,6 +543,10 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             // Single Player
             imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
             clearButtonSingle.addEventListener('click', () => clearData(0));
+            textStatsSingle.addEventListener('input', () => {
+                visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
+            });
+            visualizeStatsButton.addEventListener('click', visualizeStats);
 
             // Player 1
             imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
@@ -413,20 +556,12 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             clearButton2.addEventListener('click', () => clearData(2));
 
-            // Paste event - needs to check active tab
+            // Paste event
             window.addEventListener('paste', (event) => {
                 if (activeTab === 'single') {
                     handleFiles(event.clipboardData.files, 0);
-                } else {
-                    // In compare mode, how to know which one to paste to?
-                    // For now, let's just make it context-insensitive and add to both.
-                    // A better UX would be to paste to the one that's focused, but that's complex.
-                    // Let's assume paste applies to the active tab's inputs.
-                    // This is tricky. Let's just do single-player paste for now.
-                    // User can use "Select Images" for comparison.
-                    // Re-thought: Pasting on the window is ambiguous. I'll attach paste listeners
-                    // to the specific upload zones.
                 }
+                // Paste for comparison tabs is ambiguous, so we'll just support single tab for now.
             });
 
             // Analyze Button
@@ -435,6 +570,28 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             // Export Buttons
             copyButton.addEventListener('click', copyReport);
             printButton.addEventListener('click', () => window.print());
+
+            // Guide Modal
+            guideButton.addEventListener('click', () => guideModalOverlay.classList.add('visible'));
+            closeGuideModal.addEventListener('click', () => guideModalOverlay.classList.remove('visible'));
+            guideModalOverlay.addEventListener('click', (e) => {
+                if (e.target === guideModalOverlay) {
+                    guideModalOverlay.classList.remove('visible');
+                }
+            });
+
+            // API Key Visibility
+            toggleApiVisibility.addEventListener('click', () => {
+                if (apiKeyInput.type === 'password') {
+                    apiKeyInput.type = 'text';
+                    eyeIcon.classList.add('hidden');
+                    eyeOffIcon.classList.remove('hidden');
+                } else {
+                    apiKeyInput.type = 'password';
+                    eyeIcon.classList.remove('hidden');
+                    eyeOffIcon.classList.add('hidden');
+                }
+            });
 
             // --- File Handling Functions ---
             function handleFiles(files, playerIndex) {
@@ -498,6 +655,12 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     clearButtonSingle.classList.add('hidden');
                     textStatsSingle.value = '';
                     matchContextSingle.value = '';
+                    chartContainer.classList.add('hidden');
+                    if (statsChartInstance) {
+                        statsChartInstance.destroy();
+                        statsChartInstance = null;
+                    }
+                    visualizeStatsButton.disabled = true;
                 } else if (playerIndex === 1) {
                     imagePreviewContainer1.innerHTML = '';
                     uploadPlaceholder1.classList.remove('hidden');
@@ -524,6 +687,100 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     // Both players must have at least one image to compare
                     analyzeButton.disabled = playerData[1].images.length === 0 || playerData[2].images.length === 0;
                 }
+            }
+
+            // --- Stats Visualization ---
+            function visualizeStats() {
+                const text = textStatsSingle.value;
+                if (!text.trim()) {
+                    chartContainer.classList.add('hidden');
+                    return;
+                }
+
+                const lines = text.split('\n');
+                const labels = [];
+                const data = [];
+
+                lines.forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length < 2) return;
+                    
+                    const label = parts[0].trim();
+                    let valueString = parts[1].trim();
+                    
+                    // Handle "X/Y" formats like "4/5"
+                    if (valueString.includes('/')) {
+                        valueString = valueString.split('/')[0].trim();
+                    }
+                    
+                    // Handle percentages like "80%"
+                    if (valueString.includes('%')) {
+                        valueString = valueString.replace('%', '').trim();
+                    }
+
+                    const value = parseFloat(valueString);
+
+                    if (!isNaN(value) && label) {
+                        labels.push(label);
+                        data.push(value);
+                    }
+                });
+
+                if (data.length === 0) {
+                    showError("No parsable numeric stats found in the text box. Use format: 'Stat Name: 123'.");
+                    return;
+                }
+
+                chartContainer.classList.remove('hidden');
+
+                if (statsChartInstance) {
+                    statsChartInstance.destroy();
+                }
+
+                statsChartInstance = new Chart(statsChartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Player Stats',
+                            data: data,
+                            backgroundColor: 'rgba(56, 189, 248, 0.6)', // sky-400
+                            borderColor: 'rgba(56, 189, 248, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', // Horizontal bar chart
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                displayColors: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#d1d5db' // gray-300
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#d1d5db' // gray-300
+                                }
+                            }
+                        }
+                    }
+                });
             }
 
             // --- Analysis & API Call ---
@@ -585,7 +842,10 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             }
 
             async function callGeminiApi(parts, retryCount = 0) {
-                const apiKey = ""; // API key is handled by the environment
+                // Check for user-provided API key
+                const userApiKey = apiKeyInput.value.trim();
+                const apiKey = userApiKey || ""; // Use user's key if provided, otherwise default
+                
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
                 const payload = {
@@ -717,10 +977,9 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             }
 
             updateAnalyzeButtonState(); // Set initial button state
+            visualizeStatsButton.disabled = true; // Disabled until user types
         });
     </script>
 </body>
 </html>
-
-
 
