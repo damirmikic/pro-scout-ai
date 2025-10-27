@@ -71,22 +71,26 @@
 
         /* Custom scrollbar */
         .image-preview-container::-webkit-scrollbar,
-        #chatHistory::-webkit-scrollbar { 
+        #chatHistory::-webkit-scrollbar,
+        #searchScroller::-webkit-scrollbar { 
             height: 8px;
             width: 8px;
         }
         .image-preview-container::-webkit-scrollbar-track,
-        #chatHistory::-webkit-scrollbar-track { 
+        #chatHistory::-webkit-scrollbar-track,
+        #searchScroller::-webkit-scrollbar-track { 
             background: #4a5568; 
             border-radius: 4px; 
         }
         .image-preview-container::-webkit-scrollbar-thumb,
-        #chatHistory::-webkit-scrollbar-thumb { 
+        #chatHistory::-webkit-scrollbar-thumb,
+        #searchScroller::-webkit-scrollbar-thumb { 
             background: #718096; 
             border-radius: 4px; 
         }
         .image-preview-container::-webkit-scrollbar-thumb:hover,
-        #chatHistory::-webkit-scrollbar-thumb:hover { 
+        #chatHistory::-webkit-scrollbar-thumb:hover,
+        #searchScroller::-webkit-scrollbar-thumb:hover { 
             background: #a0aec0; 
         }
 
@@ -270,6 +274,7 @@
             margin-bottom: 1rem;
             max-width: 80%;
             line-height: 1.6;
+            word-wrap: break-word; /* Ensure text wraps */
         }
         .chat-message.user {
             background-color: #1d4ed8; /* blue-700 */
@@ -289,6 +294,17 @@
             gap: 0.5rem;
             font-style: italic;
             color: #9ca3af; /* gray-400 */
+        }
+        /* Style for HTML content in chat */
+        .chat-message.ai strong {
+            color: #e5e7eb; /* gray-200 */
+            font-weight: 600;
+        }
+        .chat-message.ai ul {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
         }
         
         /* Resources tab styles */
@@ -321,6 +337,32 @@
             border-bottom: 1px solid #374151; /* gray-700 */
             padding-bottom: 0.25rem;
         }
+        
+        /* Advanced Search Results */
+        #searchScroller {
+            max-height: 600px;
+            overflow-y: auto;
+            background: #111827;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        #searchResults table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #searchResults th, #searchResults td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #374151; /* gray-700 */
+        }
+        #searchResults th {
+            background-color: #374151; /* gray-700 */
+            font-weight: 600;
+            color: #d1d5db; /* gray-300 */
+        }
+        #searchResults tr:hover {
+            background-color: #1f2937; /* gray-800 */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -342,6 +384,7 @@
             <button id="tabSingle" class="tab-button active">Single Player Analysis</button>
             <button id="tabCompare" class="tab-button">Player Comparison</button>
             <button id="tabOpposition" class="tab-button">Opposition Analysis</button>
+            <button id="tabSearch" class="tab-button">Advanced Search</button>
             <button id="tabChatbot" class="tab-button">Scout AI Chatbot</button>
             <button id="tabResources" class="tab-button">Resources</button>
         </nav>
@@ -531,6 +574,83 @@
             </div>
             
             <!-- ======================= -->
+            <!-- ADVANCED SEARCH TAB     -->
+            <!-- ======================= -->
+            <div id="contentSearch" class="tab-content">
+                <p class="text-sm text-gray-400 mb-6 text-center">Find players matching specific criteria. Uses Google Search for real-time data.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <!-- Column 1 -->
+                    <div>
+                        <label for="searchPosition" class="mb-1 block text-sm font-medium text-gray-300">Position</label>
+                        <input type="text" id="searchPosition" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Striker, DM, Left Winger">
+                        
+                        <label for="searchNationality" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Nationality / Passport</label>
+                        <input type="text" id="searchNationality" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Brazilian, EU Passport">
+                    
+                        <label for="searchLeague" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Suitable for League</label>
+                        <input type="text" id="searchLeague" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Bundesliga, Top 5 leagues">
+                    </div>
+                    <!-- Column 2 -->
+                    <div>
+                        <label for="searchAgeMin" class="mb-1 block text-sm font-medium text-gray-300">Age</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="searchAgeMin" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" placeholder="Min">
+                            <input type="number" id="searchAgeMax" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" placeholder="Max">
+                        </div>
+                        
+                        <label for="searchValueMin" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Market Value (Millions)</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="searchValueMin" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" placeholder="Min €">
+                            <input type="number" id="searchValueMax" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" placeholder="Max €">
+                        </div>
+                        
+                        <label for="searchContract" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Contract Expires</Gabel>
+                        <select id="searchContract" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Any</option>
+                            <option value="in last 6 months">Last 6 months</option>
+                            <option value="in last 1 year">Last 1 year</option>
+                            <option value="1-2 years remaining">1-2 years</option>
+                            <option value="2+ years remaining">2+ years</option>
+                        </select>
+                    </div>
+                    <!-- Column 3 -->
+                    <div>
+                        <label for="searchStats" class="mb-1 block text-sm font-medium text-gray-300">Specific Stats (This Season)</label>
+                        <textarea id="searchStats" rows="4" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., >10 goals, >80% pass accuracy, >3 tackles p90"></textarea>
+                        
+                        <label for="searchMatches" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Matches / Minutes</label>
+                        <input type="text" id="searchMatches" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., >20 matches, >1500 minutes">
+                    </div>
+                </div>
+                
+                <button id="searchButton" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-300">
+                    <svg data-lucide="search" class="h-5 w-5"></svg>
+                    Search Players
+                </button>
+                
+                <!-- Search Results -->
+                <div id="searchResultsContainer" class="hidden mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-100">Search Results</h2>
+                        <button id="downloadSearchButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
+                            <svg data-lucide="download" class="h-4 w-4"></svg>
+                            Download CSV
+                        </button>
+                    </div>
+                    <div id="searchScroller">
+                        <div id="searchResults" class="text-gray-300">
+                            <!-- Search results will be injected here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="searchErrorMessage" class="hidden mt-4 bg-red-800 border border-red-600 text-red-200 px-4 py-3 rounded-lg" role="alert">
+                    <strong class="font-bold">Error:</strong>
+                    <span class="block sm:inline" id="searchErrorText"></span>
+                </div>
+            </div>
+            
+            <!-- ======================= -->
             <!-- CHATBOT TAB             -->
             <!-- ======================= -->
             <div id="contentChatbot" class="tab-content">
@@ -545,6 +665,9 @@
                     <input type="text" id="chatInput" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask about a player, team, or statistic...">
                     <button id="chatSendButton" class="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
                         <svg data-lucide="send" class="h-5 w-5"></svg>
+                    </button>
+                    <button id="chatNewButton" class="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500" title="Start New Chat">
+                        <svg data-lucide="refresh-cw" class="h-5 w-5"></svg>
                     </button>
                 </div>
             </div>
@@ -590,6 +713,22 @@
                         <p>Features excellent, in-depth articles on rising talents, tactical profiles, and team analyses from around the world.</p>
                     </li>
                 </ul>
+                
+                <h3>Public Books & Scouting Guides</h3>
+                <ul>
+                    <li>
+                        <a href="https://footballina.com/i/the-art-of-scouting-by-chelsea-fc.pdf" target="_blank">The Art of Scouting (Chelsea FC)</a>
+                        <p>A publicly shared PDF guide from Chelsea FC's academy, detailing their scouting principles and processes. An excellent look into a top club's methodology.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.soccerscouting.net/free-books" target="_blank">SoccerScouting.net Free Books</a>
+                        <p>A collection of free e-books covering talent identification, player analysis, and the fundamentals of professional scouting.</p>
+                    </li>
+                    <li>
+                        <a href="https://web.archive.org/web/20210506192233/http://www.11tegen11.net/wp-content/uploads/2014/12/Introduction-to-Football-Tactics-1.0.pdf" target="_blank">Introduction to Football Tactics (Archived)</a>
+                        <p>A fantastic primer on football tactics. Understanding tactics is essential for effective player scouting and analysis.</p>
+                    </li>
+                </ul>
             </div>
 
             <!-- ======================= -->
@@ -617,7 +756,7 @@
 
                 <button id="analyzeButton" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg id="buttonIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M9 17.25H15M15 17.25v1.007a3 3 0 00.879 2.122L16.5 21M15 17.25v-1.007a3 3 0 01.879-2.122L16.5 15M15 17.25H9M9 15h6M9 15c-1.036 0-1.875-.84-1.875-1.875v-1.25c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875v1.25c0 1.036-.84 1.875-1.875-1.875M9 15v-1.875c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875V15M9 9.75h6c1.036 0 1.875-.84 1.875-1.875v-1.25c0-1.036-.84-1.875-1.875-1.875h-6c-1.036 0-1.875.84-1.875-1.875v1.25c0 1.036.84 1.875 1.875 1.875z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M9 17.25H15M15 17.25v1.007a3 3 0 00.879 2.122L16.5 21M15 17.25v-1.007a3 3 0 01.879-2.122L16.5 15M15 17.25H9M9 15h6M9 15c-1.036 0-1.875-.84-1.875-1.875v-1.25c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875v1.25c0-1.036-.84-1.875-1.875-1.875M9 15v-1.875c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875V15M9 9.75h6c1.036 0 1.875-.84 1.875-1.875v-1.25c0-1.036-.84-1.875-1.875-1.875h-6c-1.036 0-1.875.84-1.875-1.875v1.25c0 1.036.84 1.875 1.875 1.875z" />
                     </svg>
                     <span id="buttonText">Analyze Player</span>
                     <div id="loadingSpinner" class="spinner hidden"></div>
@@ -676,7 +815,7 @@
                 <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
                 <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
-                <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The PDF preview will include your charts and images.</li>
+                <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The new PDF preview is a professional, multi-page document that includes your charts and images.</li>
             </ol>
 
             <h3 class="text-xl">Player Comparison</h3>
@@ -694,11 +833,20 @@
                 <li><strong>Analyze:</strong> Click the "Analyze Opposition" button.</li>
             </ol>
             
+            <h3 class="text-xl">Advanced Search</h3>
+            <ol>
+                <li><strong>Switch Tab:</strong> Click "Advanced Search" at the top.</li>
+                <li><strong>Enter Criteria:</strong> Fill in any fields you want to search by (e.g., Age 18-22, Position: Striker, Market Value: < 10M).</li>
+                <li><strong>Search:</strong> Click the "Search Players" button. The AI will use Google Search to find real players.</li>
+                <li><strong>Review & Download:</strong> The results will appear in a table. You can download this list as a CSV file.</li>
+            </ol>
+            
             <h3 class="text-xl">Scout AI Chatbot</h3>
             <ol>
                 <li><strong>Switch Tab:</strong> Click "Scout AI Chatbot" at the top.</li>
                 <li><strong>Ask Questions:</strong> Type any scouting-related question into the input field and press Enter or the Send button.</li>
                 <li><strong>Real-time Info:</strong> The bot uses Google Search to answer questions about recent form, stats, or tactics.</li>
+                <li><strong>New Chat:</strong> Click the "Refresh" icon to clear the conversation.</li>
             </ol>
             
             <h3 class="text-xl">Resources</h3>
@@ -727,21 +875,13 @@
         </div>
     </div>
     
-    <!-- Hidden element for PDF rendering -->
-    <div id="pdf-render-target" style="position: absolute; left: -9999px; width: 210mm; background: white; color: black; font-family: 'Times New Roman', serif; font-size: 12pt; padding: 20mm;">
-        <h1 id="pdf-title" style="font-size: 24pt; font-weight: bold; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10mm;"></h1>
-        <div id="pdf-charts" style="margin-bottom: 10mm;"></div>
-        <div id="pdf-images" style="margin-bottom: 10mm; display: flex; flex-wrap: wrap; gap: 5mm;"></div>
-        <div id="pdf-report-content" style="line-height: 1.5;"></div>
-    </div>
-
 
     <script>
         // Wait for the DOM to be fully loaded before running the script
         document.addEventListener('DOMContentLoaded', () => {
             
             // --- Global State ---
-            let activeTab = 'single'; // 'single', 'compare', or 'opposition'
+            let activeTab = 'single'; // 'single', 'compare', etc.
             // playerData[0] = single, [1] = p1, [2] = p2, [3] = opposition
             let playerData = [
                 { images: [], mimes: [] },
@@ -751,18 +891,21 @@
             ];
             let statsChartInstance = null; // To hold the Chart.js instance
             let generatedPdfDoc = null; // To hold the generated jsPDF object
-            let lastAiResponse = ""; // Store raw AI text for PDF generation
+            let lastAiResponse = ""; // Store raw AI text for PDF/Copy
+            let lastSearchResponse = ""; // Store raw search response for CSV
 
             // --- DOM Elements ---
             const tabSingle = document.getElementById('tabSingle');
             const tabCompare = document.getElementById('tabCompare');
             const tabOpposition = document.getElementById('tabOpposition');
+            const tabSearch = document.getElementById('tabSearch');
             const tabChatbot = document.getElementById('tabChatbot');
             const tabResources = document.getElementById('tabResources');
             
             const contentSingle = document.getElementById('contentSingle');
             const contentCompare = document.getElementById('contentCompare');
             const contentOpposition = document.getElementById('contentOpposition');
+            const contentSearch = document.getElementById('contentSearch');
             const contentChatbot = document.getElementById('contentChatbot');
             const contentResources = document.getElementById('contentResources');
             
@@ -797,13 +940,6 @@
             const pdfPreviewFrame = document.getElementById('pdfPreviewFrame');
             const downloadPdfButton = document.getElementById('downloadPdfButton');
             
-            // --- PDF Render Target Elements ---
-            const pdfRenderTarget = document.getElementById('pdf-render-target');
-            const pdfTitle = document.getElementById('pdf-title');
-            const pdfCharts = document.getElementById('pdf-charts');
-            const pdfImages = document.getElementById('pdf-images');
-            const pdfReportContent = document.getElementById('pdf-report-content');
-
             // --- Single Player Elements ---
             const uploadBoxSingle = document.getElementById('uploadBoxSingle');
             const imageUploadSingle = document.getElementById('imageUploadSingle');
@@ -853,11 +989,31 @@
             const chatHistory = document.getElementById('chatHistory');
             const chatInput = document.getElementById('chatInput');
             const chatSendButton = document.getElementById('chatSendButton');
+            const chatNewButton = document.getElementById('chatNewButton');
+            
+            // --- Search Elements ---
+            const searchButton = document.getElementById('searchButton');
+            const searchResultsContainer = document.getElementById('searchResultsContainer');
+            const searchResults = document.getElementById('searchResults');
+            const downloadSearchButton = document.getElementById('downloadSearchButton');
+            const searchErrorMessage = document.getElementById('searchErrorMessage');
+            const searchErrorText = document.getElementById('searchErrorText');
+            // Search Input Fields
+            const searchPosition = document.getElementById('searchPosition');
+            const searchNationality = document.getElementById('searchNationality');
+            const searchLeague = document.getElementById('searchLeague');
+            const searchAgeMin = document.getElementById('searchAgeMin');
+            const searchAgeMax = document.getElementById('searchAgeMax');
+            const searchValueMin = document.getElementById('searchValueMin');
+            const searchValueMax = document.getElementById('searchValueMax');
+            const searchContract = document.getElementById('searchContract');
+            const searchStats = document.getElementById('searchStats');
+            const searchMatches = document.getElementById('searchMatches');
 
             // --- AI Prompts ---
             const systemPrompt = `You are an expert football (soccer) scout and tactical analyst with decades of experience at the highest level. Your task is to analyze the provided image(s) and any optional text data. You must be critical, insightful, and professional.`;
             
-            const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights.`;
+            const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights. **Format your responses using simple HTML tags for readability (e.g., <strong> for headings, <ul> and <li> for lists). Do not use Markdown.**`;
 
             // Prompt 1: Quick Report
             const quickReportQuery = `Analyze the following image(s) and any provided text statistics for the player.
@@ -1001,27 +1157,25 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             tabSingle.addEventListener('click', () => switchTab('single'));
             tabCompare.addEventListener('click', () => switchTab('compare'));
             tabOpposition.addEventListener('click', () => switchTab('opposition'));
+            tabSearch.addEventListener('click', () => switchTab('search'));
             tabChatbot.addEventListener('click', () => switchTab('chatbot'));
             tabResources.addEventListener('click', () => switchTab('resources'));
 
             function switchTab(tabName) {
                 activeTab = tabName;
                 
-                tabSingle.classList.toggle('active', tabName === 'single');
-                contentSingle.classList.toggle('active', tabName === 'single');
+                // Toggle all tabs and content
+                [tabSingle, tabCompare, tabOpposition, tabSearch, tabChatbot, tabResources].forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                [contentSingle, contentCompare, contentOpposition, contentSearch, contentChatbot, contentResources].forEach(content => {
+                    content.classList.remove('active');
+                });
                 
-                tabCompare.classList.toggle('active', tabName === 'compare');
-                contentCompare.classList.toggle('active', tabName === 'compare');
-                
-                tabOpposition.classList.toggle('active', tabName === 'opposition');
-                contentOpposition.classList.toggle('active', tabName === 'opposition');
-                
-                tabChatbot.classList.toggle('active', tabName === 'chatbot');
-                contentChatbot.classList.toggle('active', tabName === 'chatbot');
-                
-                tabResources.classList.toggle('active', tabName === 'resources');
-                contentResources.classList.toggle('active', tabName === 'resources');
-                
+                // Activate the selected one
+                document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+                document.getElementById(`content${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+
                 // Show analysis controls only for report-generation tabs
                 const showAnalysisControls = ['single', 'compare', 'opposition'].includes(tabName);
                 analysisControls.style.display = showAnalysisControls ? 'block' : 'none';
@@ -1033,7 +1187,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 else if (tabName === 'compare') buttonText.textContent = "Compare Players";
                 else if (tabName === 'opposition') buttonText.textContent = "Analyze Opposition";
                 
-                updateAnalyzeButtonState();
+                if (showAnalysisControls) updateAnalyzeButtonState();
             }
 
             // --- Event Listeners ---
@@ -1046,24 +1200,28 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             });
             visualizeStatsButton.addEventListener('click', visualizeStats);
             [playerName, playerAge, playerClub, playerLeague, playerRating, matchContextSingle, textStatsSingle].forEach(el => {
-                el.addEventListener('input', updateAnalyzeButtonState);
+                if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
 
             // Player 1
             imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
             clearButton1.addEventListener('click', () => clearData(1));
-            [matchContext1, textStats1].forEach(el => el.addEventListener('input', updateAnalyzeButtonState));
+            [matchContext1, textStats1].forEach(el => {
+                if (el) el.addEventListener('input', updateAnalyzeButtonState);
+            });
             
             // Player 2
             imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             clearButton2.addEventListener('click', () => clearData(2));
-            [matchContext2, textStats2].forEach(el => el.addEventListener('input', updateAnalyzeButtonState));
+            [matchContext2, textStats2].forEach(el => {
+                if (el) el.addEventListener('input', updateAnalyzeButtonState);
+            });
             
             // Opposition
             imageUploadOpponent.addEventListener('change', (e) => handleFiles(e.target.files, 3));
             clearButtonOpponent.addEventListener('click', () => clearData(3));
             [opponentName, matchContextOpp, textStatsOpponent].forEach(el => {
-                el.addEventListener('input', updateAnalyzeButtonState);
+                if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
 
             // Paste event listeners
@@ -1148,6 +1306,11 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     handleChat();
                 }
             });
+            chatNewButton.addEventListener('click', handleNewChat);
+            
+            // Search Listeners
+            searchButton.addEventListener('click', handleSearch);
+            downloadSearchButton.addEventListener('click', downloadSearchResults);
             
             // --- API Key UI Function ---
             function updateApiKeyUI(isKeySaved) {
@@ -1206,8 +1369,8 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     clearButton = clearButtonOpponent;
                 }
                 
-                placeholder.classList.add('hidden');
-                clearButton.classList.remove('hidden');
+                if (placeholder) placeholder.classList.add('hidden');
+                if (clearButton) clearButton.classList.remove('hidden');
 
                 for (const file of imageFiles) {
                     processFile(file, playerIndex);
@@ -1306,7 +1469,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             // --- Stats Visualization ---
             function visualizeStats() {
                 const text = textStatsSingle.value;
-                if (!text.trim()) {
+                if (!text || !text.trim()) {
                     chartContainer.classList.add('hidden');
                     return;
                 }
@@ -1463,7 +1626,13 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                         if (response.status === 429 || response.status >= 500) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         } else {
-                            const errorData = await response.json();
+                            const errorText = await response.text();
+                            let errorData;
+                            try {
+                                errorData = JSON.parse(errorText);
+                            } catch (e) {
+                                throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);
+                            }
                             throw new Error(errorData.error?.message || "An unknown error occurred.");
                         }
                     }
@@ -1480,7 +1649,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     }
                     
                 } catch (error) {
-                    if (retryCount < 3 && error.message.includes("HTTP error")) {
+                    if (retryCount < 3 && (error.message.includes("HTTP error") || error.message.includes("Failed to fetch"))) {
                         const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
                         callReportApi(parts, retryCount + 1);
@@ -1495,6 +1664,11 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             }
             
             // --- Chatbot Functions ---
+            function handleNewChat() {
+                chatHistory.innerHTML = '';
+                addMessageToChat('ai', "Hello! I'm your AI scouting assistant. How can I help you today?");
+            }
+
             function handleChat() {
                 const query = chatInput.value.trim();
                 if (!query) return;
@@ -1502,7 +1676,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 chatInput.value = '';
                 addMessageToChat('user', query);
                 const loadingMessage = addMessageToChat('ai', '...', true);
-                callChatbotApi(query, loadingMessage);
+                callChatbotApi(query, loadingMessage, true); // true for search
             }
             
             function addMessageToChat(role, text, isLoading = false) {
@@ -1513,7 +1687,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     messageDiv.classList.add('loading');
                     messageDiv.innerHTML = `<div class="spinner spinner-sm"></div><span>Thinking...</span>`;
                 } else {
-                    messageDiv.textContent = text;
+                    messageDiv.innerHTML = text; // Render HTML
                 }
                 
                 chatHistory.appendChild(messageDiv);
@@ -1521,7 +1695,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 return messageDiv;
             }
             
-            async function callChatbotApi(query, loadingMessageElement, retryCount = 0) {
+            async function callChatbotApi(query, loadingMessageElement, useSearch, retryCount = 0) {
                 let key = apiKeyInput.value.trim();
                 if (!key) {
                     try {
@@ -1536,8 +1710,11 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 const payload = {
                     contents: [{ role: "user", parts: [{ text: query }] }],
                     systemInstruction: { parts: [{ text: chatbotSystemPrompt }] },
-                    tools: [{ "google_search": {} }] // Enable Google Search
                 };
+                
+                if (useSearch) {
+                    payload.tools = [{ "google_search": {} }];
+                }
                 
                 try {
                     const response = await fetch(apiUrl, {
@@ -1550,33 +1727,182 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                         if (response.status === 429 || response.status >= 500) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         } else {
-                            const errorData = await response.json();
+                            const errorText = await response.text();
+                            let errorData;
+                            try {
+                                errorData = JSON.parse(errorText);
+                            } catch (e) {
+                                // Handle non-JSON error responses
+                                throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);
+                            }
                             throw new Error(errorData.error?.message || "An unknown error occurred.");
                         }
                     }
 
-                    const result = await response.json();
+                    // Fix for "Unexpected end of input"
+                    const responseText = await response.text();
+                    if (!responseText) {
+                        throw new Error("Received an empty response from the API.");
+                    }
+                    
+                    let result;
+                    try {
+                         result = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error("Failed to parse JSON response:", responseText);
+                        throw new Error("Failed to parse API response. Raw: " + responseText);
+                    }
+
                     
                     if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        const responseText = result.candidates[0].content.parts[0].text;
-                        loadingMessageElement.textContent = responseText;
-                        loadingMessageElement.classList.remove('loading');
+                        const generatedText = result.candidates[0].content.parts[0].text;
+                        
+                        if (loadingMessageElement) { // For chatbot
+                            loadingMessageElement.innerHTML = generatedText; // Render HTML
+                            loadingMessageElement.classList.remove('loading');
+                        } else if (activeTab === 'search') { // For search tab
+                            lastSearchResponse = generatedText;
+                            displaySearchResults(generatedText);
+                        }
                     } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
                         throw new Error("Response blocked due to safety settings.");
                     } else {
-                        throw new Error("Invalid response from chatbot API.");
+                        throw new Error("Invalid response from API (no text).");
                     }
                     
                 } catch (error) {
-                    if (retryCount < 3 && error.message.includes("HTTP error")) {
+                    if (retryCount < 3 && (error.message.includes("HTTP error") || error.message.includes("Failed to fetch"))) {
                         const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        callChatbotApi(query, loadingMessageElement, retryCount + 1);
+                        callChatbotApi(query, loadingMessageElement, useSearch, retryCount + 1);
                     } else {
-                        loadingMessageElement.textContent = `Error: ${error.message}`;
-                        loadingMessageElement.classList.remove('loading');
-                        loadingMessageElement.style.color = '#f87171'; // red-400
+                        if (loadingMessageElement) {
+                            loadingMessageElement.innerHTML = `Error: ${error.message}`; // Render HTML
+                            loadingMessageElement.classList.remove('loading');
+                            loadingMessageElement.style.color = '#f87171'; // red-400
+                        } else if (activeTab === 'search') {
+                            showSearchError(`Failed to get results: ${error.message}`);
+                        }
                     }
+                } finally {
+                    if (activeTab === 'search' && retryCount === 0) {
+                        searchButton.disabled = false;
+                        searchButton.innerHTML = `<svg data-lucide="search" class="h-5 w-5"></svg> Search Players`;
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                }
+            }
+            
+            // --- Search Tab Functions ---
+            function handleSearch() {
+                // Build the query from the form fields
+                let queryParts = [];
+                if (searchPosition.value.trim()) queryParts.push(`Position: ${searchPosition.value.trim()}`);
+                if (searchAgeMin.value || searchAgeMax.value) {
+                    let ageQuery = "Age: ";
+                    if (searchAgeMin.value) ageQuery += `> ${searchAgeMin.value}`;
+                    if (searchAgeMin.value && searchAgeMax.value) ageQuery += " and ";
+                    if (searchAgeMax.value) ageQuery += `< ${searchAgeMax.value}`;
+                    queryParts.push(ageQuery);
+                }
+                if (searchNationality.value.trim()) queryParts.push(`Nationality/Passport: ${searchNationality.value.trim()}`);
+                if (searchValueMin.value || searchValueMax.value) {
+                    let valueQuery = "Market Value: ";
+                    if (searchValueMin.value) valueQuery += `> €${searchValueMin.value}m`;
+                    if (searchValueMin.value && searchValueMax.value) valueQuery += " and ";
+                    if (searchValueMax.value) valueQuery += `< €${searchValueMax.value}m`;
+                    queryParts.push(valueQuery);
+                }
+                if (searchContract.value) queryParts.push(`Contract Status: ${searchContract.value}`);
+                if (searchStats.value.trim()) queryParts.push(`Specific Stats: ${searchStats.value.trim()}`);
+                if (searchMatches.value.trim()) queryParts.push(`Matches/Minutes: ${searchMatches.value.trim()}`);
+                if (searchLeague.value.trim()) queryParts.push(`Suitable for/Current League: ${searchLeague.value.trim()}`);
+                
+                if (queryParts.length === 0) {
+                    showSearchError("Please enter at least one search criterion.");
+                    return;
+                }
+                
+                const fullQuery = `
+Based on publicly available data from Google Search, find up to 25 football players who match the following criteria:
+- ${queryParts.join('\n- ')}
+
+Format the result as a simple HTML table (no classes) with columns: Name, Age, Club, Nationality, Position, Market Value (Est.), Contract Expires.
+If a value is unknown, use "N/A".
+`;
+                
+                searchButton.disabled = true;
+                searchButton.innerHTML = `<div class="spinner spinner-sm"></div> Searching...`;
+                searchResultsContainer.classList.add('hidden');
+                searchErrorMessage.classList.add('hidden');
+                
+                callChatbotApi(fullQuery, null, true); // null for loading element, true for search
+            }
+            
+            function displaySearchResults(htmlTable) {
+                searchResultsContainer.classList.remove('hidden');
+                searchResults.innerHTML = htmlTable;
+                // Simple styling for the table in case AI didn't add it
+                const table = searchResults.querySelector('table');
+                if (table) {
+                    table.style.width = '100%';
+                    table.style.borderCollapse = 'collapse';
+                }
+            }
+            
+            function showSearchError(message) {
+                searchErrorText.textContent = message;
+                searchErrorMessage.classList.remove('hidden');
+            }
+            
+            function downloadSearchResults() {
+                if (!lastSearchResponse) {
+                    showSearchError("No results to download. Please run a search first.");
+                    return;
+                }
+                
+                let csv = htmlTableToCsv(lastSearchResponse);
+                if (!csv) {
+                    showSearchError("Could not parse results. Please try another search.");
+                    return;
+                }
+                
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'player_search_results.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            function htmlTableToCsv(html) {
+                try {
+                    // Find the table in the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const table = tempDiv.querySelector('table');
+                    if (!table) return null;
+                    
+                    let csv = [];
+                    const rows = table.querySelectorAll('tr');
+                    
+                    for (const row of rows) {
+                        let rowCsv = [];
+                        const cols = row.querySelectorAll('th, td');
+                        for (const col of cols) {
+                            let text = col.textContent.trim().replace(/"/g, '""'); // Escape double quotes
+                            if (text.includes(',')) text = `"${text}"`; // Add quotes if comma
+                            rowCsv.push(text);
+                        }
+                        csv.push(rowCsv.join(','));
+                    }
+                    return csv.join('\n');
+                } catch (e) {
+                    console.error("Error parsing table to CSV:", e);
+                    return null;
                 }
             }
 
@@ -1600,97 +1926,218 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
             
+            // --- New PDF Generation ---
             async function handlePdfPreview() {
                 if (!lastAiResponse) {
                     showError("Please generate a report first.");
                     return;
                 }
+                if (activeTab !== 'single') {
+                    showError("PDF Export is only available for the 'Single Player' tab.");
+                    return;
+                }
+                
+                const reportType = document.querySelector('input[name="reportType"]:checked').value;
+                if (reportType !== 'pro') {
+                    showError("The professional PDF export is only available for the 'Pro Scout Report' type.");
+                    return;
+                }
                 
                 previewButton.disabled = true;
-                previewButton.innerHTML = `<div class="spinner -ml-1 mr-3 h-4 w-4"></div> Previewing...`;
+                previewButton.innerHTML = `<div class="spinner -ml-1 mr-3 h-4 w-4"></div> Generating PDF...`;
 
                 try {
                     const { jsPDF } = window.jspdf;
-                    
-                    // --- 1. Populate the hidden render target ---
-                    
-                    // Set Title
-                    let titleText = "Scouting Report";
-                    if (activeTab === 'single') titleText = `Scout Report: ${playerName.value || 'Player'}`;
-                    else if (activeTab === 'compare') titleText = "Player Comparison Report";
-                    else if (activeTab === 'opposition') titleText = `Opposition Analysis: ${opponentName.value || 'Opponent'}`;
-                    pdfTitle.textContent = titleText;
-                    
-                    // Clear old charts/images
-                    pdfCharts.innerHTML = '';
-                    pdfImages.innerHTML = '';
-                    
-                    // Add Stats Chart (if it exists)
-                    if (activeTab === 'single' && statsChartInstance) {
-                        const chartImg = document.createElement('img');
-                        chartImg.src = statsChartInstance.toBase64Image();
-                        chartImg.style.width = '100%';
-                        chartImg.style.maxWidth = '180mm';
-                        chartImg.style.marginBottom = '5mm';
-                        pdfCharts.appendChild(chartImg);
-                    }
-                    
-                    // Add Uploaded Images
-                    let imagesToRender = [];
-                    if (activeTab === 'single') imagesToRender = playerData[0].images;
-                    else if (activeTab === 'compare') imagesToRender = [...playerData[1].images, ...playerData[2].images];
-                    else if (activeTab === 'opposition') imagesToRender = playerData[3].images;
-                    
-                    imagesToRender.forEach((imgData, i) => {
-                        const mime = playerData[activeTab === 'single' ? 0 : (activeTab === 'compare' ? (i < playerData[1].images.length ? 1 : 2) : 3)].mimes[i];
-                        const imgEl = document.createElement('img');
-                        imgEl.src = `data:${mime};base64,${imgData}`;
-                        imgEl.style.maxHeight = '100mm';
-                        imgEl.style.maxWidth = '48%';
-                        imgEl.style.objectFit = 'contain';
-                        imgEl.style.border = '1px solid #eee';
-                        pdfImages.appendChild(imgEl);
-                    });
-
-                    // Add Report Text
-                    let reportHtml = lastAiResponse
-                        .replace(/^# (\d. .*)/gm, '<h2 style="font-size: 16pt; font-weight: bold; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin-top: 8mm; margin-bottom: 4mm;">$1</h2>')
-                        .replace(/^# (\d\..*)/gm, '<h2 style="font-size: 16pt; font-weight: bold; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin-top: 8mm; margin-bottom: 4mm;">$1</h2>')
-                        .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: bold;">$1</strong>')
-                        .replace(/^- (.*)/gm, '<li style="margin-left: 5mm; margin-bottom: 1mm;">$1</li>')
-                        .replace(/\n/g, '<br>');
-                    pdfReportContent.innerHTML = reportHtml;
-
-                    // --- 2. Render with html2canvas ---
-                    const canvas = await html2canvas(pdfRenderTarget, {
-                        scale: 2, // Increase resolution
-                        useCORS: true
-                    });
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    
-                    // --- 3. Create jsPDF ---
                     const doc = new jsPDF('p', 'mm', 'a4');
-                    const pdfWidth = doc.internal.pageSize.getWidth();
-                    const pdfHeight = doc.internal.pageSize.getHeight();
+                    const margin = 15;
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    const contentWidth = pageWidth - (margin * 2);
+                    let currentY = 0;
                     
-                    const canvasWidth = canvas.width;
-                    const canvasHeight = canvas.height;
-                    const ratio = canvasHeight / canvasWidth;
+                    // --- Helper Functions for PDF ---
+                    const addHeader = (title) => {
+                        checkPageBreak(16); // Check space for header
+                        doc.setFillColor(236, 249, 255); // sky-100
+                        doc.rect(margin, currentY, contentWidth, 12, 'F');
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(14);
+                        doc.setTextColor(12, 74, 110); // sky-900
+                        doc.text(title, margin + 2, currentY + 8);
+                        currentY += 16;
+                    };
                     
-                    let imgHeight = pdfWidth * ratio;
-                    let heightLeft = imgHeight;
-                    let position = 0;
+                    const addBodyText = (text) => {
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(10);
+                        doc.setTextColor(31, 41, 55); // gray-700
+                        
+                        // Clean up markdown-like text
+                        let cleanText = text
+                            .replace(/<[^>]*>/g, '') // Remove any HTML
+                            .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markers
+                            .replace(/^- /gm, '  • ') // Convert md list to bullet
+                            .trim();
+
+                        const lines = doc.splitTextToSize(cleanText, contentWidth);
+                        for (const line of lines) {
+                            checkPageBreak(5); // Check space for line
+                            doc.text(line, margin, currentY);
+                            currentY += 5;
+                        }
+                        currentY += 4;
+                    };
                     
-                    doc.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pdfHeight;
+                    const checkPageBreak = (heightNeeded) => {
+                        if (currentY + heightNeeded > pageHeight - margin) {
+                            doc.addPage();
+                            currentY = margin;
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    // --- 1. Parse AI Response ---
+                    // Split the report into sections.
+                    const sections = lastAiResponse.split(/^# \d. /m).filter(Boolean).map(s => s.trim());
+                    if (sections.length < 8) throw new Error("Could not parse Pro Scout Report. AI response was incomplete. Please try again.");
+
+                    const reportData = {
+                        info: sections[0],
+                        rating: sections[1],
+                        summary: sections[2],
+                        positional: sections[3],
+                        keyActions: sections[4],
+                        tactical: sections[5],
+                        mentality: sections[6],
+                        conclusion: sections[7]
+                    };
+
+                    // --- 2. Build PDF Document ---
+                    currentY = margin;
+
+                    // == PDF Header ==
+                    doc.setFillColor(243, 244, 246); // gray-100
+                    doc.rect(0, 0, pageWidth, 35, 'F');
                     
-                    while (heightLeft >= 0) {
-                        position = heightLeft - imgHeight;
-                        doc.addPage();
-                        doc.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                        heightLeft -= pdfHeight;
+                    // Player Photo Placeholder
+                    doc.setDrawColor(156, 163, 175); // gray-400
+                    doc.setLineWidth(0.5);
+                    doc.rect(margin, margin - 5, 25, 25); // Adjusted Y
+                    doc.setFontSize(8);
+                    doc.setTextColor(107, 114, 128); // gray-500
+                    doc.text("Photo", margin + 12.5, margin + 7.5, { align: 'center' });
+
+                    // Player Info
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(22);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(playerName.value || 'Player Report', margin + 30, margin + 3); // Adjusted Y
+                    
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                    doc.setTextColor(55, 65, 81); // gray-600
+                    doc.text(`Age: ${playerAge.value || 'N/A'}`, margin + 30, margin + 9);
+                    doc.text(`Club: ${playerClub.value || 'N/A'}`, margin + 30, margin + 14);
+                    doc.text(`Match: ${matchContextSingle.value || 'N/A'}`, margin + 30, margin + 19);
+                    
+                    // Report Info
+                    const reportDate = new Date().toLocaleDateString();
+                    doc.setFontSize(8);
+                    doc.setTextColor(107, 114, 128);
+                    doc.text(`Report Date: ${reportDate}`, pageWidth - margin, margin + 3, { align: 'right' });
+                    doc.text(`Report ID: ${Date.now()}`, pageWidth - margin, margin + 8, { align: 'right' });
+                    
+                    currentY = 40; // Start content below header
+                    
+                    // == Section 1: Player Rating & Summary ==
+                    checkPageBreak(30);
+                    addHeader("Summary & Rating");
+                    
+                    // Rating
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    doc.text("PERFORMANCE RATING:", margin, currentY);
+                    
+                    const ratingText = playerRating.value || 'N/A';
+                    const ratingWidth = doc.getTextWidth(ratingText) + 8;
+                    doc.setFillColor(56, 189, 248); // sky-400
+                    doc.setDrawColor(56, 189, 248);
+                    doc.roundedRect(margin + 50, currentY - 4.5, ratingWidth, 7, 2, 2, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.text(ratingText, margin + 54, currentY + 1);
+                    currentY += 8;
+
+                    addBodyText(reportData.rating.substring(reportData.rating.indexOf('\n') + 1)); // Skip title
+                    addBodyText(reportData.summary.substring(reportData.summary.indexOf('\n') + 1)); // Skip title
+
+                    // == Section 2: Visuals (Charts & Images) ==
+                    checkPageBreak(16);
+                    addHeader("Visual Data");
+
+                    // Stats Chart
+                    if (statsChartInstance) {
+                        const chartDataUrl = statsChartInstance.toBase64Image();
+                        const chartWidth = contentWidth;
+                        const chartHeight = (statsChartInstance.height / statsChartInstance.width) * chartWidth;
+                        checkPageBreak(chartHeight + 10);
+                        doc.addImage(chartDataUrl, 'PNG', margin, currentY, chartWidth, chartHeight);
+                        currentY += chartHeight + 10;
                     }
+                    
+                    // Uploaded Heatmaps/Images
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    doc.setTextColor(31, 41, 55);
+                    checkPageBreak(6);
+                    doc.text("Uploaded Heatmaps & Stats:", margin, currentY);
+                    currentY += 6;
+                    
+                    let xPos = margin;
+                    const imgWidth = (contentWidth / 2) - 2;
+                    let rowMaxHeight = 0;
+                    
+                    for (let i = 0; i < playerData[0].images.length; i++) {
+                        const imgData = `data:${playerData[0].mimes[i]};base64,${playerData[0].images[i]}`;
+                        const imgProps = doc.getImageProperties(imgData);
+                        const imgHeight = (imgProps.height / imgProps.width) * imgWidth;
+                        
+                        if (xPos > margin && (xPos + imgWidth > pageWidth - margin)) {
+                            // New row
+                            currentY += rowMaxHeight + 4;
+                            xPos = margin;
+                            rowMaxHeight = 0;
+                        }
+                        
+                        checkPageBreak(imgHeight + 4);
+                        doc.addImage(imgData, 'JPEG', xPos, currentY, imgWidth, imgHeight);
+                        
+                        rowMaxHeight = Math.max(rowMaxHeight, imgHeight);
+                        xPos += imgWidth + 4;
+                    }
+                    currentY += rowMaxHeight + 10; // Add padding after last row
+
+
+                    // == Sections 3-7: Detailed Analysis ==
+                    const analysisSections = [
+                        { title: reportData.positional.split('\n')[0], text: reportData.positional.substring(reportData.positional.indexOf('\n') + 1) },
+                        { title: reportData.keyActions.split('\n')[0], text: reportData.keyActions.substring(reportData.keyActions.indexOf('\n') + 1) },
+                        { title: reportData.tactical.split('\n')[0], text: reportData.tactical.substring(reportData.tactical.indexOf('\n') + 1) },
+                        { title: reportData.mentality.split('\n')[0], text: reportData.mentality.substring(reportData.mentality.indexOf('\n') + 1) },
+                    ];
+                    
+                    for (const section of analysisSections) {
+                        checkPageBreak(16); // Header + buffer
+                        addHeader(section.title);
+                        addBodyText(section.text);
+                    }
+
+                    // == Section 8: Conclusion & Recommendation ==
+                    checkPageBreak(16);
+                    addHeader("Conclusion & Recommendation");
+                    addBodyText(reportData.conclusion.substring(reportData.conclusion.indexOf('\n') + 1));
+                    
                     
                     generatedPdfDoc = doc;
                     
@@ -1709,6 +2156,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             }
+
 
             function copyReport() {
                 let textToCopy = analysisOutput.innerHTML
