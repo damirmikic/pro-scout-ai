@@ -33,6 +33,11 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
+        .spinner-sm {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -65,10 +70,25 @@
         }
 
         /* Custom scrollbar */
-        .image-preview-container::-webkit-scrollbar { height: 8px; }
-        .image-preview-container::-webkit-scrollbar-track { background: #4a5568; border-radius: 4px; }
-        .image-preview-container::-webkit-scrollbar-thumb { background: #718096; border-radius: 4px; }
-        .image-preview-container::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        .image-preview-container::-webkit-scrollbar,
+        #chatHistory::-webkit-scrollbar { 
+            height: 8px;
+            width: 8px;
+        }
+        .image-preview-container::-webkit-scrollbar-track,
+        #chatHistory::-webkit-scrollbar-track { 
+            background: #4a5568; 
+            border-radius: 4px; 
+        }
+        .image-preview-container::-webkit-scrollbar-thumb,
+        #chatHistory::-webkit-scrollbar-thumb { 
+            background: #718096; 
+            border-radius: 4px; 
+        }
+        .image-preview-container::-webkit-scrollbar-thumb:hover,
+        #chatHistory::-webkit-scrollbar-thumb:hover { 
+            background: #a0aec0; 
+        }
 
         /* Tab styles */
         .tab-button {
@@ -78,6 +98,7 @@
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             color: #9ca3af; /* gray-400 */
+            white-space: nowrap; /* Prevent tabs from wrapping */
         }
         .tab-button.active {
             color: #38bdf8; /* sky-400 */
@@ -139,7 +160,7 @@
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-        .modal-content ol {
+        .modal-content ol, .modal-content ul {
             list-style-type: decimal;
             padding-left: 1.5rem;
             margin-bottom: 1rem;
@@ -233,6 +254,73 @@
         #apiKeyInputContainer.hidden {
             display: none;
         }
+        
+        /* Chatbot styles */
+        #chatHistory {
+            height: 400px;
+            overflow-y: auto;
+            background-color: #111827; /* gray-900 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+        .chat-message.user {
+            background-color: #1d4ed8; /* blue-700 */
+            color: #e0f2fe; /* blue-100 */
+            margin-left: auto;
+            align-self: flex-end;
+        }
+        .chat-message.ai {
+            background-color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
+            margin-right: auto;
+            align-self: flex-start;
+        }
+        .chat-message.ai.loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-style: italic;
+            color: #9ca3af; /* gray-400 */
+        }
+        
+        /* Resources tab styles */
+        #contentResources ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+        #contentResources li {
+            margin-bottom: 1rem;
+        }
+        #contentResources a {
+            color: #38bdf8; /* sky-400 */
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        #contentResources a:hover {
+            color: #7dd3fc; /* sky-300 */
+        }
+        #contentResources p {
+            color: #d1d5db; /* gray-300 */
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        #contentResources h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #e5e7eb; /* gray-200 */
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #374151; /* gray-700 */
+            padding-bottom: 0.25rem;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -250,10 +338,12 @@
         </header>
 
         <!-- Tab Navigation -->
-        <nav class="flex border-b border-gray-700 mb-6">
+        <nav class="flex border-b border-gray-700 mb-6 overflow-x-auto">
             <button id="tabSingle" class="tab-button active">Single Player Analysis</button>
             <button id="tabCompare" class="tab-button">Player Comparison</button>
             <button id="tabOpposition" class="tab-button">Opposition Analysis</button>
+            <button id="tabChatbot" class="tab-button">Scout AI Chatbot</button>
+            <button id="tabResources" class="tab-button">Resources</button>
         </nav>
 
         <main>
@@ -439,6 +529,68 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- ======================= -->
+            <!-- CHATBOT TAB             -->
+            <!-- ======================= -->
+            <div id="contentChatbot" class="tab-content">
+                <p class="text-sm text-gray-400 mb-4 text-center">Your AI scouting assistant. Ask about players, teams, stats, or tactics. Powered by Google Search.</p>
+                <div id="chatHistory" class="mb-4 flex flex-col gap-4">
+                    <!-- Chat messages will be appended here -->
+                    <div class="chat-message ai">
+                        Hello! I'm your AI scouting assistant. How can I help you today?
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="chatInput" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask about a player, team, or statistic...">
+                    <button id="chatSendButton" class="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                        <svg data-lucide="send" class="h-5 w-5"></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- ======================= -->
+            <!-- RESOURCES TAB           -->
+            <!-- ======================= -->
+            <div id="contentResources" class="tab-content">
+                <p class="text-lg text-gray-300 mb-6">Here is a list of excellent resources for data collection and scouting. This app works best when combined with high-quality data from these sources.</p>
+                
+                <h3>Primary Data & Statistics</h3>
+                <ul>
+                    <li>
+                        <a href="https://www.sofascore.com" target="_blank">Sofascore</a>
+                        <p>Excellent for live scores, in-depth match statistics, and player heatmaps. The source for many of the images this tool is designed to analyze.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.flashscore.com" target="_blank">Flashscore</a>
+                        <p>Similar to Sofascore, providing fast live data, stats, and player ratings for a vast number of leagues.</p>
+                    </li>
+                    <li>
+                        <a href="https://fbref.com" target="_blank">FBref (StatsBomb)</a>
+                        <p>The gold standard for in-depth, advanced football statistics. In partnership with StatsBomb, it provides detailed percentile rankings, scouting reports, and comparison tools.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.transfermarkt.com" target="_blank">Transfermarkt</a>
+                        <p>The best resource for player market values, contract information, agent details, and transfer history.</p>
+                    </li>
+                </ul>
+                
+                <h3>Tactical Analysis & Professional Tools</h3>
+                <ul>
+                    <li>
+                        <a href="https://wyscout.com" target="_blank">Wyscout</a>
+                        <p>A professional platform used by clubs worldwide. It offers a massive video library for analyzing any player or team, along with advanced data and tools.</p>
+                    </li>
+                    <li>
+                        <a href="https://www.theanalyst.com" target="_blank">The Analyst (Opta)</a>
+                        <p>High-level tactical articles and data insights powered by Opta data. Great for understanding modern tactical trends.</p>
+                    </li>
+                    <li>
+                        <a href="https://breakingthelines.com" target="_blank">Breaking The Lines</a>
+                        <p>Features excellent, in-depth articles on rising talents, tactical profiles, and team analyses from around the world.</p>
+                    </li>
+                </ul>
+            </div>
 
             <!-- ======================= -->
             <!-- ANALYSIS CONTROLS       -->
@@ -523,9 +675,7 @@
                 <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
                 <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
                 <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
-                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it and click "Save" to store it in your browser.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
-                <li><strong>Get Report:</strong> The AI will generate the report based on your selected type.</li>
                 <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The PDF preview will include your charts and images.</li>
             </ol>
 
@@ -534,7 +684,6 @@
                 <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
                 <li><strong>Upload for Player 1 & 2:</strong> Use the two boxes to upload images and add optional context/stats for both players.</li>
                 <li><strong>Analyze:</strong> Click the "Compare Players" button.</li>
-                <li><strong>Get Report:</strong> The AI will generate a "Head-to-Head" analysis.</li>
             </ol>
             
             <h3 class="text-xl">Opposition Analysis</h3>
@@ -543,8 +692,17 @@
                 <li><strong>Add Info:</strong> Enter the Opponent's Name, Match Context, and any team stats you have.</li>
                 <li><strong>Upload Images:</strong> Upload any relevant images (formations, team heatmaps, etc.).</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Opposition" button.</li>
-                <li><strong>Get Report:</strong> The AI will generate a tactical breakdown and exploitation plan.</li>
             </ol>
+            
+            <h3 class="text-xl">Scout AI Chatbot</h3>
+            <ol>
+                <li><strong>Switch Tab:</strong> Click "Scout AI Chatbot" at the top.</li>
+                <li><strong>Ask Questions:</strong> Type any scouting-related question into the input field and press Enter or the Send button.</li>
+                <li><strong>Real-time Info:</strong> The bot uses Google Search to answer questions about recent form, stats, or tactics.</li>
+            </ol>
+            
+            <h3 class="text-xl">Resources</h3>
+            <p>This tab contains a list of useful websites for data collection to help you get the most out of this tool.</p>
         </div>
     </div>
     
@@ -599,10 +757,16 @@
             const tabSingle = document.getElementById('tabSingle');
             const tabCompare = document.getElementById('tabCompare');
             const tabOpposition = document.getElementById('tabOpposition');
+            const tabChatbot = document.getElementById('tabChatbot');
+            const tabResources = document.getElementById('tabResources');
+            
             const contentSingle = document.getElementById('contentSingle');
             const contentCompare = document.getElementById('contentCompare');
             const contentOpposition = document.getElementById('contentOpposition');
+            const contentChatbot = document.getElementById('contentChatbot');
+            const contentResources = document.getElementById('contentResources');
             
+            const analysisControls = document.getElementById('analysisControls');
             const analyzeButton = document.getElementById('analyzeButton');
             const buttonText = document.getElementById('buttonText');
             const buttonIcon = document.getElementById('buttonIcon');
@@ -684,9 +848,16 @@
             const opponentName = document.getElementById('opponentName');
             const matchContextOpp = document.getElementById('matchContextOpp');
             const textStatsOpponent = document.getElementById('textStatsOpponent');
+            
+            // --- Chatbot Elements ---
+            const chatHistory = document.getElementById('chatHistory');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendButton = document.getElementById('chatSendButton');
 
             // --- AI Prompts ---
             const systemPrompt = `You are an expert football (soccer) scout and tactical analyst with decades of experience at the highest level. Your task is to analyze the provided image(s) and any optional text data. You must be critical, insightful, and professional.`;
+            
+            const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights.`;
 
             // Prompt 1: Quick Report
             const quickReportQuery = `Analyze the following image(s) and any provided text statistics for the player.
@@ -830,6 +1001,8 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             tabSingle.addEventListener('click', () => switchTab('single'));
             tabCompare.addEventListener('click', () => switchTab('compare'));
             tabOpposition.addEventListener('click', () => switchTab('opposition'));
+            tabChatbot.addEventListener('click', () => switchTab('chatbot'));
+            tabResources.addEventListener('click', () => switchTab('resources'));
 
             function switchTab(tabName) {
                 activeTab = tabName;
@@ -842,6 +1015,19 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 
                 tabOpposition.classList.toggle('active', tabName === 'opposition');
                 contentOpposition.classList.toggle('active', tabName === 'opposition');
+                
+                tabChatbot.classList.toggle('active', tabName === 'chatbot');
+                contentChatbot.classList.toggle('active', tabName === 'chatbot');
+                
+                tabResources.classList.toggle('active', tabName === 'resources');
+                contentResources.classList.toggle('active', tabName === 'resources');
+                
+                // Show analysis controls only for report-generation tabs
+                const showAnalysisControls = ['single', 'compare', 'opposition'].includes(tabName);
+                analysisControls.style.display = showAnalysisControls ? 'block' : 'none';
+                
+                // Hide results section when switching tabs
+                resultsSection.classList.add('hidden');
                 
                 if (tabName === 'single') buttonText.textContent = "Analyze Player";
                 else if (tabName === 'compare') buttonText.textContent = "Compare Players";
@@ -859,18 +1045,26 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
             });
             visualizeStatsButton.addEventListener('click', visualizeStats);
+            [playerName, playerAge, playerClub, playerLeague, playerRating, matchContextSingle, textStatsSingle].forEach(el => {
+                el.addEventListener('input', updateAnalyzeButtonState);
+            });
 
             // Player 1
             imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
             clearButton1.addEventListener('click', () => clearData(1));
+            [matchContext1, textStats1].forEach(el => el.addEventListener('input', updateAnalyzeButtonState));
             
             // Player 2
             imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             clearButton2.addEventListener('click', () => clearData(2));
+            [matchContext2, textStats2].forEach(el => el.addEventListener('input', updateAnalyzeButtonState));
             
             // Opposition
             imageUploadOpponent.addEventListener('change', (e) => handleFiles(e.target.files, 3));
             clearButtonOpponent.addEventListener('click', () => clearData(3));
+            [opponentName, matchContextOpp, textStatsOpponent].forEach(el => {
+                el.addEventListener('input', updateAnalyzeButtonState);
+            });
 
             // Paste event listeners
             uploadBoxSingle.addEventListener('paste', (e) => handlePaste(e, 0));
@@ -944,6 +1138,14 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     apiKeyInput.type = 'password';
                     eyeIcon.classList.remove('hidden');
                     eyeOffIcon.classList.add('hidden');
+                }
+            });
+            
+            // Chatbot Listeners
+            chatSendButton.addEventListener('click', handleChat);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleChat();
                 }
             });
             
@@ -1228,10 +1430,10 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     });
                 }
                 
-                callGeminiApi(parts);
+                callReportApi(parts);
             }
 
-            async function callGeminiApi(parts, retryCount = 0) {
+            async function callReportApi(parts, retryCount = 0) {
                 // Get key from input or local storage
                 let key = apiKeyInput.value.trim();
                 if (!key) {
@@ -1281,7 +1483,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     if (retryCount < 3 && error.message.includes("HTTP error")) {
                         const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        callGeminiApi(parts, retryCount + 1);
+                        callReportApi(parts, retryCount + 1);
                     } else {
                         showError(`Failed to get analysis: ${error.message}`);
                     }
@@ -1291,6 +1493,93 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     }
                 }
             }
+            
+            // --- Chatbot Functions ---
+            function handleChat() {
+                const query = chatInput.value.trim();
+                if (!query) return;
+                
+                chatInput.value = '';
+                addMessageToChat('user', query);
+                const loadingMessage = addMessageToChat('ai', '...', true);
+                callChatbotApi(query, loadingMessage);
+            }
+            
+            function addMessageToChat(role, text, isLoading = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', role);
+                
+                if (isLoading) {
+                    messageDiv.classList.add('loading');
+                    messageDiv.innerHTML = `<div class="spinner spinner-sm"></div><span>Thinking...</span>`;
+                } else {
+                    messageDiv.textContent = text;
+                }
+                
+                chatHistory.appendChild(messageDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll
+                return messageDiv;
+            }
+            
+            async function callChatbotApi(query, loadingMessageElement, retryCount = 0) {
+                let key = apiKeyInput.value.trim();
+                if (!key) {
+                    try {
+                        key = localStorage.getItem('geminiApiKey') || "";
+                    } catch (e) {
+                        key = "";
+                    }
+                }
+                
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
+                
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: query }] }],
+                    systemInstruction: { parts: [{ text: chatbotSystemPrompt }] },
+                    tools: [{ "google_search": {} }] // Enable Google Search
+                };
+                
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 429 || response.status >= 500) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || "An unknown error occurred.");
+                        }
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        const responseText = result.candidates[0].content.parts[0].text;
+                        loadingMessageElement.textContent = responseText;
+                        loadingMessageElement.classList.remove('loading');
+                    } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
+                        throw new Error("Response blocked due to safety settings.");
+                    } else {
+                        throw new Error("Invalid response from chatbot API.");
+                    }
+                    
+                } catch (error) {
+                    if (retryCount < 3 && error.message.includes("HTTP error")) {
+                        const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        callChatbotApi(query, loadingMessageElement, retryCount + 1);
+                    } else {
+                        loadingMessageElement.textContent = `Error: ${error.message}`;
+                        loadingMessageElement.classList.remove('loading');
+                        loadingMessageElement.style.color = '#f87171'; // red-400
+                    }
+                }
+            }
+
 
             // --- UI Helper Functions ---
             function displayResults(text) {
@@ -1366,6 +1655,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     // Add Report Text
                     let reportHtml = lastAiResponse
                         .replace(/^# (\d. .*)/gm, '<h2 style="font-size: 16pt; font-weight: bold; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin-top: 8mm; margin-bottom: 4mm;">$1</h2>')
+                        .replace(/^# (\d\..*)/gm, '<h2 style="font-size: 16pt; font-weight: bold; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin-top: 8mm; margin-bottom: 4mm;">$1</h2>')
                         .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: bold;">$1</strong>')
                         .replace(/^- (.*)/gm, '<li style="margin-left: 5mm; margin-bottom: 1mm;">$1</li>')
                         .replace(/\n/g, '<br>');
