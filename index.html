@@ -72,25 +72,29 @@
         /* Custom scrollbar */
         .image-preview-container::-webkit-scrollbar,
         #chatHistory::-webkit-scrollbar,
-        #searchScroller::-webkit-scrollbar { 
+        #searchScroller::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar { 
             height: 8px;
             width: 8px;
         }
         .image-preview-container::-webkit-scrollbar-track,
         #chatHistory::-webkit-scrollbar-track,
-        #searchScroller::-webkit-scrollbar-track { 
+        #searchScroller::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track { 
             background: #4a5568; 
             border-radius: 4px; 
         }
         .image-preview-container::-webkit-scrollbar-thumb,
         #chatHistory::-webkit-scrollbar-thumb,
-        #searchScroller::-webkit-scrollbar-thumb { 
+        #searchScroller::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb { 
             background: #718096; 
             border-radius: 4px; 
         }
         .image-preview-container::-webkit-scrollbar-thumb:hover,
         #chatHistory::-webkit-scrollbar-thumb:hover,
-        #searchScroller::-webkit-scrollbar-thumb:hover { 
+        #searchScroller::-webkit-scrollbar-thumb:hover,
+        .modal-content::-webkit-scrollbar-thumb:hover { 
             background: #a0aec0; 
         }
 
@@ -306,6 +310,9 @@
             margin-top: 0.5rem;
             margin-bottom: 0.5rem;
         }
+        .chat-message.ai li {
+            margin-bottom: 0.25rem;
+        }
         
         /* Resources tab styles */
         #contentResources ul {
@@ -514,7 +521,7 @@
                         <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
                         <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder2" class="text-center text-gray-400 py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.s 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                             <p class="mt-1 text-sm font-semibold">Upload/Paste Player 2 Images</p>
                         </div>
                         <div class="flex gap-4 mt-2 justify-center">
@@ -587,7 +594,7 @@
                         <label for="searchNationality" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Nationality / Passport</label>
                         <input type="text" id="searchNationality" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Brazilian, EU Passport">
                     
-                        <label for="searchLeague" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Suitable for League</label>
+                        <label for="searchLeague" class="mt-4 mb-1 block text-sm font-medium text-gray-300">Suitable for League (Potential)</label>
                         <input type="text" id="searchLeague" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Bundesliga, Top 5 leagues">
                     </div>
                     <!-- Column 2 -->
@@ -775,7 +782,11 @@
             <div id="resultsSection" class="hidden mt-8 bg-gray-700/50 p-6 rounded-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-gray-100">Scouting Report</h2>
-                    <div id="reportActions" class="flex gap-2">
+                    <div id="reportActions" class="flex flex-wrap gap-2">
+                        <button id="findVideosButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
+                            <svg data-lucide="video" class="h-4 w-4"></svg>
+                            Find Videos
+                        </button>
                         <button id="copyButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
                             <svg data-lucide="copy" class="h-4 w-4"><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><rect x="7" y="5" width="6" height="6" rx="1"></rect></svg>
                             Copy
@@ -816,6 +827,7 @@
                 <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
                 <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The new PDF preview is a professional, multi-page document that includes your charts and images.</li>
+                <li><strong>Find Videos:</strong> Click the "Find Videos" button in the report section to automatically search for the player's highlights in the Chatbot tab.</li>
             </ol>
 
             <h3 class="text-xl">Player Comparison</h3>
@@ -837,6 +849,7 @@
             <ol>
                 <li><strong>Switch Tab:</strong> Click "Advanced Search" at the top.</li>
                 <li><strong>Enter Criteria:</strong> Fill in any fields you want to search by (e.g., Age 18-22, Position: Striker, Market Value: < 10M).</li>
+                <li><strong>"Suitable for League":</strong> This filter looks for *potential* and *playstyle*, not just their current league.</li>
                 <li><strong>Search:</strong> Click the "Search Players" button. The AI will use Google Search to find real players.</li>
                 <li><strong>Review & Download:</strong> The results will appear in a table. You can download this list as a CSV file.</li>
             </ol>
@@ -850,7 +863,7 @@
             </ol>
             
             <h3 class="text-xl">Resources</h3>
-            <p>This tab contains a list of useful websites for data collection to help you get the most out of this tool.</p>
+            <p>This tab contains a list of useful websites and public guides for data collection to help you get the most out of this tool.</p>
         </div>
     </div>
     
@@ -920,6 +933,7 @@
             const errorText = document.getElementById('errorText');
             const copyButton = document.getElementById('copyButton');
             const previewButton = document.getElementById('previewButton');
+            const findVideosButton = document.getElementById('findVideosButton');
             const guideButton = document.getElementById('guideButton');
             const guideModalOverlay = document.getElementById('guideModalOverlay');
             const closeGuideModal = document.getElementById('closeGuideModal');
@@ -1193,67 +1207,68 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             // --- Event Listeners ---
             
             // Single Player
-            imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
-            clearButtonSingle.addEventListener('click', () => clearData(0));
-            textStatsSingle.addEventListener('input', () => {
-                visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
+            if (imageUploadSingle) imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
+            if (clearButtonSingle) clearButtonSingle.addEventListener('click', () => clearData(0));
+            if (textStatsSingle) textStatsSingle.addEventListener('input', () => {
+                if (visualizeStatsButton) visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
             });
-            visualizeStatsButton.addEventListener('click', visualizeStats);
+            if (visualizeStatsButton) visualizeStatsButton.addEventListener('click', visualizeStats);
             [playerName, playerAge, playerClub, playerLeague, playerRating, matchContextSingle, textStatsSingle].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
 
             // Player 1
-            imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
-            clearButton1.addEventListener('click', () => clearData(1));
+            if (imageUpload1) imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
+            if (clearButton1) clearButton1.addEventListener('click', () => clearData(1));
             [matchContext1, textStats1].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
             // Player 2
-            imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
-            clearButton2.addEventListener('click', () => clearData(2));
+            if (imageUpload2) imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
+            if (clearButton2) clearButton2.addEventListener('click', () => clearData(2));
             [matchContext2, textStats2].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
             // Opposition
-            imageUploadOpponent.addEventListener('change', (e) => handleFiles(e.target.files, 3));
-            clearButtonOpponent.addEventListener('click', () => clearData(3));
+            if (imageUploadOpponent) imageUploadOpponent.addEventListener('change', (e) => handleFiles(e.target.files, 3));
+            if (clearButtonOpponent) clearButtonOpponent.addEventListener('click', () => clearData(3));
             [opponentName, matchContextOpp, textStatsOpponent].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
 
             // Paste event listeners
-            uploadBoxSingle.addEventListener('paste', (e) => handlePaste(e, 0));
-            uploadBox1.addEventListener('paste', (e) => handlePaste(e, 1));
-            uploadBox2.addEventListener('paste', (e) => handlePaste(e, 2));
-            uploadBoxOpponent.addEventListener('paste', (e) => handlePaste(e, 3));
+            if (uploadBoxSingle) uploadBoxSingle.addEventListener('paste', (e) => handlePaste(e, 0));
+            if (uploadBox1) uploadBox1.addEventListener('paste', (e) => handlePaste(e, 1));
+            if (uploadBox2) uploadBox2.addEventListener('paste', (e) => handlePaste(e, 2));
+            if (uploadBoxOpponent) uploadBoxOpponent.addEventListener('paste', (e) => handlePaste(e, 3));
 
             // Analyze Button
-            analyzeButton.addEventListener('click', handleAnalysis);
+            if (analyzeButton) analyzeButton.addEventListener('click', handleAnalysis);
 
             // Export Buttons
-            copyButton.addEventListener('click', copyReport);
-            previewButton.addEventListener('click', handlePdfPreview);
+            if (copyButton) copyButton.addEventListener('click', copyReport);
+            if (previewButton) previewButton.addEventListener('click', handlePdfPreview);
+            if (findVideosButton) findVideosButton.addEventListener('click', findVideos);
 
             // Guide Modal
-            guideButton.addEventListener('click', () => guideModalOverlay.classList.add('visible'));
-            closeGuideModal.addEventListener('click', () => guideModalOverlay.classList.remove('visible'));
-            guideModalOverlay.addEventListener('click', (e) => {
+            if (guideButton) guideButton.addEventListener('click', () => guideModalOverlay.classList.add('visible'));
+            if (closeGuideModal) closeGuideModal.addEventListener('click', () => guideModalOverlay.classList.remove('visible'));
+            if (guideModalOverlay) guideModalOverlay.addEventListener('click', (e) => {
                 if (e.target === guideModalOverlay) {
                     guideModalOverlay.classList.remove('visible');
                 }
             });
             
             // PDF Preview Modal
-            closePreviewModal.addEventListener('click', () => pdfPreviewModalOverlay.classList.remove('visible'));
-            pdfPreviewModalOverlay.addEventListener('click', (e) => {
+            if (closePreviewModal) closePreviewModal.addEventListener('click', () => pdfPreviewModalOverlay.classList.remove('visible'));
+            if (pdfPreviewModalOverlay) pdfPreviewModalOverlay.addEventListener('click', (e) => {
                 if (e.target === pdfPreviewModalOverlay) {
                     pdfPreviewModalOverlay.classList.remove('visible');
                 }
             });
-            downloadPdfButton.addEventListener('click', () => {
+            if (downloadPdfButton) downloadPdfButton.addEventListener('click', () => {
                 if (generatedPdfDoc) {
                     const pName = (playerName.value || opponentName.value || "report").replace(/\s+/g, '-');
                     generatedPdfDoc.save(`scout-report-${pName}.pdf`);
@@ -1263,7 +1278,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             });
 
             // API Key Listeners
-            apiKeySaveButton.addEventListener('click', () => {
+            if (apiKeySaveButton) apiKeySaveButton.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
                 if (key) {
                     try {
@@ -1277,7 +1292,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 }
             });
             
-            apiKeyClearButton.addEventListener('click', () => {
+            if (apiKeyClearButton) apiKeyClearButton.addEventListener('click', () => {
                 try {
                     localStorage.removeItem('geminiApiKey');
                     apiKeyInput.value = '';
@@ -1287,7 +1302,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 }
             });
 
-            toggleApiVisibility.addEventListener('click', () => {
+            if (toggleApiVisibility) toggleApiVisibility.addEventListener('click', () => {
                 if (apiKeyInput.type === 'password') {
                     apiKeyInput.type = 'text';
                     eyeIcon.classList.add('hidden');
@@ -1300,17 +1315,17 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             });
             
             // Chatbot Listeners
-            chatSendButton.addEventListener('click', handleChat);
-            chatInput.addEventListener('keydown', (e) => {
+            if (chatSendButton) chatSendButton.addEventListener('click', handleChat);
+            if (chatInput) chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     handleChat();
                 }
             });
-            chatNewButton.addEventListener('click', handleNewChat);
+            if (chatNewButton) chatNewButton.addEventListener('click', handleNewChat);
             
             // Search Listeners
-            searchButton.addEventListener('click', handleSearch);
-            downloadSearchButton.addEventListener('click', downloadSearchResults);
+            if (searchButton) searchButton.addEventListener('click', handleSearch);
+            if (downloadSearchButton) downloadSearchButton.addEventListener('click', downloadSearchResults);
             
             // --- API Key UI Function ---
             function updateApiKeyUI(isKeySaved) {
@@ -1391,7 +1406,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     updateAnalyzeButtonState();
                     hideError();
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(file); // Corrected function name
             }
 
             function addImageToPreview(dataUrl, playerIndex) {
@@ -1455,12 +1470,13 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             }
 
             function updateAnalyzeButtonState() {
+                if (!analyzeButton) return;
                 if (activeTab === 'single') {
                     analyzeButton.disabled = playerData[0].images.length === 0;
                 } else if (activeTab === 'compare') {
                     analyzeButton.disabled = playerData[1].images.length === 0 || playerData[2].images.length === 0;
                 } else if (activeTab === 'opposition') {
-                    const hasText = opponentName.value.trim() !== '' || textStatsOpponent.value.trim() !== '';
+                    const hasText = (opponentName && opponentName.value.trim() !== '') || (textStatsOpponent && textStatsOpponent.value.trim() !== '');
                     const hasImages = playerData[3].images.length > 0;
                     analyzeButton.disabled = !hasText && !hasImages;
                 }
@@ -1545,7 +1561,9 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 let query;
                 
                 if (activeTab === 'single') {
-                    const reportType = document.querySelector('input[name="reportType"]:checked').value;
+                    const reportTypeRadio = document.querySelector('input[name="reportType"]:checked');
+                    const reportType = reportTypeRadio ? reportTypeRadio.value : 'quick';
+                    
                     const pName = playerName.value || "Not specified";
                     query = (reportType === 'quick' ? quickReportQuery : proReportQuery)
                         .replace('{PLAYER_NAME}', pName)
@@ -1928,6 +1946,23 @@ If a value is unknown, use "N/A".
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
             
+            function findVideos() {
+                const pName = playerName.value.trim();
+                if (!pName) {
+                    showError("Please enter a player name in the 'Player Information' section first.");
+                    return;
+                }
+                
+                const query = `Find recent match highlights and performance videos for ${pName}`;
+                
+                // Switch to chatbot tab
+                switchTab('chatbot');
+                
+                // Send the query
+                chatInput.value = query;
+                handleChat();
+            }
+            
             // --- New PDF Generation ---
             async function handlePdfPreview() {
                 if (!lastAiResponse) {
@@ -1939,14 +1974,16 @@ If a value is unknown, use "N/A".
                     return;
                 }
                 
-                const reportType = document.querySelector('input[name="reportType"]:checked').value;
+                const reportTypeRadio = document.querySelector('input[name="reportType"]:checked');
+                const reportType = reportTypeRadio ? reportTypeRadio.value : 'quick';
                 if (reportType !== 'pro') {
                     showError("The professional PDF export is only available for the 'Pro Scout Report' type.");
                     return;
                 }
                 
                 previewButton.disabled = true;
-                previewButton.innerHTML = `<div class="spinner -ml-1 mr-3 h-4 w-4"></div> Generating PDF...`;
+                previewButton.innerHTML = `<div class="spinner spinner-sm -ml-1 mr-2"></div> Generating...`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 try {
                     const { jsPDF } = window.jspdf;
@@ -2239,10 +2276,9 @@ If a value is unknown, use "N/A".
             }
 
             updateAnalyzeButtonState(); // Set initial button state
-            visualizeStatsButton.disabled = true; // Disabled until user types
+            if (visualizeStatsButton) visualizeStatsButton.disabled = true; // Disabled until user types
         });
     </script>
 </body>
 </html>
-
 
