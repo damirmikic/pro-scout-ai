@@ -1816,7 +1816,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 if (searchContract.value) queryParts.push(`Contract Status: ${searchContract.value}`);
                 if (searchStats.value.trim()) queryParts.push(`Specific Stats: ${searchStats.value.trim()}`);
                 if (searchMatches.value.trim()) queryParts.push(`Matches/Minutes: ${searchMatches.value.trim()}`);
-                if (searchLeague.value.trim()) queryParts.push(`Suitable for/Current League: ${searchLeague.value.trim()}`);
+                if (searchLeague.value.trim()) queryParts.push(`Has the potential quality or playstyle suitable for: ${searchLeague.value.trim()} (This is a scout assessment, they don't have to be playing in that league currently).`);
                 
                 if (queryParts.length === 0) {
                     showSearchError("Please enter at least one search criterion.");
@@ -1824,8 +1824,10 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 }
                 
                 const fullQuery = `
-Based on publicly available data from Google Search, find up to 25 football players who match the following criteria:
+Based on publicly available data and tactical analysis from Google Search, find up to 25 football players who match the following criteria:
 - ${queryParts.join('\n- ')}
+
+One key criterion is "Suitable for League." This means you should assess if the player's *potential* and *playstyle* match that league, not just if they *currently* play in it.
 
 Format the result as a simple HTML table (no classes) with columns: Name, Age, Club, Nationality, Position, Market Value (Est.), Contract Expires.
 If a value is unknown, use "N/A".
@@ -2242,4 +2244,5 @@ If a value is unknown, use "N/A".
     </script>
 </body>
 </html>
+
 
