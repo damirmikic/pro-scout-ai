@@ -12,6 +12,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load PDF generation libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Use Inter font */
         body {
@@ -144,6 +147,22 @@
         .modal-content li {
             margin-bottom: 0.5rem;
         }
+        
+        /* PDF Preview Modal */
+        #pdfPreviewModalOverlay .modal-content {
+            width: 60rem; /* Wider for PDF */
+            max-width: 95%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #pdfPreviewFrame {
+            width: 100%;
+            height: 70vh; /* Make iframe tall */
+            border: 1px solid #4b5563; /* gray-600 */
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+        }
 
         /* Custom Radio Button Styles */
         .radio-label {
@@ -192,50 +211,27 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-
-        /* Print styles */
-        @media print {
-            body {
-                background-color: #ffffff;
-                color: #000000;
-            }
-            main > *,
-            header,
-            #analysisControls,
-            #reportActions,
-            #guideButton,
-            .modal-overlay,
-            #playerInfoSection,
-            #reportTypeSection {
-                display: none;
-            }
-            #resultsSection,
-            #resultsSection > * {
-                display: block;
-            }
-            #analysisOutput {
-                color: #000000;
-                white-space: pre-wrap; /* Ensure content wraps for print */
-            }
-            #resultsSection {
-                margin-top: 0;
-                padding: 0;
-                background: none;
-                border: none;
-                box-shadow: none;
-            }
-            h2 { /* Report title */
-                color: #000000;
-            }
-            h3 { /* Section titles */
-                color: #000000;
-                font-size: 1.25rem;
-                font-weight: 600;
-                margin-top: 1rem;
-                margin-bottom: 0.5rem;
-                /* Re-create styles stripped by markdown replace */
-                /* text-blue-300 */
-            }
+        
+        /* API Key fields */
+        #apiKeyMessage {
+            color: #10b981; /* emerald-500 */
+            font-size: 0.9rem;
+            display: none;
+        }
+        #apiKeyMessage.visible {
+            display: block;
+        }
+        #apiKeyClearButton {
+            color: #f87171; /* red-400 */
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+        #apiKeyInputContainer.hidden {
+            display: none;
         }
     </style>
 </head>
@@ -257,6 +253,7 @@
         <nav class="flex border-b border-gray-700 mb-6">
             <button id="tabSingle" class="tab-button active">Single Player Analysis</button>
             <button id="tabCompare" class="tab-button">Player Comparison</button>
+            <button id="tabOpposition" class="tab-button">Opposition Analysis</button>
         </nav>
 
         <main>
@@ -265,7 +262,7 @@
             <!-- ======================= -->
             <div id="contentSingle" class="tab-content active">
                 <!-- Upload Section -->
-                <div class="flex flex-col items-center justify-center bg-gray-700 p-6 rounded-lg border-2 border-dashed border-gray-500 min-h-[24rem]">
+                <div id="uploadBoxSingle" class="flex flex-col items-center justify-center bg-gray-700 p-6 rounded-lg border-2 border-dashed border-gray-500 min-h-[24rem]">
                     <div id="imagePreviewContainerSingle" class="w-full mb-4 image-preview-container">
                         <!-- Images will be added here dynamically -->
                     </div>
@@ -359,7 +356,7 @@
             <div id="contentCompare" class="tab-content">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Player 1 Column -->
-                    <div class="bg-gray-700 p-4 rounded-lg">
+                    <div id="uploadBox1" class="bg-gray-700 p-4 rounded-lg">
                         <h3 class="text-xl font-bold text-center text-blue-300 mb-4">Player 1</h3>
                         <div id="imagePreviewContainer1" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder1" class="text-center text-gray-400 py-8">
@@ -380,7 +377,7 @@
                     </div>
 
                     <!-- Player 2 Column -->
-                    <div class="bg-gray-700 p-4 rounded-lg">
+                    <div id="uploadBox2" class="bg-gray-700 p-4 rounded-lg">
                         <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
                         <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder2" class="text-center text-gray-400 py-8">
@@ -401,6 +398,47 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- ======================= -->
+            <!-- OPPOSITION TAB          -->
+            <!-- ======================= -->
+            <div id="contentOpposition" class="tab-content">
+                <!-- Inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="opponentName" class="mb-2 block font-semibold text-gray-300">Opponent Name</label>
+                        <input type="text" id="opponentName" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Liverpool">
+                        
+                        <label for="matchContextOpp" class="mt-4 mb-2 block font-semibold text-gray-300">Match Context (Optional)</label>
+                        <input type="text" id="matchContextOpp" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Our Team: Man City, FA Cup Final">
+                        
+                        <label for="textStatsOpponent" class="mt-4 mb-2 block font-semibold text-gray-300">Paste Team Stats (Optional)</label>
+                        <textarea id="textStatsOpponent" rows="8" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Avg Possession: 58%&#10;Goals For: 12 (last 5 games)&#10;Key Player: Mohamed Salah..."></textarea>
+                    </div>
+                    <!-- Upload Section -->
+                    <div>
+                        <label class="mb-2 block font-semibold text-gray-300">Upload Images (Formations, Heatmaps, etc.)</label>
+                        <div id="uploadBoxOpponent" class="flex flex-col items-center justify-center bg-gray-700 p-6 rounded-lg border-2 border-dashed border-gray-500 min-h-[16rem]">
+                            <div id="imagePreviewContainerOpponent" class="w-full mb-4 image-preview-container">
+                                <!-- Images will be added here dynamically -->
+                            </div>
+                            <div id="uploadPlaceholderOpponent" class="text-center text-gray-400">
+                                <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                                <p class="mt-2 text-sm font-semibold">Drag & Drop, Paste, or Select Images</p>
+                            </div>
+                            <div class="flex gap-4 mt-4">
+                                <label class="file-input-label px-3 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+                                    <span>Select Image(s)</span>
+                                    <input type="file" id="imageUploadOpponent" accept="image/png, image/jpeg" class="hidden" multiple>
+                                </label>
+                                <button id="clearButtonOpponent" class="hidden px-3 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors text-sm">
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ======================= -->
             <!-- ANALYSIS CONTROLS       -->
@@ -409,12 +447,19 @@
                 <!-- API Key Input -->
                 <div class="mb-4">
                     <label for="apiKey" class="mb-2 block text-sm font-semibold text-gray-400">Optional: Your Gemini API Key</label>
-                    <div class="flex items-center gap-2">
-                        <input type="password" id="apiKey" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your API key (optional)">
+                    <div id="apiKeyInputContainer" class="flex items-center gap-2">
+                        <input type="password" id="apiKey" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your API key">
                         <button type="button" id="toggleApiVisibility" class="p-3 bg-gray-600 rounded-lg text-gray-300 hover:bg-gray-500">
                             <svg data-lucide="eye" id="eyeIcon" class="h-5 w-5"></svg>
                             <svg data-lucide="eye-off" id="eyeOffIcon" class="h-5 w-5 hidden"></svg>
                         </button>
+                        <button type="button" id="apiKeySaveButton" class="p-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <svg data-lucide="save" class="h-5 w-5"></svg>
+                        </button>
+                    </div>
+                    <div id="apiKeyMessage" class="mt-2">
+                        Key saved!
+                        <button id="apiKeyClearButton"> [Clear Key]</button>
                     </div>
                 </div>
 
@@ -444,9 +489,9 @@
                             <svg data-lucide="copy" class="h-4 w-4"><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><rect x="7" y="5" width="6" height="6" rx="1"></rect></svg>
                             Copy
                         </button>
-                        <button id="printButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
-                            <svg data-lucide="printer" class="h-4 w-4"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                            Print
+                        <button id="previewButton" class="flex items-center gap-2 px-3 py-1 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition-colors text-sm">
+                            <svg data-lucide="file-check" class="h-4 w-4"></svg>
+                            Preview PDF
                         </button>
                     </div>
                 </div>
@@ -471,28 +516,65 @@
             
             <p>Welcome! This app helps you create professional scouting reports by analyzing images (like heatmaps and stat graphics) and text data.</p>
 
-            <h3 class="text-xl">Single Player Analysis (Default Tab)</h3>
+            <h3 class="text-xl">Single Player Analysis</h3>
             <ol>
                 <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/Cmd+V).</li>
                 <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, Rating, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
                 <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
                 <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
                 <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
-                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it. If you leave it blank, the app will use the default.</li>
+                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it and click "Save" to store it in your browser.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
                 <li><strong>Get Report:</strong> The AI will generate the report based on your selected type.</li>
-                <li><strong>Export:</strong> Use the "Copy" or "Print" (to PDF) buttons to save your report.</li>
+                <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The PDF preview will include your charts and images.</li>
             </ol>
 
-            <h3 class="text-xl">Player Comparison Tab</h3>
+            <h3 class="text-xl">Player Comparison</h3>
             <ol>
                 <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
-                <li><strong>Upload for Player 1:</strong> Use the "Player 1" box to upload images and add optional context/stats for your first player.</li>
-                <li><strong>Upload for Player 2:</strong> Use the "Player 2" box to do the same for your second player.</li>
-                <li><strong>Analyze:</strong> Click the "Compare Players" button (it's only enabled when both players have at least one image).</li>
+                <li><strong>Upload for Player 1 & 2:</strong> Use the two boxes to upload images and add optional context/stats for both players.</li>
+                <li><strong>Analyze:</strong> Click the "Compare Players" button.</li>
                 <li><strong>Get Report:</strong> The AI will generate a "Head-to-Head" analysis.</li>
             </ol>
+            
+            <h3 class="text-xl">Opposition Analysis</h3>
+            <ol>
+                <li><strong>Switch Tab:</strong> Click "Opposition Analysis" at the top.</li>
+                <li><strong>Add Info:</strong> Enter the Opponent's Name, Match Context, and any team stats you have.</li>
+                <li><strong>Upload Images:</strong> Upload any relevant images (formations, team heatmaps, etc.).</li>
+                <li><strong>Analyze:</strong> Click the "Analyze Opposition" button.</li>
+                <li><strong>Get Report:</strong> The AI will generate a tactical breakdown and exploitation plan.</li>
+            </ol>
         </div>
+    </div>
+    
+    <!-- ======================= -->
+    <!-- PDF PREVIEW MODAL       -->
+    <!-- ======================= -->
+    <div id="pdfPreviewModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl">PDF Report Preview</h2>
+                <button id="closePreviewModal" class="text-gray-400 hover:text-white">
+                    <svg data-lucide="x" class="h-6 w-6"></svg>
+                </button>
+            </div>
+            
+            <iframe id="pdfPreviewFrame" class="mb-4"></iframe>
+            
+            <button id="downloadPdfButton" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300">
+                <svg data-lucide="download" class="h-5 w-5"></svg>
+                Download PDF
+            </button>
+        </div>
+    </div>
+    
+    <!-- Hidden element for PDF rendering -->
+    <div id="pdf-render-target" style="position: absolute; left: -9999px; width: 210mm; background: white; color: black; font-family: 'Times New Roman', serif; font-size: 12pt; padding: 20mm;">
+        <h1 id="pdf-title" style="font-size: 24pt; font-weight: bold; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10mm;"></h1>
+        <div id="pdf-charts" style="margin-bottom: 10mm;"></div>
+        <div id="pdf-images" style="margin-bottom: 10mm; display: flex; flex-wrap: wrap; gap: 5mm;"></div>
+        <div id="pdf-report-content" style="line-height: 1.5;"></div>
     </div>
 
 
@@ -501,20 +583,26 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             // --- Global State ---
-            let activeTab = 'single'; // 'single' or 'compare'
-            // playerData[0] is single player, playerData[1] is player 1, playerData[2] is player 2
+            let activeTab = 'single'; // 'single', 'compare', or 'opposition'
+            // playerData[0] = single, [1] = p1, [2] = p2, [3] = opposition
             let playerData = [
+                { images: [], mimes: [] },
                 { images: [], mimes: [] },
                 { images: [], mimes: [] },
                 { images: [], mimes: [] }
             ];
             let statsChartInstance = null; // To hold the Chart.js instance
+            let generatedPdfDoc = null; // To hold the generated jsPDF object
+            let lastAiResponse = ""; // Store raw AI text for PDF generation
 
             // --- DOM Elements ---
             const tabSingle = document.getElementById('tabSingle');
             const tabCompare = document.getElementById('tabCompare');
+            const tabOpposition = document.getElementById('tabOpposition');
             const contentSingle = document.getElementById('contentSingle');
             const contentCompare = document.getElementById('contentCompare');
+            const contentOpposition = document.getElementById('contentOpposition');
+            
             const analyzeButton = document.getElementById('analyzeButton');
             const buttonText = document.getElementById('buttonText');
             const buttonIcon = document.getElementById('buttonIcon');
@@ -524,16 +612,36 @@
             const errorMessage = document.getElementById('errorMessage');
             const errorText = document.getElementById('errorText');
             const copyButton = document.getElementById('copyButton');
-            const printButton = document.getElementById('printButton');
+            const previewButton = document.getElementById('previewButton');
             const guideButton = document.getElementById('guideButton');
             const guideModalOverlay = document.getElementById('guideModalOverlay');
             const closeGuideModal = document.getElementById('closeGuideModal');
+            
+            // API Key Elements
+            const apiKeyInputContainer = document.getElementById('apiKeyInputContainer');
             const apiKeyInput = document.getElementById('apiKey');
             const toggleApiVisibility = document.getElementById('toggleApiVisibility');
             const eyeIcon = document.getElementById('eyeIcon');
             const eyeOffIcon = document.getElementById('eyeOffIcon');
+            const apiKeySaveButton = document.getElementById('apiKeySaveButton');
+            const apiKeyMessage = document.getElementById('apiKeyMessage');
+            const apiKeyClearButton = document.getElementById('apiKeyClearButton');
+            
+            // --- PDF Preview Modal Elements ---
+            const pdfPreviewModalOverlay = document.getElementById('pdfPreviewModalOverlay');
+            const closePreviewModal = document.getElementById('closePreviewModal');
+            const pdfPreviewFrame = document.getElementById('pdfPreviewFrame');
+            const downloadPdfButton = document.getElementById('downloadPdfButton');
+            
+            // --- PDF Render Target Elements ---
+            const pdfRenderTarget = document.getElementById('pdf-render-target');
+            const pdfTitle = document.getElementById('pdf-title');
+            const pdfCharts = document.getElementById('pdf-charts');
+            const pdfImages = document.getElementById('pdf-images');
+            const pdfReportContent = document.getElementById('pdf-report-content');
 
             // --- Single Player Elements ---
+            const uploadBoxSingle = document.getElementById('uploadBoxSingle');
             const imageUploadSingle = document.getElementById('imageUploadSingle');
             const imagePreviewContainerSingle = document.getElementById('imagePreviewContainerSingle');
             const uploadPlaceholderSingle = document.getElementById('uploadPlaceholderSingle');
@@ -542,7 +650,6 @@
             const visualizeStatsButton = document.getElementById('visualizeStatsButton');
             const chartContainer = document.getElementById('chartContainer');
             const statsChartCanvas = document.getElementById('statsChart');
-            // New Info Fields
             const playerName = document.getElementById('playerName');
             const playerAge = document.getElementById('playerAge');
             const playerClub = document.getElementById('playerClub');
@@ -551,6 +658,7 @@
             const matchContextSingle = document.getElementById('matchContextSingle');
             
             // --- Player 1 Elements ---
+            const uploadBox1 = document.getElementById('uploadBox1');
             const imageUpload1 = document.getElementById('imageUpload1');
             const imagePreviewContainer1 = document.getElementById('imagePreviewContainer1');
             const uploadPlaceholder1 = document.getElementById('uploadPlaceholder1');
@@ -559,15 +667,26 @@
             const textStats1 = document.getElementById('textStats1');
             
             // --- Player 2 Elements ---
+            const uploadBox2 = document.getElementById('uploadBox2');
             const imageUpload2 = document.getElementById('imageUpload2');
             const imagePreviewContainer2 = document.getElementById('imagePreviewContainer2');
             const uploadPlaceholder2 = document.getElementById('uploadPlaceholder2');
             const clearButton2 = document.getElementById('clearButton2');
             const matchContext2 = document.getElementById('matchContext2');
             const textStats2 = document.getElementById('textStats2');
+            
+            // --- Opposition Elements ---
+            const uploadBoxOpponent = document.getElementById('uploadBoxOpponent');
+            const imageUploadOpponent = document.getElementById('imageUploadOpponent');
+            const imagePreviewContainerOpponent = document.getElementById('imagePreviewContainerOpponent');
+            const uploadPlaceholderOpponent = document.getElementById('uploadPlaceholderOpponent');
+            const clearButtonOpponent = document.getElementById('clearButtonOpponent');
+            const opponentName = document.getElementById('opponentName');
+            const matchContextOpp = document.getElementById('matchContextOpp');
+            const textStatsOpponent = document.getElementById('textStatsOpponent');
 
             // --- AI Prompts ---
-            const systemPrompt = `You are an expert football (soccer) scout with decades of experience analyzing players at the highest level for a top-tier club. Your task is to analyze the provided image(s) and any optional text data. The images contain a player's heatmap and performance statistics. The text data provides supplementary stats. You must be critical, insightful, and professional. Be mindful that the data might be from a single match, so interpret potential 'cons' with caution (e.g., distinguish between a one-off bad game and a potential persistent flaw if possible).`;
+            const systemPrompt = `You are an expert football (soccer) scout and tactical analyst with decades of experience at the highest level. Your task is to analyze the provided image(s) and any optional text data. You must be critical, insightful, and professional.`;
 
             // Prompt 1: Quick Report
             const quickReportQuery = `Analyze the following image(s) and any provided text statistics for the player.
@@ -637,7 +756,7 @@ Analyze 2-3 critical moments or recurring actions from the stats using the PMDS 
 
 # 6. Tactical Awareness (Four Phases Framework)
 Assess the player's ability to understand and implement tactical instructions.
-- Communication (Information): (e.g., "Appears to scan the field frequently, implied by successful long passes...")
+- Communication (Information): (e.g., "Appears to scan a field frequently, implied by successful long passes...")
 - Decision (What): (e.g., "Consistently chose the simple, correct pass (high pass %)..." or "Tended to force dribbles in crowded areas (low dribble success)...")
 - Decision (How): (e.g., "Used a variety of pass types (curved, driven, lobbed)...")
 - Execution: (e.g., "Technically proficient, with high accuracy in passing and tackling stats...")
@@ -682,26 +801,52 @@ Compare their primary weaknesses or areas for improvement.
 # 5. Final Verdict & Tactical Fit
 Provide a concluding summary. Which player is more impactful? Who has higher potential? What kind of tactical system would each player thrive in?
 `;
+            
+            // Prompt 4: Opposition Analysis
+            const oppositionQuery = `Act as a senior tactical analyst. I am providing you with data on an upcoming opponent.
+- Opponent: {OPPONENT_NAME}
+- Match Context: {MATCH_CONTEXT}
+- Provided Stats: {OPPONENT_STATS}
+
+Based on the images (formations, heatmaps, etc.) and the text stats provided, generate a concise pre-match tactical report. Follow this structure:
+
+# 1. Opponent Profile & Likely Formation
+Based on the data, what is their most likely formation (e.g., 4-3-3, 3-5-2) and their general style (e.g., High-press, possession-based, counter-attack)?
+
+# 2. Key Players
+Identify 2-3 players who appear to be central to their play, based on stats or positional maps.
+
+# 3. Key Strengths
+List 3-4 primary tactical strengths. (e.g., "Attacks down the right flank," "Solid defensive block," "Quick transitions").
+
+# 4. Key Weaknesses
+List 3-4 exploitable weaknesses. (e.g., "Space behind fullbacks," "Vulnerable to high press," "Slow defensive transitions").
+
+# 5. Suggested Tactical Exploitation
+Provide 3-5 brief, actionable points on how *our* team can exploit these weaknesses. (e.g., "1. Target their left-back with quick 1-2s.", "2. Press their center-backs to force long balls.", "3. Use a false-9 to draw their holding midfielder out of position.").
+`;
 
             // --- Tab Navigation ---
             tabSingle.addEventListener('click', () => switchTab('single'));
             tabCompare.addEventListener('click', () => switchTab('compare'));
+            tabOpposition.addEventListener('click', () => switchTab('opposition'));
 
             function switchTab(tabName) {
                 activeTab = tabName;
-                if (tabName === 'single') {
-                    tabSingle.classList.add('active');
-                    tabCompare.classList.remove('active');
-                    contentSingle.classList.add('active');
-                    contentCompare.classList.remove('active');
-                    buttonText.textContent = "Analyze Player";
-                } else {
-                    tabSingle.classList.remove('active');
-                    tabCompare.classList.add('active');
-                    contentSingle.classList.remove('active');
-                    contentCompare.classList.add('active');
-                    buttonText.textContent = "Compare Players";
-                }
+                
+                tabSingle.classList.toggle('active', tabName === 'single');
+                contentSingle.classList.toggle('active', tabName === 'single');
+                
+                tabCompare.classList.toggle('active', tabName === 'compare');
+                contentCompare.classList.toggle('active', tabName === 'compare');
+                
+                tabOpposition.classList.toggle('active', tabName === 'opposition');
+                contentOpposition.classList.toggle('active', tabName === 'opposition');
+                
+                if (tabName === 'single') buttonText.textContent = "Analyze Player";
+                else if (tabName === 'compare') buttonText.textContent = "Compare Players";
+                else if (tabName === 'opposition') buttonText.textContent = "Analyze Opposition";
+                
                 updateAnalyzeButtonState();
             }
 
@@ -722,21 +867,23 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             // Player 2
             imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             clearButton2.addEventListener('click', () => clearData(2));
+            
+            // Opposition
+            imageUploadOpponent.addEventListener('change', (e) => handleFiles(e.target.files, 3));
+            clearButtonOpponent.addEventListener('click', () => clearData(3));
 
-            // Paste event
-            window.addEventListener('paste', (event) => {
-                if (activeTab === 'single') {
-                    handleFiles(event.clipboardData.files, 0);
-                }
-                // Paste for comparison tabs is ambiguous, so we'll just support single tab for now.
-            });
+            // Paste event listeners
+            uploadBoxSingle.addEventListener('paste', (e) => handlePaste(e, 0));
+            uploadBox1.addEventListener('paste', (e) => handlePaste(e, 1));
+            uploadBox2.addEventListener('paste', (e) => handlePaste(e, 2));
+            uploadBoxOpponent.addEventListener('paste', (e) => handlePaste(e, 3));
 
             // Analyze Button
             analyzeButton.addEventListener('click', handleAnalysis);
 
             // Export Buttons
             copyButton.addEventListener('click', copyReport);
-            printButton.addEventListener('click', () => window.print());
+            previewButton.addEventListener('click', handlePdfPreview);
 
             // Guide Modal
             guideButton.addEventListener('click', () => guideModalOverlay.classList.add('visible'));
@@ -746,8 +893,48 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     guideModalOverlay.classList.remove('visible');
                 }
             });
+            
+            // PDF Preview Modal
+            closePreviewModal.addEventListener('click', () => pdfPreviewModalOverlay.classList.remove('visible'));
+            pdfPreviewModalOverlay.addEventListener('click', (e) => {
+                if (e.target === pdfPreviewModalOverlay) {
+                    pdfPreviewModalOverlay.classList.remove('visible');
+                }
+            });
+            downloadPdfButton.addEventListener('click', () => {
+                if (generatedPdfDoc) {
+                    const pName = (playerName.value || opponentName.value || "report").replace(/\s+/g, '-');
+                    generatedPdfDoc.save(`scout-report-${pName}.pdf`);
+                } else {
+                    showError("No PDF generated. Please preview again.");
+                }
+            });
 
-            // API Key Visibility
+            // API Key Listeners
+            apiKeySaveButton.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    try {
+                        localStorage.setItem('geminiApiKey', key);
+                        updateApiKeyUI(true);
+                        apiKeyMessage.textContent = 'API Key saved locally!';
+                        apiKeyMessage.classList.add('visible');
+                    } catch (e) {
+                        showError("Failed to save API key. Local storage might be full or disabled.");
+                    }
+                }
+            });
+            
+            apiKeyClearButton.addEventListener('click', () => {
+                try {
+                    localStorage.removeItem('geminiApiKey');
+                    apiKeyInput.value = '';
+                    updateApiKeyUI(false);
+                } catch (e) {
+                    showError("Failed to clear API key.");
+                }
+            });
+
             toggleApiVisibility.addEventListener('click', () => {
                 if (apiKeyInput.type === 'password') {
                     apiKeyInput.type = 'text';
@@ -759,24 +946,66 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     eyeOffIcon.classList.add('hidden');
                 }
             });
+            
+            // --- API Key UI Function ---
+            function updateApiKeyUI(isKeySaved) {
+                if (isKeySaved) {
+                    apiKeyInputContainer.classList.add('hidden');
+                    apiKeyMessage.classList.add('visible');
+                } else {
+                    apiKeyInputContainer.classList.remove('hidden');
+                    apiKeyMessage.classList.remove('visible');
+                }
+            }
 
             // --- File Handling Functions ---
+            function handlePaste(event, playerIndex) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const clipboardItems = event.clipboardData.items;
+                const files = [];
+                
+                if (!clipboardItems) {
+                    return;
+                }
+                
+                for (let i = 0; i < clipboardItems.length; i++) {
+                    if (clipboardItems[i].kind === 'file' && clipboardItems[i].type.startsWith('image/')) {
+                        files.push(clipboardItems[i].getAsFile());
+                    }
+                }
+                
+                if (files.length > 0) {
+                    handleFiles(files, playerIndex);
+                } else {
+                    showError("No image found in clipboard. Paste a screenshot or an image file.");
+                }
+            }
+            
             function handleFiles(files, playerIndex) {
                 if (!files || files.length === 0) return;
                 
                 const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
                 if (imageFiles.length === 0) return;
 
+                let placeholder, clearButton;
                 if (playerIndex === 0) {
-                    uploadPlaceholderSingle.classList.add('hidden');
-                    clearButtonSingle.classList.remove('hidden');
+                    placeholder = uploadPlaceholderSingle;
+                    clearButton = clearButtonSingle;
                 } else if (playerIndex === 1) {
-                    uploadPlaceholder1.classList.add('hidden');
-                    clearButton1.classList.remove('hidden');
+                    placeholder = uploadPlaceholder1;
+                    clearButton = clearButton1;
                 } else if (playerIndex === 2) {
-                    uploadPlaceholder2.classList.add('hidden');
-                    clearButton2.classList.remove('hidden');
+                    placeholder = uploadPlaceholder2;
+                    clearButton = clearButton2;
+                } else if (playerIndex === 3) {
+                    placeholder = uploadPlaceholderOpponent;
+                    clearButton = clearButtonOpponent;
                 }
+                
+                placeholder.classList.add('hidden');
+                clearButton.classList.remove('hidden');
 
                 for (const file of imageFiles) {
                     processFile(file, playerIndex);
@@ -797,7 +1026,7 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     updateAnalyzeButtonState();
                     hideError();
                 };
-                reader.readDataURL(file);
+                reader.readAsDataURL(file);
             }
 
             function addImageToPreview(dataUrl, playerIndex) {
@@ -805,11 +1034,12 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                 if (playerIndex === 0) container = imagePreviewContainerSingle;
                 else if (playerIndex === 1) container = imagePreviewContainer1;
                 else if (playerIndex === 2) container = imagePreviewContainer2;
+                else if (playerIndex === 3) container = imagePreviewContainerOpponent;
                 
                 if (!container) return;
                 const img = document.createElement('img');
                 img.src = dataUrl;
-                img.alt = "Player data preview";
+                img.alt = "Data preview";
                 container.appendChild(img);
             }
 
@@ -845,6 +1075,13 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     clearButton2.classList.add('hidden');
                     textStats2.value = '';
                     matchContext2.value = '';
+                } else if (playerIndex === 3) {
+                    imagePreviewContainerOpponent.innerHTML = '';
+                    uploadPlaceholderOpponent.classList.remove('hidden');
+                    clearButtonOpponent.classList.add('hidden');
+                    textStatsOpponent.value = '';
+                    opponentName.value = '';
+                    matchContextOpp.value = '';
                 }
                 
                 updateAnalyzeButtonState();
@@ -855,9 +1092,12 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             function updateAnalyzeButtonState() {
                 if (activeTab === 'single') {
                     analyzeButton.disabled = playerData[0].images.length === 0;
-                } else {
-                    // Both players must have at least one image to compare
+                } else if (activeTab === 'compare') {
                     analyzeButton.disabled = playerData[1].images.length === 0 || playerData[2].images.length === 0;
+                } else if (activeTab === 'opposition') {
+                    const hasText = opponentName.value.trim() !== '' || textStatsOpponent.value.trim() !== '';
+                    const hasImages = playerData[3].images.length > 0;
+                    analyzeButton.disabled = !hasText && !hasImages;
                 }
             }
 
@@ -880,18 +1120,10 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     const label = parts[0].trim();
                     let valueString = parts[1].trim();
                     
-                    // Handle "X/Y" formats like "4/5"
-                    if (valueString.includes('/')) {
-                        valueString = valueString.split('/')[0].trim();
-                    }
-                    
-                    // Handle percentages like "80%"
-                    if (valueString.includes('%')) {
-                        valueString = valueString.replace('%', '').trim();
-                    }
+                    if (valueString.includes('/')) valueString = valueString.split('/')[0].trim();
+                    if (valueString.includes('%')) valueString = valueString.replace('%', '').trim();
 
                     const value = parseFloat(valueString);
-
                     if (!isNaN(value) && label) {
                         labels.push(label);
                         data.push(value);
@@ -899,15 +1131,12 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                 });
 
                 if (data.length === 0) {
-                    showError("No parsable numeric stats found in the text box. Use format: 'Stat Name: 123'.");
+                    showError("No parsable numeric stats found. Use format: 'Stat Name: 123'.");
                     return;
                 }
 
                 chartContainer.classList.remove('hidden');
-
-                if (statsChartInstance) {
-                    statsChartInstance.destroy();
-                }
+                if (statsChartInstance) statsChartInstance.destroy();
 
                 statsChartInstance = new Chart(statsChartCanvas, {
                     type: 'bar',
@@ -916,39 +1145,24 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                         datasets: [{
                             label: 'Player Stats',
                             data: data,
-                            backgroundColor: 'rgba(56, 189, 248, 0.6)', // sky-400
+                            backgroundColor: 'rgba(56, 189, 248, 0.6)',
                             borderColor: 'rgba(56, 189, 248, 1)',
                             borderWidth: 1
                         }]
                     },
                     options: {
-                        indexAxis: 'y', // Horizontal bar chart
+                        indexAxis: 'y',
                         responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                displayColors: false
-                            }
-                        },
+                        plugins: { legend: { display: false }, tooltip: { displayColors: false } },
                         scales: {
                             x: {
                                 beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
-                                },
-                                ticks: {
-                                    color: '#d1d5db' // gray-300
-                                }
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#d1d5db' }
                             },
                             y: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#d1d5db' // gray-300
-                                }
+                                grid: { display: false },
+                                ticks: { color: '#d1d5db' }
                             }
                         }
                     }
@@ -960,74 +1174,57 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                 setLoading(true);
                 hideError();
                 resultsSection.classList.add('hidden');
+                lastAiResponse = ""; // Clear last response
                 
                 const parts = [];
                 let query;
                 
                 if (activeTab === 'single') {
-                    // --- Single Player Analysis ---
                     const reportType = document.querySelector('input[name="reportType"]:checked').value;
-                    
-                    const context = matchContextSingle.value || "Not specified";
-                    const stats = textStatsSingle.value;
                     const pName = playerName.value || "Not specified";
-                    const pAge = playerAge.value || "Not specified";
-                    const pClub = playerClub.value || "Not specified";
-                    const pLeague = playerLeague.value || "Not specified";
-                    const pRating = playerRating.value || "Not specified";
-
-                    if (reportType === 'quick') {
-                        query = quickReportQuery;
-                    } else {
-                        query = proReportQuery;
-                    }
-
-                    // Populate player info into the query
-                    query = query
+                    query = (reportType === 'quick' ? quickReportQuery : proReportQuery)
                         .replace('{PLAYER_NAME}', pName)
-                        .replace('{PLAYER_AGE}', pAge)
-                        .replace('{PLAYER_CLUB}', pClub)
-                        .replace('{PLAYER_LEAGUE}', pLeague)
-                        .replace('{PLAYER_RATING}', pRating)
-                        .replace('{MATCH_CONTEXT}', context);
+                        .replace('{PLAYER_AGE}', playerAge.value || "Not specified")
+                        .replace('{PLAYER_CLUB}', playerClub.value || "Not specified")
+                        .replace('{PLAYER_LEAGUE}', playerLeague.value || "Not specified")
+                        .replace('{PLAYER_RATING}', playerRating.value || "Not specified")
+                        .replace('{MATCH_CONTEXT}', matchContextSingle.value || "Not specified");
                     
                     parts.push({ text: query });
-                    if (stats.trim() !== "") {
-                        parts.push({ text: "\n\n# Additional Textual Stats:\n" + stats });
-                    }
+                    const stats = textStatsSingle.value;
+                    if (stats.trim() !== "") parts.push({ text: "\n\n# Additional Textual Stats:\n" + stats });
                     playerData[0].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[0].mimes[i], data: imgData } });
                     });
                     
-                } else {
-                    // --- Player Comparison Analysis ---
-                    const context1 = matchContext1.value || "Not specified";
-                    const stats1 = textStats1.value;
-                    const context2 = matchContext2.value || "Not specified";
-                    const stats2 = textStats2.value;
-                    
+                } else if (activeTab === 'compare') {
                     query = comparisonUserQuery
-                        .replace('{MATCH_CONTEXT_1}', context1)
-                        .replace('{MATCH_CONTEXT_2}', context2);
-                        
+                        .replace('{MATCH_CONTEXT_1}', matchContext1.value || "Not specified")
+                        .replace('{MATCH_CONTEXT_2}', matchContext2.value || "Not specified");
                     parts.push({ text: query });
                     
-                    // Add Player 1 Data
+                    const stats1 = textStats1.value;
                     parts.push({ text: "\n\n# --- PLAYER 1 DATA ---" });
-                    if (stats1.trim() !== "") {
-                        parts.push({ text: "\n# Player 1 Additional Textual Stats:\n" + stats1 });
-                    }
+                    if (stats1.trim() !== "") parts.push({ text: "\n# Player 1 Stats:\n" + stats1 });
                     playerData[1].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[1].mimes[i], data: imgData } });
                     });
                     
-                    // Add Player 2 Data
+                    const stats2 = textStats2.value;
                     parts.push({ text: "\n\n# --- PLAYER 2 DATA ---" });
-                    if (stats2.trim() !== "") {
-                        parts.push({ text: "\n# Player 2 Additional Textual Stats:\n" + stats2 });
-                    }
+                    if (stats2.trim() !== "") parts.push({ text: "\n# Player 2 Stats:\n" + stats2 });
                     playerData[2].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[2].mimes[i], data: imgData } });
+                    });
+                    
+                } else if (activeTab === 'opposition') {
+                    query = oppositionQuery
+                        .replace('{OPPONENT_NAME}', opponentName.value || "Not specified")
+                        .replace('{MATCH_CONTEXT}', matchContextOpp.value || "Not specified")
+                        .replace('{OPPONENT_STATS}', textStatsOpponent.value || "No stats provided");
+                    parts.push({ text: query });
+                    playerData[3].images.forEach((imgData, i) => {
+                        parts.push({ inlineData: { mimeType: playerData[3].mimes[i], data: imgData } });
                     });
                 }
                 
@@ -1035,20 +1232,22 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             }
 
             async function callGeminiApi(parts, retryCount = 0) {
-                // Check for user-provided API key
-                const userApiKey = apiKeyInput.value.trim();
-                const apiKey = userApiKey || ""; // Use user's key if provided, otherwise default
+                // Get key from input or local storage
+                let key = apiKeyInput.value.trim();
+                if (!key) {
+                    try {
+                        key = localStorage.getItem('geminiApiKey') || "";
+                    } catch (e) {
+                        key = "";
+                    }
+                }
                 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
 
                 const payload = {
                     contents: [{ role: "user", parts: parts }],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                    generationConfig: {
-                        temperature: 0.3,
-                    }
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: { temperature: 0.3 }
                 };
 
                 try {
@@ -1070,8 +1269,8 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     const result = await response.json();
                     
                     if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        const analysisText = result.candidates[0].content.parts[0].text;
-                        displayResults(analysisText);
+                        lastAiResponse = result.candidates[0].content.parts[0].text;
+                        displayResults(lastAiResponse);
                     } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
                         throw new Error("Analysis blocked due to safety settings. Try different images or text.");
                     } else {
@@ -1095,7 +1294,6 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
 
             // --- UI Helper Functions ---
             function displayResults(text) {
-                // More comprehensive markdown conversion
                 let html = text
                     .replace(/^# 1. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
                     .replace(/^# 2. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
@@ -1104,53 +1302,151 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     .replace(/^# 5. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
                     .replace(/^# 6. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
                     .replace(/^# 7. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 8. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>') // For Pro Report
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                    .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>'); // List items
+                    .replace(/^# 8. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>');
 
                 analysisOutput.innerHTML = html;
                 resultsSection.classList.remove('hidden');
-                // Re-initialize icons if they are in the results (though they aren't right now)
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
             
+            async function handlePdfPreview() {
+                if (!lastAiResponse) {
+                    showError("Please generate a report first.");
+                    return;
+                }
+                
+                previewButton.disabled = true;
+                previewButton.innerHTML = `<div class="spinner -ml-1 mr-3 h-4 w-4"></div> Previewing...`;
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    
+                    // --- 1. Populate the hidden render target ---
+                    
+                    // Set Title
+                    let titleText = "Scouting Report";
+                    if (activeTab === 'single') titleText = `Scout Report: ${playerName.value || 'Player'}`;
+                    else if (activeTab === 'compare') titleText = "Player Comparison Report";
+                    else if (activeTab === 'opposition') titleText = `Opposition Analysis: ${opponentName.value || 'Opponent'}`;
+                    pdfTitle.textContent = titleText;
+                    
+                    // Clear old charts/images
+                    pdfCharts.innerHTML = '';
+                    pdfImages.innerHTML = '';
+                    
+                    // Add Stats Chart (if it exists)
+                    if (activeTab === 'single' && statsChartInstance) {
+                        const chartImg = document.createElement('img');
+                        chartImg.src = statsChartInstance.toBase64Image();
+                        chartImg.style.width = '100%';
+                        chartImg.style.maxWidth = '180mm';
+                        chartImg.style.marginBottom = '5mm';
+                        pdfCharts.appendChild(chartImg);
+                    }
+                    
+                    // Add Uploaded Images
+                    let imagesToRender = [];
+                    if (activeTab === 'single') imagesToRender = playerData[0].images;
+                    else if (activeTab === 'compare') imagesToRender = [...playerData[1].images, ...playerData[2].images];
+                    else if (activeTab === 'opposition') imagesToRender = playerData[3].images;
+                    
+                    imagesToRender.forEach((imgData, i) => {
+                        const mime = playerData[activeTab === 'single' ? 0 : (activeTab === 'compare' ? (i < playerData[1].images.length ? 1 : 2) : 3)].mimes[i];
+                        const imgEl = document.createElement('img');
+                        imgEl.src = `data:${mime};base64,${imgData}`;
+                        imgEl.style.maxHeight = '100mm';
+                        imgEl.style.maxWidth = '48%';
+                        imgEl.style.objectFit = 'contain';
+                        imgEl.style.border = '1px solid #eee';
+                        pdfImages.appendChild(imgEl);
+                    });
+
+                    // Add Report Text
+                    let reportHtml = lastAiResponse
+                        .replace(/^# (\d. .*)/gm, '<h2 style="font-size: 16pt; font-weight: bold; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin-top: 8mm; margin-bottom: 4mm;">$1</h2>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: bold;">$1</strong>')
+                        .replace(/^- (.*)/gm, '<li style="margin-left: 5mm; margin-bottom: 1mm;">$1</li>')
+                        .replace(/\n/g, '<br>');
+                    pdfReportContent.innerHTML = reportHtml;
+
+                    // --- 2. Render with html2canvas ---
+                    const canvas = await html2canvas(pdfRenderTarget, {
+                        scale: 2, // Increase resolution
+                        useCORS: true
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    // --- 3. Create jsPDF ---
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    const pdfWidth = doc.internal.pageSize.getWidth();
+                    const pdfHeight = doc.internal.pageSize.getHeight();
+                    
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+                    const ratio = canvasHeight / canvasWidth;
+                    
+                    let imgHeight = pdfWidth * ratio;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    doc.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+                    
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                        heightLeft -= pdfHeight;
+                    }
+                    
+                    generatedPdfDoc = doc;
+                    
+                    // --- 4. Show Preview ---
+                    const pdfDataUri = doc.output('datauristring');
+                    pdfPreviewFrame.src = pdfDataUri;
+                    pdfPreviewModalOverlay.classList.add('visible');
+
+                } catch (err) {
+                    showError("Error generating PDF preview: " + err.message);
+                    console.error(err);
+                } finally {
+                    // Reset button
+                    previewButton.disabled = false;
+                    previewButton.innerHTML = `<svg data-lucide="file-check" class="h-4 w-4"></svg> Preview PDF`;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
+            }
+
             function copyReport() {
-                // Create a temporary element to hold the formatted text
-                const tempEl = document.createElement('div');
-                // Replace HTML tags with plain text equivalents for copying
                 let textToCopy = analysisOutput.innerHTML
-                    .replace(/<h3 class="[^"]*">(.*?)<\/h3>/g, '\n\n$1\n--------------------\n') // Headings
-                    .replace(/<strong>(.*?)<\/strong>/g, '$1') // Bold
-                    .replace(/<li class="[^"]*">(.*?)<\/li>/g, '\n- $1') // List items
-                    .replace(/<br>/g, '\n') // Line breaks
+                    .replace(/<h3 class="[^"]*">(.*?)<\/h3>/g, '\n\n$1\n--------------------\n')
+                    .replace(/<strong>(.*?)<\/strong>/g, '$1')
+                    .replace(/<li class="[^"]*">(.*?)<\/li>/g, '\n- $1')
+                    .replace(/<br>/g, '\n')
                     .replace(/&lt;/g, '<')
                     .replace(/&gt;/g, '>')
                     .replace(/&amp;/g, '&');
                 
-                // Set innerText to decode HTML entities
+                const tempEl = document.createElement('div');
                 tempEl.innerText = textToCopy;
                 textToCopy = tempEl.innerText.trim();
 
-                // Use a temporary textarea to preserve formatting (like newlines)
                 const textArea = document.createElement('textarea');
                 textArea.value = textToCopy;
-                textArea.style.position = 'fixed'; // Prevent scrolling to bottom
+                textArea.style.position = 'fixed';
                 textArea.style.left = '-9999px';
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
                     document.execCommand('copy');
                     copyButton.innerHTML = '<svg data-lucide="check" class="h-4 w-4"></svg> Copied!';
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                     setTimeout(() => {
                         copyButton.innerHTML = '<svg data-lucide="copy" class="h-4 w-4"></svg> Copy';
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
-                        }
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
                     }, 2000);
                 } catch (err) {
                     showError('Failed to copy text.');
@@ -1165,7 +1461,7 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     buttonIcon.classList.add('hidden');
                     loadingSpinner.classList.remove('hidden');
                 } else {
-                    updateAnalyzeButtonState(); // Re-check if it should be enabled
+                    updateAnalyzeButtonState();
                     buttonText.classList.remove('hidden');
                     buttonIcon.classList.remove('hidden');
                     loadingSpinner.classList.add('hidden');
@@ -1186,6 +1482,20 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                 lucide.createIcons();
             } else {
                 console.error("Lucide icons script not loaded.");
+            }
+            
+            // Check for saved API key on load
+            try {
+                const savedKey = localStorage.getItem('geminiApiKey');
+                if (savedKey) {
+                    apiKeyInput.value = savedKey;
+                    updateApiKeyUI(true);
+                } else {
+                    updateApiKeyUI(false);
+                }
+            } catch (e) {
+                console.warn("Could not access local storage.");
+                updateApiKeyUI(false);
             }
 
             updateAnalyzeButtonState(); // Set initial button state
