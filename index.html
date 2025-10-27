@@ -136,13 +136,61 @@
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-        .modal-content ul {
-            list-style-type: disc;
+        .modal-content ol {
+            list-style-type: decimal;
             padding-left: 1.5rem;
             margin-bottom: 1rem;
         }
         .modal-content li {
             margin-bottom: 0.5rem;
+        }
+
+        /* Custom Radio Button Styles */
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid #4b5563; /* gray-600 */
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            background-color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
+        }
+        .radio-label:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+        .radio-input {
+            display: none;
+        }
+        .radio-input:checked + .radio-label {
+            background-color: #0c4a6e; /* sky-900 */
+            border-color: #38bdf8; /* sky-400 */
+            color: #e0f2fe; /* sky-100 */
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+        .radio-circle {
+            width: 1.25em;
+            height: 1.25em;
+            border-radius: 50%;
+            border: 2px solid #9ca3af; /* gray-400 */
+            margin-right: 0.75rem;
+            display: inline-block;
+            position: relative;
+        }
+        .radio-input:checked + .radio-label .radio-circle {
+            border-color: #38bdf8; /* sky-400 */
+        }
+        .radio-input:checked + .radio-label .radio-circle::after {
+            content: '';
+            width: 0.75em;
+            height: 0.75em;
+            border-radius: 50%;
+            background-color: #38bdf8; /* sky-400 */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         /* Print styles */
@@ -156,7 +204,9 @@
             #analysisControls,
             #reportActions,
             #guideButton,
-            .modal-overlay {
+            .modal-overlay,
+            #playerInfoSection,
+            #reportTypeSection {
                 display: none;
             }
             #resultsSection,
@@ -234,12 +284,58 @@
                     </div>
                 </div>
 
+                <!-- Player Info Section -->
+                <div id="playerInfoSection" class="mt-6 p-4 bg-gray-700/50 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-4">Player Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="playerName" class="mb-1 block text-sm font-medium text-gray-300">Player Name</label>
+                            <input type="text" id="playerName" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., John Doe">
+                        </div>
+                        <div>
+                            <label for="playerAge" class="mb-1 block text-sm font-medium text-gray-300">Age</label>
+                            <input type="number" id="playerAge" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 22">
+                        </div>
+                        <div>
+                            <label for="playerRating" class="mb-1 block text-sm font-medium text-gray-300">Player Rating (A/B, 5-9, etc.)</label>
+                            <input type="text" id="playerRating" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., A-, 8.1, Green">
+                        </div>
+                        <div>
+                            <label for="playerClub" class="mb-1 block text-sm font-medium text-gray-300">Club</label>
+                            <input type="text" id="playerClub" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., AC Milan">
+                        </div>
+                        <div>
+                            <label for="playerLeague" class="mb-1 block text-sm font-medium text-gray-300">League</label>
+                            <input type="text" id="playerLeague" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Serie A">
+                        </div>
+                        <div>
+                            <label for="matchContextSingle" class="mb-1 block text-sm font-medium text-gray-300">Match Observed</label>
+                            <input type="text" id="matchContextSingle" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., vs. Liverpool, 90 mins">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Controls and Text Input -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div>
-                        <label for="matchContextSingle" class="mb-2 block font-semibold text-gray-300">Optional: Match Context</label>
-                        <input type="text" id="matchContextSingle" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., vs. Liverpool, 90 mins">
+                    <!-- Report Type -->
+                    <div id="reportTypeSection">
+                        <label class="mb-3 block font-semibold text-gray-300">Report Type</label>
+                        <div class="flex gap-4">
+                            <input type="radio" id="reportQuick" name="reportType" value="quick" class="radio-input" checked>
+                            <label for="reportQuick" class="radio-label w-full justify-center">
+                                <span class="radio-circle"></span>
+                                Quick Report
+                            </label>
+
+                            <input type="radio" id="reportPro" name="reportType" value="pro" class="radio-input">
+                            <label for="reportPro" class="radio-label w-full justify-center">
+                                <span class="radio-circle"></span>
+                                Pro Scout Report
+                            </label>
+                        </div>
                     </div>
+                    
+                    <!-- Stats Input -->
                     <div>
                         <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste Additional Stats</label>
                         <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5..."></textarea>
@@ -288,7 +384,7 @@
                         <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
                         <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder2" class="text-center text-gray-400 py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.s 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                             <p class="mt-1 text-sm font-semibold">Upload/Paste Player 2 Images</p>
                         </div>
                         <div class="flex gap-4 mt-2 justify-center">
@@ -376,24 +472,25 @@
             <p>Welcome! This app helps you create professional scouting reports by analyzing images (like heatmaps and stat graphics) and text data.</p>
 
             <h3 class="text-xl">Single Player Analysis (Default Tab)</h3>
-            <ol class="list-decimal pl-6 mb-4">
+            <ol>
                 <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/Cmd+V).</li>
-                <li><strong>Add Context (Optional):</strong> In the "Match Context" box, add info like "vs. Man City, 90 mins" to help the AI.</li>
+                <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, Rating, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
                 <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
                 <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
-                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it in the "Your Gemini API Key" field. If you leave it blank, the app will use the default.</li>
+                <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
+                <li><strong>Add API Key (Optional):</strong> If you have your own Gemini API key, you can enter it. If you leave it blank, the app will use the default.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
-                <li><strong>Get Report:</strong> The AI will generate a full report with 7 sections: Position, Role, Pros, Cons, Summary, Similar Player, and Development Plan.</li>
+                <li><strong>Get Report:</strong> The AI will generate the report based on your selected type.</li>
                 <li><strong>Export:</strong> Use the "Copy" or "Print" (to PDF) buttons to save your report.</li>
             </ol>
 
             <h3 class="text-xl">Player Comparison Tab</h3>
-            <ol class="list-decimal pl-6 mb-4">
+            <ol>
                 <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
                 <li><strong>Upload for Player 1:</strong> Use the "Player 1" box to upload images and add optional context/stats for your first player.</li>
                 <li><strong>Upload for Player 2:</strong> Use the "Player 2" box to do the same for your second player.</li>
                 <li><strong>Analyze:</strong> Click the "Compare Players" button (it's only enabled when both players have at least one image).</li>
-                <li><strong>Get Report:</strong> The AI will generate a "Head-to-Head" analysis, comparing their profiles, strengths, weaknesses, and tactical fit.</li>
+                <li><strong>Get Report:</strong> The AI will generate a "Head-to-Head" analysis.</li>
             </ol>
         </div>
     </div>
@@ -441,12 +538,18 @@
             const imagePreviewContainerSingle = document.getElementById('imagePreviewContainerSingle');
             const uploadPlaceholderSingle = document.getElementById('uploadPlaceholderSingle');
             const clearButtonSingle = document.getElementById('clearButtonSingle');
-            const matchContextSingle = document.getElementById('matchContextSingle');
             const textStatsSingle = document.getElementById('textStatsSingle');
             const visualizeStatsButton = document.getElementById('visualizeStatsButton');
             const chartContainer = document.getElementById('chartContainer');
             const statsChartCanvas = document.getElementById('statsChart');
-
+            // New Info Fields
+            const playerName = document.getElementById('playerName');
+            const playerAge = document.getElementById('playerAge');
+            const playerClub = document.getElementById('playerClub');
+            const playerLeague = document.getElementById('playerLeague');
+            const playerRating = document.getElementById('playerRating');
+            const matchContextSingle = document.getElementById('matchContextSingle');
+            
             // --- Player 1 Elements ---
             const imageUpload1 = document.getElementById('imageUpload1');
             const imagePreviewContainer1 = document.getElementById('imagePreviewContainer1');
@@ -466,11 +569,18 @@
             // --- AI Prompts ---
             const systemPrompt = `You are an expert football (soccer) scout with decades of experience analyzing players at the highest level for a top-tier club. Your task is to analyze the provided image(s) and any optional text data. The images contain a player's heatmap and performance statistics. The text data provides supplementary stats. You must be critical, insightful, and professional. Be mindful that the data might be from a single match, so interpret potential 'cons' with caution (e.g., distinguish between a one-off bad game and a potential persistent flaw if possible).`;
 
-            const singleUserQuery = `Analyze the following image(s) and any provided text statistics for the player.
+            // Prompt 1: Quick Report
+            const quickReportQuery = `Analyze the following image(s) and any provided text statistics for the player.
 Based on all available data (heatmap activity, image stats, and text stats), please provide a full professional scouting report.
-Note the provided match context: {MATCH_CONTEXT}
+Note the provided player info:
+- Player: {PLAYER_NAME}
+- Age: {PLAYER_AGE}
+- Club: {PLAYER_CLUB}
+- League: {PLAYER_LEAGUE}
+- Rating: {PLAYER_RATING}
+- Match Observed: {MATCH_CONTEXT}
 
-Structure your analysis with the following clear sections. Use Markdown formatting for headings.
+Structure your analysis with the following 7 clear sections. Use Markdown formatting for headings.
 
 # 1. Likely Position(s)
 Identify the player's most likely position and any secondary positions (e.g., 'Primary: Box-to-Box Midfielder (CM)', 'Secondary: Deep-Lying Playmaker (DLP)'). Justify your choice based on the heatmap(s).
@@ -493,7 +603,64 @@ Based on the complete analysis (heatmap, stats, role), suggest ONE well-known pr
 # 7. Suggested Development Plan
 Based on the 'Cons' you identified, suggest 2-3 specific, actionable development points or drills. (e.g., "1. Final Third Decision-Making: Drills focusing on cut-back passes and shooting under pressure.", "2. Weaker Foot Usage: Dedicate 15 minutes post-training to repetitive passing and shooting with weaker foot.").
 `;
+            
+            // Prompt 2: Pro Scout Report
+            const proReportQuery = `Generate a comprehensive, professional scouting report based on the provided data (images and text).
+            
+# 1. Player Information
+- Name: {PLAYER_NAME}
+- Age: {PLAYER_AGE}
+- Position (from data): (Identify this from the heatmap/stats)
+- Club: {PLAYER_CLUB}
+- League: {PLAYER_LEAGUE}
+- Match Observed: {MATCH_CONTEXT}
 
+# 2. Player Rating
+- Performance Rating: {PLAYER_RATING}
+- (Briefly justify this rating based on the provided stats and your analysis)
+
+# 3. Summary
+Provide a brief overview of the player's performance.
+- Key Strengths: (List 2-3 standout attributes from the data)
+- Areas for Improvement: (List 2-3 specific parts of their game that need attention)
+
+# 4. Positional Play
+Analyze positioning in various phases based on the heatmap and stats.
+- Offensive Phase: (e.g., "Finds pockets of space between midfield and defense lines, evident from heatmap activity in zone 14...")
+- Defensive Phase: (e.g., "Disciplined in holding his position, but heatmap shows a reluctance to track runners wide...")
+- Transition Play: (e.g., "Quick to support the attack, but slow in defensive recovery as shown by...")
+
+# 5. Key Actions (PMDS Framework)
+Analyze 2-3 critical moments or recurring actions from the stats using the PMDS framework (Position, Moment, Direction, Speed).
+- Example Action 1 (e.g., Pressing): "Position: High in the opponent's half. Moment: Triggered by a poor first touch from the defender. Direction: Arcing run to cut off the pass. Speed: Explosive. Result: Forced a turnover."
+- Example Action 2 (e.g., Key Pass): "Position: Right half-space. Moment: As winger checked to him. Direction: Forward, breaking the lines. Speed: Perfectly weighted. Result: Created a clear shot on goal."
+
+# 6. Tactical Awareness (Four Phases Framework)
+Assess the player's ability to understand and implement tactical instructions.
+- Communication (Information): (e.g., "Appears to scan the field frequently, implied by successful long passes...")
+- Decision (What): (e.g., "Consistently chose the simple, correct pass (high pass %)..." or "Tended to force dribbles in crowded areas (low dribble success)...")
+- Decision (How): (e.g., "Used a variety of pass types (curved, driven, lobbed)...")
+- Execution: (e.g., "Technically proficient, with high accuracy in passing and tackling stats...")
+
+# 7. Mentality
+Assess intangible qualities based on the provided stats.
+- Work Rate: (e.g., "Exceptional, as shown by the extensive heatmap coverage and high number of defensive actions...")
+- Leadership: (e.g., "Difficult to assess from stats alone, but high pass volume suggests teammates trust him as a hub...")
+- Composure Under Pressure: (e.g., "Pass completion rate remained high despite... " or "High foul count (5) suggests moments of panic...")
+
+# 8. Conclusion
+Summarize your thoughts on the player’s potential and suitability.
+- Growth Potential: (e.g., "Significant potential to become a top-division starter if 'Areas for Improvement' are addressed.")
+- Suitability for a System: (e.g., "Best suited for a high-possession team that needs a creative fulcrum..." or "Ideal for a counter-attacking side...")
+- Transfer Recommendation: (e.g., "Recommend for further monitoring" or "Immediate signing for B-team/loan.")
+- **Similar Player Models:**
+    - Top-League Comparison: (e.g., Martin Ødegaard - Similar vision and left foot)
+    - Mid-League Comparison: (e.g., Joey Veerman (PSV) - Similar tempo-dictating style)
+    - Same-League Comparison: (e.g., Teun Koopmeiners - If you cannot find a non-teammate, state that)
+    - Historical Comparison: (e.g., Guti - Similar flair and risk-taking in final third)
+`;
+
+            // Prompt 3: Comparison Report
             const comparisonUserQuery = `Analyze the provided data for TWO players. Player 1's data is provided first, followed by Player 2's data.
 - Player 1 Context: {MATCH_CONTEXT_1}
 - Player 2 Context: {MATCH_CONTEXT_2}
@@ -630,7 +797,7 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     updateAnalyzeButtonState();
                     hideError();
                 };
-                reader.readAsDataURL(file);
+                reader.readDataURL(file);
             }
 
             function addImageToPreview(dataUrl, playerIndex) {
@@ -655,6 +822,11 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     clearButtonSingle.classList.add('hidden');
                     textStatsSingle.value = '';
                     matchContextSingle.value = '';
+                    playerName.value = '';
+                    playerAge.value = '';
+                    playerClub.value = '';
+                    playerLeague.value = '';
+                    playerRating.value = '';
                     chartContainer.classList.add('hidden');
                     if (statsChartInstance) {
                         statsChartInstance.destroy();
@@ -794,9 +966,30 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                 
                 if (activeTab === 'single') {
                     // --- Single Player Analysis ---
+                    const reportType = document.querySelector('input[name="reportType"]:checked').value;
+                    
                     const context = matchContextSingle.value || "Not specified";
                     const stats = textStatsSingle.value;
-                    query = singleUserQuery.replace('{MATCH_CONTEXT}', context);
+                    const pName = playerName.value || "Not specified";
+                    const pAge = playerAge.value || "Not specified";
+                    const pClub = playerClub.value || "Not specified";
+                    const pLeague = playerLeague.value || "Not specified";
+                    const pRating = playerRating.value || "Not specified";
+
+                    if (reportType === 'quick') {
+                        query = quickReportQuery;
+                    } else {
+                        query = proReportQuery;
+                    }
+
+                    // Populate player info into the query
+                    query = query
+                        .replace('{PLAYER_NAME}', pName)
+                        .replace('{PLAYER_AGE}', pAge)
+                        .replace('{PLAYER_CLUB}', pClub)
+                        .replace('{PLAYER_LEAGUE}', pLeague)
+                        .replace('{PLAYER_RATING}', pRating)
+                        .replace('{MATCH_CONTEXT}', context);
                     
                     parts.push({ text: query });
                     if (stats.trim() !== "") {
@@ -911,7 +1104,9 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
                     .replace(/^# 5. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
                     .replace(/^# 6. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
                     .replace(/^# 7. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+                    .replace(/^# 8. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>') // For Pro Report
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                    .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>'); // List items
 
                 analysisOutput.innerHTML = html;
                 resultsSection.classList.remove('hidden');
@@ -922,10 +1117,27 @@ Provide a concluding summary. Which player is more impactful? Who has higher pot
             }
             
             function copyReport() {
-                const textToCopy = analysisOutput.innerText;
+                // Create a temporary element to hold the formatted text
+                const tempEl = document.createElement('div');
+                // Replace HTML tags with plain text equivalents for copying
+                let textToCopy = analysisOutput.innerHTML
+                    .replace(/<h3 class="[^"]*">(.*?)<\/h3>/g, '\n\n$1\n--------------------\n') // Headings
+                    .replace(/<strong>(.*?)<\/strong>/g, '$1') // Bold
+                    .replace(/<li class="[^"]*">(.*?)<\/li>/g, '\n- $1') // List items
+                    .replace(/<br>/g, '\n') // Line breaks
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&');
+                
+                // Set innerText to decode HTML entities
+                tempEl.innerText = textToCopy;
+                textToCopy = tempEl.innerText.trim();
+
                 // Use a temporary textarea to preserve formatting (like newlines)
                 const textArea = document.createElement('textarea');
                 textArea.value = textToCopy;
+                textArea.style.position = 'fixed'; // Prevent scrolling to bottom
+                textArea.style.left = '-9999px';
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
