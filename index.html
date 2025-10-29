@@ -142,7 +142,7 @@
                             <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                 <i data-lucide="upload-cloud" class="w-10 h-10 mb-3 text-slate-400"></i>
                                 <p class="mb-2 text-sm text-slate-400"><span class="font-semibold">Click to upload,</span> drag & drop, or paste</p>
-                                <p class="text-xs text-slate-500">PNG, JPG, or WEBP</p>
+                                <p class="text-xs text-slate-500">PNG, JPG, or WEBP (Multi-paste enabled)</p>
                             </div>
                             <input id="fileUploadSingle" type="file" class="hidden" multiple accept="image/png, image/jpeg, image/webp">
                         </div>
@@ -488,9 +488,13 @@
     </div>
 
 
-    <script type_="module">
+    <script type="module">
         // Initialize Lucide icons
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            console.error("Lucide icons script not loaded.");
+        }
 
         // Get global variables from environment (if they exist)
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-pro-scout-ai';
@@ -673,10 +677,12 @@
             const analysisControlsTabs = ['singlePlayer', 'comparison', 'opposition'];
             const controlsToToggle = [analyzeBtn, clearBtn, apiKeySection];
             
-            if (analysisControlsTabs.includes(tabId)) {
-                controlsToToggle.forEach(el => el.classList.remove('hidden'));
-            } else {
-                controlsToToggle.forEach(el => el.classList.add('hidden'));
+            if (controlsToToggle.every(el => el)) { // Check if elements exist
+                if (analysisControlsTabs.includes(tabId)) {
+                    controlsToToggle.forEach(el => el.classList.remove('hidden'));
+                } else {
+                    controlsToToggle.forEach(el => el.classList.add('hidden'));
+                }
             }
 
             currentTab = tabId;
@@ -684,47 +690,58 @@
 
         // --- API Key Management ---
         function loadApiKey() {
-            const savedKey = localStorage.getItem('geminiApiKey');
-            if (savedKey) {
-                userApiKey = savedKey;
-                apiKeyInput.value = "******************";
-                apiKeyInput.disabled = true;
-                apiKeyMessage.innerHTML = 'Saved key loaded. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
-                apiKeyMessage.classList.remove('hidden');
-                
-                document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                    localStorage.removeItem('geminiApiKey');
-                    userApiKey = "";
-                    apiKeyInput.value = "";
-                    apiKeyInput.disabled = false;
-                    apiKeyMessage.classList.add('hidden');
-                });
+            try {
+                const savedKey = localStorage.getItem('geminiApiKey');
+                if (savedKey) {
+                    userApiKey = savedKey;
+                    apiKeyInput.value = "******************";
+                    apiKeyInput.disabled = true;
+                    apiKeyMessage.innerHTML = 'Saved key loaded. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
+                    apiKeyMessage.classList.remove('hidden');
+                    
+                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
+                        localStorage.removeItem('geminiApiKey');
+                        userApiKey = "";
+                        apiKeyInput.value = "";
+                        apiKeyInput.disabled = false;
+                        apiKeyMessage.classList.add('hidden');
+                    });
+                }
+            } catch (e) {
+                console.error("Could not load API key from LocalStorage:", e);
             }
         }
 
         function saveApiKey() {
-            const key = apiKeyInput.value.trim();
-            if (key) {
-                userApiKey = key;
-                localStorage.setItem('geminiApiKey', key);
-                apiKeyInput.value = "******************";
-                apiKeyInput.disabled = true;
-                apiKeyMessage.innerHTML = 'Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
-                apiKeyMessage.classList.remove('hidden');
-                
-                document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                    localStorage.removeItem('geminiApiKey');
-                    userApiKey = "";
-                    apiKeyInput.value = "";
-                    apiKeyInput.disabled = false;
-                    apiKeyMessage.classList.add('hidden');
-                });
+            try {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    userApiKey = key;
+                    localStorage.setItem('geminiApiKey', key);
+                    apiKeyInput.value = "******************";
+                    apiKeyInput.disabled = true;
+                    apiKeyMessage.innerHTML = 'Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
+                    apiKeyMessage.classList.remove('hidden');
+                    
+                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
+                        localStorage.removeItem('geminiApiKey');
+                        userApiKey = "";
+                        apiKeyInput.value = "";
+                        apiKeyInput.disabled = false;
+                        apiKeyMessage.classList.add('hidden');
+                    });
+                }
+            } catch (e) {
+                console.error("Could not save API key to LocalStorage:", e);
+                showError("Could not save API key. Your browser might be blocking LocalStorage.");
             }
         }
 
         // --- Image Upload Handling ---
         
         function setupUploadListeners(dropZone, fileInput, previewEl, imageArray) {
+            if (!dropZone || !fileInput) return;
+
             // Click to upload
             dropZone.addEventListener('click', () => fileInput.click());
             
@@ -754,23 +771,22 @@
         }
         
         function handlePaste(e, previewEl, imageArray) {
+            e.preventDefault(); // Prevent browser from opening pasted image
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            let foundImage = false;
+            if (!items) return;
+
             for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
+                if (items[i].kind === 'file' && items[i].type.indexOf('image') !== -1) {
                     const blob = items[i].getAsFile();
                     if (blob) {
                         processFile(blob, previewEl, imageArray);
-                        foundImage = true;
                     }
                 }
-            }
-            if (!foundImage) {
-                console.warn("No image found in clipboard paste.");
             }
         }
 
         function handleFiles(files, previewEl, imageArray) {
+            if (!files) return;
             for (const file of files) {
                 if (file.type.startsWith('image/')) {
                     processFile(file, previewEl, imageArray);
@@ -798,8 +814,6 @@
         }
 
         function updateImagePreviews(previewEl, imageArray, newImageBase64) {
-            const index = imageArray.length - 1; // Index of the image we just added
-            
             const div = document.createElement('div');
             div.classList.add('relative', 'group');
             
@@ -812,10 +826,6 @@
             removeBtn.innerHTML = '&times;';
             removeBtn.classList.add('absolute', 'top-1', 'right-1', 'bg-red-600', 'text-white', 'rounded-full', 'w-5', 'h-5', 'flex', 'items-center', 'justify-center', 'text-xs', 'font-bold', 'opacity-0', 'group-hover:opacity-100', 'transition-opacity');
             removeBtn.onclick = () => {
-                // Find the image data to remove. This is a bit tricky, but we can use the index.
-                // This assumes the user removes images in a way that maps to the array...
-                // A more robust way would be to assign a unique ID.
-                // For simplicity, let's find by base64 src.
                 const b64Data = img.src.split(',')[1];
                 const dataIndex = imageArray.findIndex(item => item.base64 === b64Data);
                 
@@ -833,43 +843,49 @@
         // --- Clear All Inputs ---
         function clearAllInputs() {
             // Single Player
-            playerName.value = '';
-            playerAge.value = '';
-            playerClub.value = '';
-            playerLeague.value = '';
-            playerPositions.value = '';
-            matchContext.value = '';
-            reportType.value = 'quick';
-            imagePreviewSingle.innerHTML = '';
+            if(playerName) playerName.value = '';
+            if(playerAge) playerAge.value = '';
+            if(playerClub) playerClub.value = '';
+            if(playerLeague) playerLeague.value = '';
+            if(playerPositions) playerPositions.value = '';
+            if(matchContext) matchContext.value = '';
+            if(reportType) reportType.value = 'quick';
+            if(imagePreviewSingle) imagePreviewSingle.innerHTML = '';
             singlePlayerImages = [];
-            textStatsSingle.value = '';
-            analysisOutput.innerHTML = '<p class="text-slate-400">Analysis cleared.</p>';
+            if(textStatsSingle) textStatsSingle.value = '';
+            if(analysisOutput) analysisOutput.innerHTML = '<p class="text-slate-400">Analysis cleared.</p>';
             if (statsChart) {
                 statsChart.destroy();
                 statsChart = null;
             }
-            visualizeStatsBtn.disabled = true;
+            if(visualizeStatsBtn) visualizeStatsBtn.disabled = true;
 
             // Comparison
-            p1Name.value = ''; p1Age.value = ''; p1Club.value = ''; p1League.value = '';
-            p2Name.value = ''; p2Age.value = ''; p2Club.value = ''; p2League.value = '';
-            imagePreviewCompare1.innerHTML = '';
+            if(p1Name) p1Name.value = '';
+            if(p1Age) p1Age.value = '';
+            if(p1Club) p1Club.value = '';
+            if(p1League) p1League.value = '';
+            if(p2Name) p2Name.value = '';
+            if(p2Age) p2Age.value = '';
+            if(p2Club) p2Club.value = '';
+            if(p2League) p2League.value = '';
+            if(imagePreviewCompare1) imagePreviewCompare1.innerHTML = '';
             compare1Images = [];
-            textStatsCompare1.value = '';
-            imagePreviewCompare2.innerHTML = '';
+            if(textStatsCompare1) textStatsCompare1.value = '';
+            if(imagePreviewCompare2) imagePreviewCompare2.innerHTML = '';
             compare2Images = [];
-            textStatsCompare2.value = '';
-            analysisOutputCompare.innerHTML = '<p class="text-slate-400">Comparison cleared.</p>';
+            if(textStatsCompare2) textStatsCompare2.value = '';
+            if(analysisOutputCompare) analysisOutputCompare.innerHTML = '<p class="text-slate-400">Comparison cleared.</p>';
 
             // Opposition
-            opponentName.value = '';
-            imagePreviewOpponent.innerHTML = '';
+            if(opponentName) opponentName.value = '';
+            if(imagePreviewOpponent) imagePreviewOpponent.innerHTML = '';
             opponentImages = [];
-            textStatsOpponent.value = '';
-            analysisOutputOpponent.innerHTML = '<p class="text-slate-400">Opposition analysis cleared.</p>';
+            if(textStatsOpponent) textStatsOpponent.value = '';
+            if(analysisOutputOpponent) analysisOutputOpponent.innerHTML = '<p class="text-slate-400">Opposition analysis cleared.</p>';
             
             // Hide export buttons
-            exportButtons.classList.add('hidden');
+            if(exportButtons) exportButtons.classList.add('hidden');
         }
 
         // --- Main Analysis Logic ---
@@ -994,7 +1010,7 @@
             try {
                 const extractedStats = await callGeminiApi(parts);
                 textStatsSingle.value += (textStatsSingle.value ? '\n' : '') + extractedStats;
-                visualizeStatsBtn.disabled = false; // Enable visualization
+                if(visualizeStatsBtn) visualizeStatsBtn.disabled = false; // Enable visualization
             } catch (error) {
                 showError(`Failed to scan stats: ${error.message}`);
             } finally {
@@ -1005,8 +1021,8 @@
 
         async function analyzeSinglePlayer() {
             showLoading("Generating single player analysis...");
-            analysisOutput.innerHTML = '';
-            exportButtons.classList.add('hidden');
+            if(analysisOutput) analysisOutput.innerHTML = '';
+            if(exportButtons) exportButtons.classList.add('hidden');
 
             const parts = [];
             const info = {
@@ -1075,7 +1091,7 @@
             try {
                 const resultText = await callGeminiApi(parts);
                 displayResults(resultText, analysisOutput);
-                exportButtons.classList.remove('hidden');
+                if(exportButtons) exportButtons.classList.remove('hidden');
             } catch (error) {
                 showError(`Analysis failed: ${error.message}`);
             } finally {
@@ -1085,7 +1101,7 @@
         
         async function analyzeComparison() {
             showLoading("Generating player comparison...");
-            analysisOutputCompare.innerHTML = '';
+            if(analysisOutputCompare) analysisOutputCompare.innerHTML = '';
 
             const parts = [];
             
@@ -1132,7 +1148,7 @@
         
         async function analyzeOpposition() {
             showLoading("Generating opposition analysis...");
-            analysisOutputOpponent.innerHTML = '';
+            if(analysisOutputOpponent) analysisOutputOpponent.innerHTML = '';
             
             const parts = [];
             let prompt = `You are a professional tactical analyst. Create an opposition scouting report for ${opponentName.value.trim() || 'the opponent'}.\n\n`;
@@ -1164,9 +1180,9 @@
         
         async function handleSearch() {
             showLoading("Searching for players...");
-            searchError.classList.add('hidden');
-            searchResults.innerHTML = '<p class="text-slate-400">Searching...</p>';
-            downloadCsvBtn.classList.add('hidden');
+            if(searchError) searchError.classList.add('hidden');
+            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Searching...</p>';
+            if(downloadCsvBtn) downloadCsvBtn.classList.add('hidden');
             
             const queryParts = [];
             if (searchPosition.value.trim()) queryParts.push(`Position: ${searchPosition.value.trim()}`);
@@ -1198,7 +1214,7 @@ If a value is unknown, use "N/A".
 Do not include any text before or after the HTML table.
 `;
             
-            searchButton.disabled = true;
+            if(searchButton) searchButton.disabled = true;
             try {
                 const resultHtml = await callGeminiApi([{ text: fullQuery }], true); // Use grounding
                 
@@ -1211,7 +1227,7 @@ Do not include any text before or after the HTML table.
                     .replace(/<tr>/g, '<tr class="hover:bg-slate-800">')
                     .replace(/<td>/g, '<td class="p-3 border-b border-slate-700 text-sm">');
                 
-                searchResults.innerHTML = styledHtml;
+                if(searchResults) searchResults.innerHTML = styledHtml;
                 
                 // Prepare CSV content
                 csvContent = "Name,Age,Club,Nationality,Position,Market Value (Est.),Contract Expires,Latest News\n";
@@ -1224,21 +1240,23 @@ Do not include any text before or after the HTML table.
                         });
                         csvContent += rowData.join(',') + '\n';
                     });
-                    downloadCsvBtn.classList.remove('hidden');
+                    if(downloadCsvBtn) downloadCsvBtn.classList.remove('hidden');
                 }
 
             } catch (error) {
                 showSearchError(`Search failed: ${error.message}`);
             } finally {
                 hideLoading();
-                searchButton.disabled = false;
+                if(searchButton) searchButton.disabled = false;
             }
         }
         
         function showSearchError(message) {
-            searchError.textContent = message;
-            searchError.classList.remove('hidden');
-            searchResults.innerHTML = '<p class="text-slate-400">Search failed. Please try again.</p>';
+            if(searchError) {
+                searchError.textContent = message;
+                searchError.classList.remove('hidden');
+            }
+            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Search failed. Please try again.</p>';
             hideLoading();
         }
         
@@ -1269,16 +1287,16 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userQuery);
+                const resultText = await callChatbotApi(userText); // userQuery was undefined, changed to userText
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
 
                 // Update loading message with real response
-                loadingEl.querySelector('.chat-content').innerHTML = formatChatText(resultText);
+                if(loadingEl) loadingEl.querySelector('.chat-content').innerHTML = formatChatText(resultText);
 
             } catch (error) {
-                loadingEl.querySelector('.chat-content').innerHTML = `<p class="text-red-400">Error: ${error.message}</p>`;
+                if(loadingEl) loadingEl.querySelector('.chat-content').innerHTML = `<p class="text-red-400">Error: ${error.message}</p>`;
             } finally {
                 chatInput.disabled = false;
                 chatSendBtn.disabled = false;
@@ -1298,19 +1316,41 @@ Do not include any text before or after the HTML table.
                     parts: [{ text: "You are a professional football scout and tactical analyst. Answer the user's questions with this persona. Use Google Search to find up-to-date information. Format your answers clearly with headings, lists, and bold text." }]
                 }
             };
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (fetchError) {
+                console.error("Network error calling Chatbot API:", fetchError);
+                throw new Error("Network error. Please check your connection.");
+            }
 
             if (!response.ok) {
-                const errorBody = await response.json();
+                let errorBody;
+                try {
+                    errorBody = await response.json();
+                } catch(e) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}. Could not parse error response.`);
+                }
+                console.error("Chatbot API Error Body:", errorBody);
                 throw new Error(errorBody.error?.message || "An unknown API error occurred.");
             }
 
-            const result = await response.json();
+            let result;
+            try {
+                const rawText = await response.text(); // Read as text first
+                if (!rawText) {
+                    throw new Error("Received empty response from API.");
+                }
+                result = JSON.parse(rawText); // Then parse
+            } catch (e) {
+                console.error("Failed to parse Chatbot API response:", e);
+                throw new Error("Failed to parse AI response. " + e.message);
+            }
 
             if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
                 return result.candidates[0].content.parts[0].text;
@@ -1327,13 +1367,15 @@ Do not include any text before or after the HTML table.
             const senderNameClass = sender === 'User' ? 'text-teal-300' : 'text-sky-300';
 
             const messageEl = document.createElement('div');
-            messageEl.classList.add('p-3', 'rounded-lg', 'max-w-3/4', senderClass);
+            messageEl.classList.add('p-3', 'rounded-lg', 'max-w-3/4', 'w-fit', senderClass); // Added w-fit
             messageEl.innerHTML = `
                 <p class="font-semibold ${senderNameClass} mb-1">${sender}</p>
                 <div class="chat-content prose prose-sm prose-invert max-w-none">${formatChatText(text)}</div>
             `;
-            chatWindow.appendChild(messageEl);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            if(chatWindow) {
+                chatWindow.appendChild(messageEl);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
             return messageEl;
         }
 
@@ -1352,13 +1394,14 @@ Do not include any text before or after the HTML table.
 
         function newChat() {
             chatHistory = [];
-            chatWindow.innerHTML = '';
+            if(chatWindow) chatWindow.innerHTML = '';
             addChatMessage('Scout AI', 'Hi! Ask me anything, like "What is the tactical style of Brighton?" or "Summarize Lamine Yamal\'s stats this season."');
         }
 
 
         // --- Output Formatting ---
         function displayResults(text, element) {
+            if (!element) return;
             let html = text
                 .replace(/^# 1. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
                 .replace(/^# 2. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
@@ -1379,17 +1422,18 @@ Do not include any text before or after the HTML table.
         }
 
         function copyToClipboard() {
+            if (!analysisOutput) return;
             const reportText = analysisOutput.innerText;
             navigator.clipboard.writeText(reportText).then(() => {
                 copyBtn.innerHTML = '<i data-lucide="check" class="h-5 w-5 mr-2"></i>Copied!';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
                 setTimeout(() => {
                     copyBtn.innerHTML = '<i data-lucide="clipboard" class="h-5 w-5 mr-2"></i>Copy';
-                    lucide.createIcons();
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }, 2000);
             }).catch(err => {
                 showError('Failed to copy to clipboard.');
             });
-            lucide.createIcons();
         }
         
         function findVideos() {
@@ -1408,6 +1452,7 @@ Do not include any text before or after the HTML table.
 
         // --- Stats Visualization ---
         function visualizeStats() {
+            if (!textStatsSingle) return;
             const text = textStatsSingle.value;
             const lines = text.split('\n');
             const data = {
@@ -1445,6 +1490,11 @@ Do not include any text before or after the HTML table.
 
             if (statsChart) {
                 statsChart.destroy();
+            }
+
+            if (typeof Chart === 'undefined') {
+                showError("Chart.js library is not loaded.");
+                return;
             }
 
             statsChart = new Chart(statsChartCanvas, {
@@ -1487,9 +1537,13 @@ Do not include any text before or after the HTML table.
         }
         
         // --- PDF Generation ---
-        const { jsPDF } = window.jspdf;
-
+        
         async function generatePDF() {
+            if (typeof jsPDF === 'undefined') {
+                showError("jsPDF library is not loaded.");
+                return;
+            }
+            const { jsPDF } = window.jspdf;
             showLoading("Generating PDF preview...");
             
             try {
@@ -1745,20 +1799,20 @@ Do not include any text before or after the HTML table.
             });
             
             // API Key management
-            loadApiKey();
-            saveApiKeyBtn.addEventListener('click', saveApiKey);
+            if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveApiKey);
+            loadApiKey(); // Load after button listener is attached
             
             // Main controls
-            analyzeBtn.addEventListener('click', handleAnalysis);
-            clearBtn.addEventListener('click', clearAllInputs);
+            if (analyzeBtn) analyzeBtn.addEventListener('click', handleAnalysis);
+            if (clearBtn) clearBtn.addEventListener('click', clearAllInputs);
 
             // Modals
-            howToUseBtn.addEventListener('click', showHowToUse);
-            closeHowToUseBtn.addEventListener('click', closeHowToUse);
-            closeErrorBtn.addEventListener('click', closeError);
-            pdfBtn.addEventListener('click', generatePDF);
-            closePdfPreviewBtn.addEventListener('click', closePdfPreview);
-            downloadPdfBtn.addEventListener('click', () => {
+            if (howToUseBtn) howToUseBtn.addEventListener('click', showHowToUse);
+            if (closeHowToUseBtn) closeHowToUseBtn.addEventListener('click', closeHowToUse);
+            if (closeErrorBtn) closeErrorBtn.addEventListener('click', closeError);
+            if (pdfBtn) pdfBtn.addEventListener('click', generatePDF);
+            if (closePdfPreviewBtn) closePdfPreviewBtn.addEventListener('click', closePdfPreview);
+            if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => {
                 if (generatedPdfBlobUrl) {
                     const link = document.createElement('a');
                     link.href = generatedPdfBlobUrl;
@@ -1768,14 +1822,14 @@ Do not include any text before or after the HTML table.
             });
 
             // Export Buttons
-            copyBtn.addEventListener('click', copyToClipboard);
-            videoBtn.addEventListener('click', findVideos);
+            if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
+            if (videoBtn) videoBtn.addEventListener('click', findVideos);
             
             // Single Player Tab
             setupUploadListeners(dropZoneSingle, fileUploadSingle, imagePreviewSingle, singlePlayerImages);
-            scanStatsBtn.addEventListener('click', scanStatsFromImage);
-            visualizeStatsBtn.addEventListener('click', visualizeStats);
-            textStatsSingle.addEventListener('input', () => {
+            if (scanStatsBtn) scanStatsBtn.addEventListener('click', scanStatsFromImage);
+            if (visualizeStatsBtn) visualizeStatsBtn.addEventListener('click', visualizeStats);
+            if (textStatsSingle) textStatsSingle.addEventListener('input', () => {
                 visualizeStatsBtn.disabled = textStatsSingle.value.trim().length === 0;
             });
             
@@ -1787,20 +1841,22 @@ Do not include any text before or after the HTML table.
             setupUploadListeners(dropZoneOpponent, fileUploadOpponent, imagePreviewOpponent, opponentImages);
             
             // Search Tab
-            searchButton.addEventListener('click', handleSearch);
-            downloadCsvBtn.addEventListener('click', downloadCSV);
+            if (searchButton) searchButton.addEventListener('click', handleSearch);
+            if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', downloadCSV);
 
             // Chatbot Tab
-            chatSendBtn.addEventListener('click', handleChat);
-            chatInput.addEventListener('keydown', (e) => {
+            if (chatSendBtn) chatSendBtn.addEventListener('click', handleChat);
+            if (chatInput) chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     handleChat();
                 }
             });
-            newChatBtn.addEventListener('click', newChat);
+            if (newChatBtn) newChatBtn.addEventListener('click', newChat);
             
             // Initialize lucide icons
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         });
 
     </script>
