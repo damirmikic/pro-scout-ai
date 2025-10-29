@@ -422,11 +422,16 @@
                         <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                         <p class="mt-2 font-semibold">Drag & Drop, Paste, or Select Images</p>
                     </div>
-                    <div class="flex gap-4 mt-4">
+                    <div class="flex flex-wrap gap-4 mt-4 justify-center">
                         <label class="file-input-label px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer">
                             <span>Select Image(s)</span>
                             <input type="file" id="imageUploadSingle" accept="image/png, image/jpeg" class="hidden" multiple>
                         </label>
+                        <button id="scanImagesButton" class="hidden px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                            <svg data-lucide="scan-text" class="h-5 w-5"></svg>
+                            <span id="scanButtonText">Scan Images for Stats</span>
+                            <div id="scanSpinner" class="spinner spinner-sm hidden"></div>
+                        </button>
                         <button id="clearButtonSingle" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors">
                             Clear All
                         </button>
@@ -446,8 +451,8 @@
                             <input type="number" id="playerAge" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 22">
                         </div>
                         <div>
-                            <label for="playerRating" class="mb-1 block text-sm font-medium text-gray-300">Player Rating (A/B, 5-9, etc.)</label>
-                            <input type="text" id="playerRating" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., A-, 8.1, Green">
+                            <label for="playerPosition" class="mb-1 block text-sm font-medium text-gray-300">Position(s) (Optional)</label>
+                            <input type="text" id="playerPosition" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., CM, RW, Striker">
                         </div>
                         <div>
                             <label for="playerClub" class="mb-1 block text-sm font-medium text-gray-300">Club</label>
@@ -486,8 +491,8 @@
                     
                     <!-- Stats Input -->
                     <div>
-                        <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste Additional Stats</label>
-                        <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5..."></textarea>
+                        <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste or Scan Stats</label>
+                        <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5...&#10;(Click 'Scan Images for Stats' to auto-fill)"></textarea>
                         <button id="visualizeStatsButton" class="mt-2 w-full flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg data-lucide="bar-chart-3" class="h-5 w-5"></svg>
                             Visualize Text Stats
@@ -510,6 +515,15 @@
                     <!-- Player 1 Column -->
                     <div id="uploadBox1" class="bg-gray-700 p-4 rounded-lg">
                         <h3 class="text-xl font-bold text-center text-blue-300 mb-4">Player 1</h3>
+                        
+                        <!-- Player 1 Info -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <input type="text" id="playerName1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 1 Name">
+                            <input type="number" id="playerAge1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
+                            <input type="text" id="playerClub1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
+                            <input type="text" id="playerLeague1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="League">
+                        </div>
+                        
                         <div id="imagePreviewContainer1" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder1" class="text-center text-gray-400 py-8">
                             <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
@@ -531,6 +545,15 @@
                     <!-- Player 2 Column -->
                     <div id="uploadBox2" class="bg-gray-700 p-4 rounded-lg">
                         <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
+                        
+                        <!-- Player 2 Info -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <input type="text" id="playerName2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 2 Name">
+                            <input type="number" id="playerAge2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
+                            <input type="text" id="playerClub2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
+                            <input type="text" id="playerLeague2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="League">
+                        </div>
+                        
                         <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
                         <div id="uploadPlaceholder2" class="text-center text-gray-400 py-8">
                             <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
@@ -833,10 +856,10 @@
             <h3 class="text-xl">Single Player Analysis</h3>
             <ol>
                 <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/Cmd+V).</li>
-                <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, Rating, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
-                <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
-                <li><strong>Visualize (Optional):</strong> If you added text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
-                <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
+                <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, Position, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
+                <li><strong>Scan Stats (Optional):</strong> After uploading images, click **"Scan Images for Stats"**. The AI will read the text from your images (like stats graphics) and auto-fill the "Stats" box below.</li>
+                <li><strong>Visualize (Optional):</strong> If you have text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
+                <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis. The AI will calculate the player's rating for you.</li>
                 <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
                 <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The new PDF preview is a professional, multi-page document that includes your charts and images.</li>
                 <li><strong>Find Videos:</strong> Click the "Find Videos" button in the report section to automatically search for the player's highlights in the Chatbot tab.</li>
@@ -845,6 +868,7 @@
             <h3 class="text-xl">Player Comparison</h3>
             <ol>
                 <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
+                <li><strong>Add Info:</strong> Fill in the name, age, club, and league for both players.</li>
                 <li><strong>Upload for Player 1 & 2:</strong> Use the two boxes to upload images and add optional context/stats for both players.</li>
                 <li><strong>Analyze:</strong> Click the "Compare Players" button.</li>
             </ol>
@@ -972,6 +996,9 @@
             const imagePreviewContainerSingle = document.getElementById('imagePreviewContainerSingle');
             const uploadPlaceholderSingle = document.getElementById('uploadPlaceholderSingle');
             const clearButtonSingle = document.getElementById('clearButtonSingle');
+            const scanImagesButton = document.getElementById('scanImagesButton');
+            const scanButtonText = document.getElementById('scanButtonText');
+            const scanSpinner = document.getElementById('scanSpinner');
             const textStatsSingle = document.getElementById('textStatsSingle');
             const visualizeStatsButton = document.getElementById('visualizeStatsButton');
             const chartContainer = document.getElementById('chartContainer');
@@ -980,7 +1007,7 @@
             const playerAge = document.getElementById('playerAge');
             const playerClub = document.getElementById('playerClub');
             const playerLeague = document.getElementById('playerLeague');
-            const playerRating = document.getElementById('playerRating');
+            const playerPosition = document.getElementById('playerPosition');
             const matchContextSingle = document.getElementById('matchContextSingle');
             
             // --- Player 1 Elements ---
@@ -991,6 +1018,10 @@
             const clearButton1 = document.getElementById('clearButton1');
             const matchContext1 = document.getElementById('matchContext1');
             const textStats1 = document.getElementById('textStats1');
+            const playerName1 = document.getElementById('playerName1');
+            const playerAge1 = document.getElementById('playerAge1');
+            const playerClub1 = document.getElementById('playerClub1');
+            const playerLeague1 = document.getElementById('playerLeague1');
             
             // --- Player 2 Elements ---
             const uploadBox2 = document.getElementById('uploadBox2');
@@ -1000,6 +1031,10 @@
             const clearButton2 = document.getElementById('clearButton2');
             const matchContext2 = document.getElementById('matchContext2');
             const textStats2 = document.getElementById('textStats2');
+            const playerName2 = document.getElementById('playerName2');
+            const playerAge2 = document.getElementById('playerAge2');
+            const playerClub2 = document.getElementById('playerClub2');
+            const playerLeague2 = document.getElementById('playerLeague2');
             
             // --- Opposition Elements ---
             const uploadBoxOpponent = document.getElementById('uploadBoxOpponent');
@@ -1049,13 +1084,14 @@ Note the provided player info:
 - Age: {PLAYER_AGE}
 - Club: {PLAYER_CLUB}
 - League: {PLAYER_LEAGUE}
-- Rating: {PLAYER_RATING}
+- Position (from user): {PLAYER_POSITION}
 - Match Observed: {MATCH_CONTEXT}
 
 Structure your analysis with the following 7 clear sections. Use Markdown formatting for headings.
 
-# 1. Likely Position(s)
-Identify the player's most likely position and any secondary positions (e.g., 'Primary: Box-to-Box Midfielder (CM)', 'Secondary: Deep-Lying Playmaker (DLP)'). Justify your choice based on the heatmap(s).
+# 1. Likely Position(s) & AI Rating
+Based on the heatmap and stats, confirm the player's position (or correct the user's input if it's clearly wrong).
+Then, provide a **Performance Rating** for this match (e.g., 'A-', '8.1/10', 'Green') and briefly justify it with the stats.
 
 # 2. Key Duties & Tactical Role
 Describe their primary responsibilities and tactical role on the pitch based on the data (e.g., 'Covers ground between both boxes, contributes to both defense and attack, looks to progress the ball...').
@@ -1082,14 +1118,14 @@ Based on the 'Cons' you identified, suggest 2-3 specific, actionable development
 # 1. Player Information
 - Name: {PLAYER_NAME}
 - Age: {PLAYER_AGE}
-- Position (from data): (Identify this from the heatmap/stats)
+- Position (from data): (Identify this from the heatmap/stats, using {PLAYER_POSITION} as a hint)
 - Club: {PLAYER_CLUB}
 - League: {PLAYER_LEAGUE}
 - Match Observed: {MATCH_CONTEXT}
 
 # 2. Player Rating
-- Performance Rating: {PLAYER_RATING}
-- (Briefly justify this rating based on the provided stats and your analysis)
+- **AI Performance Rating**: (Assign a rating like A/B, 8/10, etc.)
+- **Justification**: (Briefly justify this rating based on the provided stats and your analysis)
 
 # 3. Summary
 Provide a brief overview of the player's performance.
@@ -1134,10 +1170,24 @@ Summarize your thoughts on the player’s potential and suitability.
 
             // Prompt 3: Comparison Report
             const comparisonUserQuery = `Analyze the provided data for TWO players. Player 1's data is provided first, followed by Player 2's data.
-- Player 1 Context: {MATCH_CONTEXT_1}
-- Player 2 Context: {MATCH_CONTEXT_2}
 
-Provide a professional head-to-head scouting report. Structure your analysis with the following clear sections. Use Markdown formatting for headings.
+# --- PLAYER 1 DATA ---
+- Name: {PLAYER_NAME_1}
+- Age: {PLAYER_AGE_1}
+- Club: {PLAYER_CLUB_1}
+- League: {PLAYER_LEAGUE_1}
+- Context: {MATCH_CONTEXT_1}
+- Stats: {STATS_1}
+
+# --- PLAYER 2 DATA ---
+- Name: {PLAYER_NAME_2}
+- Age: {PLAYER_AGE_2}
+- Club: {PLAYER_CLUB_2}
+- League: {PLAYER_LEAGUE_2}
+- Context: {MATCH_CONTEXT_2}
+- Stats: {STATS_2}
+
+Provide a professional head-to-head scouting report. Use the provided info to add context. Structure your analysis with the following clear sections. Use Markdown formatting for headings.
 
 # 1. Player 1 Profile (Position & Role)
 Briefly identify Player 1's likely position and tactical role based on their data.
@@ -1146,7 +1196,7 @@ Briefly identify Player 1's likely position and tactical role based on their dat
 Briefly identify Player 2's likely position and tactical role based on their data.
 
 # 3. Head-to-Head Comparison (Strengths)
-Compare the players directly on 3-5 key attributes, stating who has the edge in each. (e.g., 'Work Rate: Player 1 shows superior defensive coverage...', 'Passing: Player 2 appears to be the more creative passer...').
+Compare the players directly on 3-5 key attributes, stating who has the edge in each. (e.g., 'Work Rate: Player 1 (Name) shows superior defensive coverage...', 'Passing: Player 2 (Name) appears to be the more creative passer...').
 
 # 4. Head-to-Head Comparison (Weaknesses)
 Compare their primary weaknesses or areas for improvement.
@@ -1178,6 +1228,10 @@ List 3-4 exploitable weaknesses. (e.g., "Space behind fullbacks," "Vulnerable to
 # 5. Suggested Tactical Exploitation
 Provide 3-5 brief, actionable points on how *our* team can exploit these weaknesses. (e.g., "1. Target their left-back with quick 1-2s.", "2. Press their center-backs to force long balls.", "3. Use a false-9 to draw their holding midfielder out of position.").
 `;
+
+            // Prompt 5: Scan Stats from Images
+            const scanStatsQuery = "Analyze the provided image(s). Identify any football (soccer) player statistics visible. Extract them and format them as a simple key-value list (e.g., 'Goals: 1', 'Tackles: 3/4', 'Pass Accuracy: 85%'). Only return the list of stats.";
+            
 
             // --- Tab Navigation ---
             tabSingle.addEventListener('click', () => switchTab('single'));
@@ -1221,25 +1275,26 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             // Single Player
             if (imageUploadSingle) imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
             if (clearButtonSingle) clearButtonSingle.addEventListener('click', () => clearData(0));
+            if (scanImagesButton) scanImagesButton.addEventListener('click', handleScanImages);
             if (textStatsSingle) textStatsSingle.addEventListener('input', () => {
                 if (visualizeStatsButton) visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
             });
             if (visualizeStatsButton) visualizeStatsButton.addEventListener('click', visualizeStats);
-            [playerName, playerAge, playerClub, playerLeague, playerRating, matchContextSingle, textStatsSingle].forEach(el => {
+            [playerName, playerAge, playerClub, playerLeague, playerPosition, matchContextSingle, textStatsSingle].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
 
             // Player 1
             if (imageUpload1) imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
             if (clearButton1) clearButton1.addEventListener('click', () => clearData(1));
-            [matchContext1, textStats1].forEach(el => {
+            [playerName1, playerAge1, playerClub1, playerLeague1, matchContext1, textStats1].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
             // Player 2
             if (imageUpload2) imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             if (clearButton2) clearButton2.addEventListener('click', () => clearData(2));
-            [matchContext2, textStats2].forEach(el => {
+            [playerName2, playerAge2, playerClub2, playerLeague2, matchContext2, textStats2].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
@@ -1381,10 +1436,11 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
                 if (imageFiles.length === 0) return;
 
-                let placeholder, clearButton;
+                let placeholder, clearButton, scanButton;
                 if (playerIndex === 0) {
                     placeholder = uploadPlaceholderSingle;
                     clearButton = clearButtonSingle;
+                    scanButton = scanImagesButton;
                 } else if (playerIndex === 1) {
                     placeholder = uploadPlaceholder1;
                     clearButton = clearButton1;
@@ -1398,6 +1454,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 
                 if (placeholder) placeholder.classList.add('hidden');
                 if (clearButton) clearButton.classList.remove('hidden');
+                if (scanButton) scanButton.classList.remove('hidden');
 
                 for (const file of imageFiles) {
                     processFile(file, playerIndex);
@@ -1418,7 +1475,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     updateAnalyzeButtonState();
                     hideError();
                 };
-                reader.readAsDataURL(file); // Corrected function name
+                reader.readAsDataURL(file);
             }
 
             function addImageToPreview(dataUrl, playerIndex) {
@@ -1442,13 +1499,14 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     imagePreviewContainerSingle.innerHTML = '';
                     uploadPlaceholderSingle.classList.remove('hidden');
                     clearButtonSingle.classList.add('hidden');
+                    scanImagesButton.classList.add('hidden');
                     textStatsSingle.value = '';
                     matchContextSingle.value = '';
                     playerName.value = '';
                     playerAge.value = '';
                     playerClub.value = '';
                     playerLeague.value = '';
-                    playerRating.value = '';
+                    playerPosition.value = '';
                     chartContainer.classList.add('hidden');
                     if (statsChartInstance) {
                         statsChartInstance.destroy();
@@ -1461,12 +1519,20 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     clearButton1.classList.add('hidden');
                     textStats1.value = '';
                     matchContext1.value = '';
+                    playerName1.value = '';
+                    playerAge1.value = '';
+                    playerClub1.value = '';
+                    playerLeague1.value = '';
                 } else if (playerIndex === 2) {
                     imagePreviewContainer2.innerHTML = '';
                     uploadPlaceholder2.classList.remove('hidden');
                     clearButton2.classList.add('hidden');
                     textStats2.value = '';
                     matchContext2.value = '';
+                    playerName2.value = '';
+                    playerAge2.value = '';
+                    playerClub2.value = '';
+                    playerLeague2.value = '';
                 } else if (playerIndex === 3) {
                     imagePreviewContainerOpponent.innerHTML = '';
                     uploadPlaceholderOpponent.classList.remove('hidden');
@@ -1561,6 +1627,46 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     }
                 });
             }
+            
+            // --- New "Scan Images for Stats" Function ---
+            async function handleScanImages() {
+                if (playerData[0].images.length === 0) {
+                    showError("Please upload at least one image to scan.");
+                    return;
+                }
+                
+                scanImagesButton.disabled = true;
+                scanButtonText.textContent = "Scanning...";
+                scanSpinner.classList.remove('hidden');
+                hideError();
+
+                const parts = [];
+                parts.push({ text: scanStatsQuery });
+                playerData[0].images.forEach((imgData, i) => {
+                    parts.push({ inlineData: { mimeType: playerData[0].mimes[i], data: imgData } });
+                });
+
+                try {
+                    const extractedStats = await callGenericApi(parts);
+                    const currentStats = textStatsSingle.value.trim();
+                    if (currentStats) {
+                        textStatsSingle.value = currentStats + "\n" + extractedStats;
+                    } else {
+                        textStatsSingle.value = extractedStats;
+                    }
+                    // Trigger input event to enable visualize button
+                    textStatsSingle.dispatchEvent(new Event('input'));
+                    // Automatically visualize the new stats
+                    visualizeStats();
+                } catch (error) {
+                    showError(`Failed to scan stats: ${error.message}`);
+                } finally {
+                    scanImagesButton.disabled = false;
+                    scanButtonText.textContent = "Scan Images for Stats";
+                    scanSpinner.classList.add('hidden');
+                }
+            }
+
 
             // --- Analysis & API Call ---
             function handleAnalysis() {
@@ -1582,7 +1688,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                         .replace('{PLAYER_AGE}', playerAge.value || "Not specified")
                         .replace('{PLAYER_CLUB}', playerClub.value || "Not specified")
                         .replace('{PLAYER_LEAGUE}', playerLeague.value || "Not specified")
-                        .replace('{PLAYER_RATING}', playerRating.value || "Not specified")
+                        .replace('{PLAYER_POSITION}', playerPosition.value || "Not specified")
                         .replace('{MATCH_CONTEXT}', matchContextSingle.value || "Not specified");
                     
                     parts.push({ text: query });
@@ -1594,20 +1700,27 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     
                 } else if (activeTab === 'compare') {
                     query = comparisonUserQuery
+                        .replace('{PLAYER_NAME_1}', playerName1.value || "Player 1")
+                        .replace('{PLAYER_AGE_1}', playerAge1.value || "N/A")
+                        .replace('{PLAYER_CLUB_1}', playerClub1.value || "N/A")
+                        .replace('{PLAYER_LEAGUE_1}', playerLeague1.value || "N/A")
                         .replace('{MATCH_CONTEXT_1}', matchContext1.value || "Not specified")
-                        .replace('{MATCH_CONTEXT_2}', matchContext2.value || "Not specified");
+                        .replace('{STATS_1}', textStats1.value || "No stats provided")
+                        .replace('{PLAYER_NAME_2}', playerName2.value || "Player 2")
+                        .replace('{PLAYER_AGE_2}', playerAge2.value || "N/A")
+                        .replace('{PLAYER_CLUB_2}', playerClub2.value || "N/A")
+                        .replace('{PLAYER_LEAGUE_2}', playerLeague2.value || "N/A")
+                        .replace('{MATCH_CONTEXT_2}', matchContext2.value || "Not specified")
+                        .replace('{STATS_2}', textStats2.value || "No stats provided");
+                        
                     parts.push({ text: query });
                     
-                    const stats1 = textStats1.value;
-                    parts.push({ text: "\n\n# --- PLAYER 1 DATA ---" });
-                    if (stats1.trim() !== "") parts.push({ text: "\n# Player 1 Stats:\n" + stats1 });
+                    parts.push({ text: "\n\n# --- PLAYER 1 IMAGES ---" });
                     playerData[1].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[1].mimes[i], data: imgData } });
                     });
                     
-                    const stats2 = textStats2.value;
-                    parts.push({ text: "\n\n# --- PLAYER 2 DATA ---" });
-                    if (stats2.trim() !== "") parts.push({ text: "\n# Player 2 Stats:\n" + stats2 });
+                    parts.push({ text: "\n\n# --- PLAYER 2 IMAGES ---" });
                     playerData[2].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[2].mimes[i], data: imgData } });
                     });
@@ -1625,8 +1738,8 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 
                 callReportApi(parts);
             }
-
-            async function callReportApi(parts, retryCount = 0) {
+            
+            async function callGenericApi(parts, retryCount = 0) {
                 // Get key from input or local storage
                 let key = apiKeyInput.value.trim();
                 if (!key) {
@@ -1642,7 +1755,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 const payload = {
                     contents: [{ role: "user", parts: parts }],
                     systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: { temperature: 0.3 }
+                    generationConfig: { temperature: 0.1 } // Low temp for extraction
                 };
 
                 try {
@@ -1670,10 +1783,9 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     const result = await response.json();
                     
                     if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        lastAiResponse = result.candidates[0].content.parts[0].text;
-                        displayResults(lastAiResponse);
+                        return result.candidates[0].content.parts[0].text;
                     } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
-                        throw new Error("Analysis blocked due to safety settings. Try different images or text.");
+                        throw new Error("Analysis blocked due to safety settings.");
                     } else {
                         throw new Error("Invalid response structure from API. No text generated.");
                     }
@@ -1682,14 +1794,22 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     if (retryCount < 3 && (error.message.includes("HTTP error") || error.message.includes("Failed to fetch"))) {
                         const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        callReportApi(parts, retryCount + 1);
+                        return callGenericApi(parts, retryCount + 1);
                     } else {
-                        showError(`Failed to get analysis: ${error.message}`);
+                        throw error; // Re-throw the error to be caught by the caller
                     }
+                }
+            }
+
+            async function callReportApi(parts) {
+                try {
+                    const resultText = await callGenericApi(parts);
+                    lastAiResponse = resultText;
+                    displayResults(lastAiResponse);
+                } catch (error) {
+                    showError(`Failed to get analysis: ${error.message}`);
                 } finally {
-                    if (retryCount === 0) {
-                         setLoading(false);
-                    }
+                    setLoading(false);
                 }
             }
             
@@ -1977,6 +2097,8 @@ If a value is unknown, use "N/A".
             // This function safely parses the report, even if section numbers are missing.
             function parseProReport(rawText) {
                 const reportData = {};
+                
+                // V2: AI-calculated rating
                 const sections = [
                     "Player Information", "Player Rating", "Summary",
                     "Positional Play", "Key Actions (PMDS Framework)",
@@ -2111,7 +2233,7 @@ If a value is unknown, use "N/A".
                     }
                     
                     if (!reportData.conclusion) {
-                         throw new Error("Could not parse the AI report. Key sections (like Conclusion) are missing. Please try again.");
+                         throw new Error("Could not parse Pro Scout Report. AI response was incomplete. Please try again.");
                     }
 
 
@@ -2156,19 +2278,26 @@ If a value is unknown, use "N/A".
                     checkPageBreak(30);
                     addHeader("Summary & Rating");
                     
-                    // Rating
+                    // Rating - Extract from AI response
+                    let aiRating = "N/A";
+                    if (reportData.rating) {
+                        const ratingMatch = reportData.rating.match(/AI Performance Rating.*?:\s*(.*?)\n/i);
+                        if (ratingMatch && ratingMatch[1]) {
+                            aiRating = ratingMatch[1].trim();
+                        }
+                    }
+                    
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(10);
                     doc.text("PERFORMANCE RATING:", margin, currentY);
                     
-                    const ratingText = playerRating.value || 'N/A';
-                    const ratingWidth = doc.getTextWidth(ratingText) + 8;
+                    const ratingWidth = doc.getTextWidth(aiRating) + 8;
                     doc.setFillColor(56, 189, 248); // sky-400
                     doc.setDrawColor(56, 189, 248);
                     doc.roundedRect(margin + 50, currentY - 4.5, ratingWidth, 7, 2, 2, 'F');
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(12);
-                    doc.text(ratingText, margin + 54, currentY + 1);
+                    doc.text(aiRating, margin + 54, currentY + 1);
                     currentY += 8;
 
                     addBodyText(reportData.rating || "N/A");
