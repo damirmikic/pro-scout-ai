@@ -193,6 +193,12 @@
             border-radius: 0.5rem;
             background-color: #ffffff;
         }
+        
+        /* Success Modal */
+        #successModalOverlay .modal-content {
+            max-width: 28rem; /* 448px */
+            text-align: center;
+        }
 
         /* Custom Radio Button Styles */
         .radio-label {
@@ -422,16 +428,11 @@
                         <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                         <p class="mt-2 font-semibold">Drag & Drop, Paste, or Select Images</p>
                     </div>
-                    <div class="flex flex-wrap gap-4 mt-4 justify-center">
+                    <div class="flex gap-4 mt-4">
                         <label class="file-input-label px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors cursor-pointer">
                             <span>Select Image(s)</span>
                             <input type="file" id="imageUploadSingle" accept="image/png, image/jpeg" class="hidden" multiple>
                         </label>
-                        <button id="scanImagesButton" class="hidden px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
-                            <svg data-lucide="scan-text" class="h-5 w-5"></svg>
-                            <span id="scanButtonText">Scan Images for Stats</span>
-                            <div id="scanSpinner" class="spinner spinner-sm hidden"></div>
-                        </button>
                         <button id="clearButtonSingle" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors">
                             Clear All
                         </button>
@@ -450,9 +451,9 @@
                             <label for="playerAge" class="mb-1 block text-sm font-medium text-gray-300">Age</label>
                             <input type="number" id="playerAge" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 22">
                         </div>
-                        <div>
+                         <div>
                             <label for="playerPosition" class="mb-1 block text-sm font-medium text-gray-300">Position(s) (Optional)</label>
-                            <input type="text" id="playerPosition" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., CM, RW, Striker">
+                            <input type="text" id="playerPosition" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., CM, RW">
                         </div>
                         <div>
                             <label for="playerClub" class="mb-1 block text-sm font-medium text-gray-300">Club</label>
@@ -491,12 +492,20 @@
                     
                     <!-- Stats Input -->
                     <div>
-                        <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste or Scan Stats</label>
-                        <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5...&#10;(Click 'Scan Images for Stats' to auto-fill)"></textarea>
-                        <button id="visualizeStatsButton" class="mt-2 w-full flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg data-lucide="bar-chart-3" class="h-5 w-5"></svg>
-                            Visualize Text Stats
-                        </button>
+                        <label for="textStatsSingle" class="mb-2 block font-semibold text-gray-300">Optional: Paste Additional Stats</label>
+                        <textarea id="textStatsSingle" rows="5" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g.,&#10;Goals: 1&#10;Assists: 0&#10;Tackles: 4/5...&#10;Or click 'Scan Images for Stats' below."></textarea>
+                        
+                        <div class="flex gap-2 mt-2">
+                             <button id="scanStatsButton" class="w-1/2 flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg data-lucide="scan-text" class="h-5 w-5"></svg>
+                                Scan Images
+                                <div id="scanSpinner" class="spinner spinner-sm hidden"></div>
+                            </button>
+                            <button id="visualizeStatsButton" class="w-1/2 flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg data-lucide="bar-chart-3" class="h-5 w-5"></svg>
+                                Visualize Stats
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -517,11 +526,12 @@
                         <h3 class="text-xl font-bold text-center text-blue-300 mb-4">Player 1</h3>
                         
                         <!-- Player 1 Info -->
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <input type="text" id="playerName1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 1 Name">
-                            <input type="number" id="playerAge1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
-                            <input type="text" id="playerClub1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
-                            <input type="text" id="playerLeague1" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="League">
+                        <div class="space-y-2 mb-4">
+                            <input type="text" id="playerName1" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 1 Name">
+                            <div class="flex gap-2">
+                                <input type="number" id="playerAge1" class="w-1/2 p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
+                                <input type="text" id="playerClub1" class="w-1/2 p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
+                            </div>
                         </div>
                         
                         <div id="imagePreviewContainer1" class="w-full mb-4 image-preview-container"></div>
@@ -547,11 +557,12 @@
                         <h3 class="text-xl font-bold text-center text-teal-300 mb-4">Player 2</h3>
                         
                         <!-- Player 2 Info -->
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <input type="text" id="playerName2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 2 Name">
-                            <input type="number" id="playerAge2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
-                            <input type="text" id="playerClub2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
-                            <input type="text" id="playerLeague2" class="p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="League">
+                        <div class="space-y-2 mb-4">
+                            <input type="text" id="playerName2" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Player 2 Name">
+                            <div class="flex gap-2">
+                                <input type="number" id="playerAge2" class="w-1/2 p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Age">
+                                <input type="text" id="playerClub2" class="w-1/2 p-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-200 placeholder-gray-400 text-sm" placeholder="Club">
+                            </div>
                         </div>
                         
                         <div id="imagePreviewContainer2" class="w-full mb-4 image-preview-container"></div>
@@ -855,12 +866,13 @@
 
             <h3 class="text-xl">Single Player Analysis</h3>
             <ol>
-                <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/Cmd+V).</li>
-                <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, Position, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
-                <li><strong>Scan Stats (Optional):</strong> After uploading images, click **"Scan Images for Stats"**. The AI will read the text from your images (like stats graphics) and auto-fill the "Stats" box below.</li>
-                <li><strong>Visualize (Optional):</strong> If you have text stats, click "Visualize Text Stats" to see a simple bar chart of that data.</li>
-                <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis. The AI will calculate the player's rating for you.</li>
-                <li><strong>Analyze:</strong> Click the "Analyze Player" button.</li>
+                <li><strong>Upload Images:</strong> Click "Select Image(s)" or drag-and-drop heatmap/stats images into the upload box. You can also paste an image from your clipboard (Ctrl+V/CmdV).</li>
+                <li><strong>Add Player Info (Optional):</strong> Fill in the player's Name, Age, Club, League, and the Match you observed. This is highly recommended for the "Pro Scout Report".</li>
+                <li><strong>Add Text Stats (Optional):</strong> Paste any extra stats (e.g., `Goals: 1`) into the "Additional Stats" box.</li>
+                <li><strong>Scan Images for Stats (New!):</strong> Click "Scan Images" to let the AI read statistics directly from your uploaded images and add them to the text box.</li>
+                <li><strong>Visualize (Optional):</strong> If you have text stats, click "Visualize Text Stats" to see a simple bar chart.</li>
+                <li><strong>Select Report Type:</strong> Choose "Quick Report" for a 7-point summary or "Pro Scout Report" for a detailed 8-section analysis.</li>
+                <li><strong>Analyze:</strong> Click the "Analyze Player" button. A pop-up will appear when it's done.</li>
                 <li><strong>Export:</strong> Use the "Copy" or "Preview PDF" buttons to save your report. The new PDF preview is a professional, multi-page document that includes your charts and images.</li>
                 <li><strong>Find Videos:</strong> Click the "Find Videos" button in the report section to automatically search for the player's highlights in the Chatbot tab.</li>
             </ol>
@@ -868,7 +880,7 @@
             <h3 class="text-xl">Player Comparison</h3>
             <ol>
                 <li><strong>Switch Tab:</strong> Click "Player Comparison" at the top.</li>
-                <li><strong>Add Info:</strong> Fill in the name, age, club, and league for both players.</li>
+                <li><strong>Add Player Info:</strong> Fill in the names, ages, and clubs for both players.</li>
                 <li><strong>Upload for Player 1 & 2:</strong> Use the two boxes to upload images and add optional context/stats for both players.</li>
                 <li><strong>Analyze:</strong> Click the "Compare Players" button.</li>
             </ol>
@@ -924,6 +936,23 @@
         </div>
     </div>
     
+    <!-- ======================= -->
+    <!-- ANALYSIS SUCCESS MODAL  -->
+    <!-- ======================= -->
+    <div id="successModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 bg-green-100 rounded-full">
+                <svg class="h-10 w-10 text-green-600" data-lucide="check" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h2 class="text-2xl mt-4">Analysis Complete!</h2>
+            <p class="text-gray-400 mt-2 mb-6">Your scouting report has been successfully generated and is ready for review below.</p>
+            <button id="closeSuccessModal" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors">
+                View Report
+            </button>
+        </div>
+    </div>
 
     <script>
         // Wait for the DOM to be fully loaded before running the script
@@ -990,16 +1019,19 @@
             const pdfPreviewFrame = document.getElementById('pdfPreviewFrame');
             const downloadPdfButton = document.getElementById('downloadPdfButton');
             
+            // --- Success Modal Elements ---
+            const successModalOverlay = document.getElementById('successModalOverlay');
+            const closeSuccessModal = document.getElementById('closeSuccessModal');
+            
             // --- Single Player Elements ---
             const uploadBoxSingle = document.getElementById('uploadBoxSingle');
             const imageUploadSingle = document.getElementById('imageUploadSingle');
             const imagePreviewContainerSingle = document.getElementById('imagePreviewContainerSingle');
             const uploadPlaceholderSingle = document.getElementById('uploadPlaceholderSingle');
             const clearButtonSingle = document.getElementById('clearButtonSingle');
-            const scanImagesButton = document.getElementById('scanImagesButton');
-            const scanButtonText = document.getElementById('scanButtonText');
-            const scanSpinner = document.getElementById('scanSpinner');
             const textStatsSingle = document.getElementById('textStatsSingle');
+            const scanStatsButton = document.getElementById('scanStatsButton');
+            const scanSpinner = document.getElementById('scanSpinner');
             const visualizeStatsButton = document.getElementById('visualizeStatsButton');
             const chartContainer = document.getElementById('chartContainer');
             const statsChartCanvas = document.getElementById('statsChart');
@@ -1021,7 +1053,6 @@
             const playerName1 = document.getElementById('playerName1');
             const playerAge1 = document.getElementById('playerAge1');
             const playerClub1 = document.getElementById('playerClub1');
-            const playerLeague1 = document.getElementById('playerLeague1');
             
             // --- Player 2 Elements ---
             const uploadBox2 = document.getElementById('uploadBox2');
@@ -1034,7 +1065,6 @@
             const playerName2 = document.getElementById('playerName2');
             const playerAge2 = document.getElementById('playerAge2');
             const playerClub2 = document.getElementById('playerClub2');
-            const playerLeague2 = document.getElementById('playerLeague2');
             
             // --- Opposition Elements ---
             const uploadBoxOpponent = document.getElementById('uploadBoxOpponent');
@@ -1074,6 +1104,8 @@
             // --- AI Prompts ---
             const systemPrompt = `You are an expert football (soccer) scout and tactical analyst with decades of experience at the highest level. Your task is to analyze the provided image(s) and any optional text data. You must be critical, insightful, and professional.`;
             
+            const statsScanPrompt = `Analyze the provided image(s). Extract ALL statistics visible. Format them as a simple plain text list, one per line (e.g., "Tackles: 3/4", "Pass Accuracy: 88%", "Goals: 1"). Do not add any other text, summary, or commentary. Only output the list of stats.`;
+            
             const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights. **Format your responses using simple HTML tags for readability (e.g., <strong> or <b> for headings, <ul> and <li> for lists, <a> for links). Do not use Markdown.**`;
 
             // Prompt 1: Quick Report
@@ -1084,32 +1116,34 @@ Note the provided player info:
 - Age: {PLAYER_AGE}
 - Club: {PLAYER_CLUB}
 - League: {PLAYER_LEAGUE}
-- Position (from user): {PLAYER_POSITION}
+- Position(s): {PLAYER_POSITION}
 - Match Observed: {MATCH_CONTEXT}
 
 Structure your analysis with the following 7 clear sections. Use Markdown formatting for headings.
 
-# 1. Likely Position(s) & AI Rating
-Based on the heatmap and stats, confirm the player's position (or correct the user's input if it's clearly wrong).
-Then, provide a **Performance Rating** for this match (e.g., 'A-', '8.1/10', 'Green') and briefly justify it with the stats.
+# 1. Likely Position(s)
+Identify the player's most likely position from the data AND incorporate the user-provided position: "{PLAYER_POSITION}". (e.g., 'Primary (from data): Box-to-Box Midfielder (CM)', 'User-provided: CM'). Justify your choice based on the heatmap(s).
 
-# 2. Key Duties & Tactical Role
-Describe their primary responsibilities and tactical role on the pitch based on the data (e.g., 'Covers ground between both boxes, contributes to both defense and attack, looks to progress the ball...').
+# 2. Performance Rating
+Based on all provided stats, assign a match rating (e.g., 7.5/10, B+) and briefly justify it.
 
-# 3. Pros
-Identify 3-5 key strengths visible from the data. Be specific. (e.g., 'High Defensive Work Rate: Indicated by heavy shading in his own half and high tackle/interception numbers.', 'Passing Range: Evident from the high number of long balls completed.').
+# 3. Key Duties & Tactical Role
+Describe their primary responsibilities and tactical role on the pitch based on the data.
 
-# 4. Cons & Areas for Improvement
-Identify 3-5 potential weaknesses or areas for improvement. Be critical and constructive. (e.g., 'Final Third Ineffectiveness: Heatmap thins out in the opponent's box, supported by low key passes.', 'Disciplinary Issues: High number of fouls.').
+# 4. Pros
+Identify 3-5 key strengths visible from the data. Be specific. (e.g., 'High Defensive Work Rate: Indicated by heavy shading in his own half and high tackle/interception numbers.').
 
-# 5. Full Scouting Summary
-Provide a detailed, narrative summary (2-3 paragraphs) of the player's style, impact, and overall profile. Conclude with a final verdict on their potential level (e.g., 'Solid rotational player for a top-division side', 'High-potential prospect needs refinement', 'Top-class Champions League level player').
+# 5. Cons & Areas for Improvement
+Identify 3-5 potential weaknesses or areas for improvement. Be critical and constructive.
 
-# 6. Suggested Similar Player
-Based on the complete analysis (heatmap, stats, role), suggest ONE well-known professional player with a similar playstyle. Briefly justify your choice (1-2 sentences). (e.g., "Style Comparison: N'Golo Kanté. Both players exhibit exceptional work rate, strong defensive positioning, and primarily focus on ball recovery and simple distribution.")
+# 6. Full Scouting Summary
+Provide a detailed, narrative summary (2-3 paragraphs) of the player's style, impact, and overall profile. Conclude with a final verdict on their potential level.
 
-# 7. Suggested Development Plan
-Based on the 'Cons' you identified, suggest 2-3 specific, actionable development points or drills. (e.g., "1. Final Third Decision-Making: Drills focusing on cut-back passes and shooting under pressure.", "2. Weaker Foot Usage: Dedicate 15 minutes post-training to repetitive passing and shooting with weaker foot.").
+# 7. Suggested Similar Player
+Based on the complete analysis, suggest ONE well-known professional player with a similar playstyle. Briefly justify your choice.
+
+# 8. Suggested Development Plan
+Based on the 'Cons' you identified, suggest 2-3 specific, actionable development points or drills.
 `;
             
             // Prompt 2: Pro Scout Report
@@ -1118,14 +1152,14 @@ Based on the 'Cons' you identified, suggest 2-3 specific, actionable development
 # 1. Player Information
 - Name: {PLAYER_NAME}
 - Age: {PLAYER_AGE}
-- Position (from data): (Identify this from the heatmap/stats, using {PLAYER_POSITION} as a hint)
+- Position(s): {PLAYER_POSITION}
 - Club: {PLAYER_CLUB}
 - League: {PLAYER_LEAGUE}
 - Match Observed: {MATCH_CONTEXT}
 
 # 2. Player Rating
-- **AI Performance Rating**: (Assign a rating like A/B, 8/10, etc.)
-- **Justification**: (Briefly justify this rating based on the provided stats and your analysis)
+- **AI Performance Rating:** (Assign a rating: e.g., 8.2/10, A-, Green)
+- **Justification:** (Briefly justify this rating based on the provided stats and your analysis)
 
 # 3. Summary
 Provide a brief overview of the player's performance.
@@ -1134,69 +1168,63 @@ Provide a brief overview of the player's performance.
 
 # 4. Positional Play
 Analyze positioning in various phases based on the heatmap and stats.
-- Offensive Phase: (e.g., "Finds pockets of space between midfield and defense lines, evident from heatmap activity in zone 14...")
-- Defensive Phase: (e.g., "Disciplined in holding his position, but heatmap shows a reluctance to track runners wide...")
-- Transition Play: (e.g., "Quick to support the attack, but slow in defensive recovery as shown by...")
+- Offensive Phase:
+- Defensive Phase:
+- Transition Play:
 
 # 5. Key Actions (PMDS Framework)
 Analyze 2-3 critical moments or recurring actions from the stats using the PMDS framework (Position, Moment, Direction, Speed).
-- Example Action 1 (e.g., Pressing): "Position: High in the opponent's half. Moment: Triggered by a poor first touch from the defender. Direction: Arcing run to cut off the pass. Speed: Explosive. Result: Forced a turnover."
-- Example Action 2 (e.g., Key Pass): "Position: Right half-space. Moment: As winger checked to him. Direction: Forward, breaking the lines. Speed: Perfectly weighted. Result: Created a clear shot on goal."
+- Example Action 1:
+- Example Action 2:
 
 # 6. Tactical Awareness (Four Phases Framework)
 Assess the player's ability to understand and implement tactical instructions.
-- Communication (Information): (e.g., "Appears to scan a field frequently, implied by successful long passes...")
-- Decision (What): (e.g., "Consistently chose the simple, correct pass (high pass %)..." or "Tended to force dribbles in crowded areas (low dribble success)...")
-- Decision (How): (e.g., "Used a variety of pass types (curved, driven, lobbed)...")
-- Execution: (e.g., "Technically proficient, with high accuracy in passing and tackling stats...")
+- Communication (Information):
+- Decision (What):
+- Decision (How):
+- Execution:
 
 # 7. Mentality
 Assess intangible qualities based on the provided stats.
-- Work Rate: (e.g., "Exceptional, as shown by the extensive heatmap coverage and high number of defensive actions...")
-- Leadership: (e.g., "Difficult to assess from stats alone, but high pass volume suggests teammates trust him as a hub...")
-- Composure Under Pressure: (e.g., "Pass completion rate remained high despite... " or "High foul count (5) suggests moments of panic...")
+- Work Rate:
+- Leadership:
+- Composure Under Pressure:
 
 # 8. Conclusion
 Summarize your thoughts on the player’s potential and suitability.
-- Growth Potential: (e.g., "Significant potential to become a top-division starter if 'Areas for Improvement' are addressed.")
-- Suitability for a System: (e.g., "Best suited for a high-possession team that needs a creative fulcrum..." or "Ideal for a counter-attacking side...")
-- Transfer Recommendation: (e.g., "Recommend for further monitoring" or "Immediate signing for B-team/loan.")
+- Growth Potential:
+- Suitability for a System:
+- Transfer Recommendation:
 - **Similar Player Models:**
-    - Top-League Comparison: (e.g., Martin Ødegaard - Similar vision and left foot)
-    - Mid-League Comparison: (e.g., Joey Veerman (PSV) - Similar tempo-dictating style)
-    - Same-League Comparison: (e.g., Teun Koopmeiners - If you cannot find a non-teammate, state that)
-    - Historical Comparison: (e.g., Guti - Similar flair and risk-taking in final third)
+    - Top-League Comparison: (e.g., Martin Ødegaard)
+    - Mid-League Comparison: (e.g., Joey Veerman (PSV))
+    - Same-League Comparison: (e.g., Teun Koopmeiners)
+    - Historical Comparison: (e.g., Guti)
 `;
 
             // Prompt 3: Comparison Report
-            const comparisonUserQuery = `Analyze the provided data for TWO players. Player 1's data is provided first, followed by Player 2's data.
+            const comparisonUserQuery = `Analyze the provided data for TWO players.
+- **Player 1 Info:**
+  - Name: {PLAYER_NAME_1}
+  - Age: {PLAYER_AGE_1}
+  - Club: {PLAYER_CLUB_1}
+  - Context: {MATCH_CONTEXT_1}
+- **Player 2 Info:**
+  - Name: {PLAYER_NAME_2}
+  - Age: {PLAYER_AGE_2}
+  - Club: {PLAYER_CLUB_2}
+  - Context: {MATCH_CONTEXT_2}
 
-# --- PLAYER 1 DATA ---
-- Name: {PLAYER_NAME_1}
-- Age: {PLAYER_AGE_1}
-- Club: {PLAYER_CLUB_1}
-- League: {PLAYER_LEAGUE_1}
-- Context: {MATCH_CONTEXT_1}
-- Stats: {STATS_1}
+Provide a professional head-to-head scouting report. Integrate their names and info. Structure your analysis with the following clear sections. Use Markdown formatting for headings.
 
-# --- PLAYER 2 DATA ---
-- Name: {PLAYER_NAME_2}
-- Age: {PLAYER_AGE_2}
-- Club: {PLAYER_CLUB_2}
-- League: {PLAYER_LEAGUE_2}
-- Context: {MATCH_CONTEXT_2}
-- Stats: {STATS_2}
-
-Provide a professional head-to-head scouting report. Use the provided info to add context. Structure your analysis with the following clear sections. Use Markdown formatting for headings.
-
-# 1. Player 1 Profile (Position & Role)
+# 1. Player 1 Profile ({PLAYER_NAME_1})
 Briefly identify Player 1's likely position and tactical role based on their data.
 
-# 2. Player 2 Profile (Position & Role)
+# 2. Player 2 Profile ({PLAYER_NAME_2})
 Briefly identify Player 2's likely position and tactical role based on their data.
 
 # 3. Head-to-Head Comparison (Strengths)
-Compare the players directly on 3-5 key attributes, stating who has the edge in each. (e.g., 'Work Rate: Player 1 (Name) shows superior defensive coverage...', 'Passing: Player 2 (Name) appears to be the more creative passer...').
+Compare the players directly on 3-5 key attributes, stating who has the edge in each. (e.g., 'Work Rate: {PLAYER_NAME_1} shows superior defensive coverage...', 'Passing: {PLAYER_NAME_2} appears to be the more creative passer...').
 
 # 4. Head-to-Head Comparison (Weaknesses)
 Compare their primary weaknesses or areas for improvement.
@@ -1228,10 +1256,6 @@ List 3-4 exploitable weaknesses. (e.g., "Space behind fullbacks," "Vulnerable to
 # 5. Suggested Tactical Exploitation
 Provide 3-5 brief, actionable points on how *our* team can exploit these weaknesses. (e.g., "1. Target their left-back with quick 1-2s.", "2. Press their center-backs to force long balls.", "3. Use a false-9 to draw their holding midfielder out of position.").
 `;
-
-            // Prompt 5: Scan Stats from Images
-            const scanStatsQuery = "Analyze the provided image(s). Identify any football (soccer) player statistics visible. Extract them and format them as a simple key-value list (e.g., 'Goals: 1', 'Tackles: 3/4', 'Pass Accuracy: 85%'). Only return the list of stats.";
-            
 
             // --- Tab Navigation ---
             tabSingle.addEventListener('click', () => switchTab('single'));
@@ -1275,7 +1299,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             // Single Player
             if (imageUploadSingle) imageUploadSingle.addEventListener('change', (e) => handleFiles(e.target.files, 0));
             if (clearButtonSingle) clearButtonSingle.addEventListener('click', () => clearData(0));
-            if (scanImagesButton) scanImagesButton.addEventListener('click', handleScanImages);
+            if (scanStatsButton) scanStatsButton.addEventListener('click', handleScanStats);
             if (textStatsSingle) textStatsSingle.addEventListener('input', () => {
                 if (visualizeStatsButton) visualizeStatsButton.disabled = textStatsSingle.value.trim() === '';
             });
@@ -1287,14 +1311,14 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
             // Player 1
             if (imageUpload1) imageUpload1.addEventListener('change', (e) => handleFiles(e.target.files, 1));
             if (clearButton1) clearButton1.addEventListener('click', () => clearData(1));
-            [playerName1, playerAge1, playerClub1, playerLeague1, matchContext1, textStats1].forEach(el => {
+            [matchContext1, textStats1, playerName1, playerAge1, playerClub1].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
             // Player 2
             if (imageUpload2) imageUpload2.addEventListener('change', (e) => handleFiles(e.target.files, 2));
             if (clearButton2) clearButton2.addEventListener('click', () => clearData(2));
-            [playerName2, playerAge2, playerClub2, playerLeague2, matchContext2, textStats2].forEach(el => {
+            [matchContext2, textStats2, playerName2, playerAge2, playerClub2].forEach(el => {
                 if (el) el.addEventListener('input', updateAnalyzeButtonState);
             });
             
@@ -1341,6 +1365,14 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     generatedPdfDoc.save(`scout-report-${pName}.pdf`);
                 } else {
                     showError("No PDF generated. Please preview again.");
+                }
+            });
+            
+            // Success Modal
+            if (closeSuccessModal) closeSuccessModal.addEventListener('click', () => successModalOverlay.classList.remove('visible'));
+            if (successModalOverlay) successModalOverlay.addEventListener('click', (e) => {
+                if (e.target === successModalOverlay) {
+                    successModalOverlay.classList.remove('visible');
                 }
             });
 
@@ -1440,7 +1472,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 if (playerIndex === 0) {
                     placeholder = uploadPlaceholderSingle;
                     clearButton = clearButtonSingle;
-                    scanButton = scanImagesButton;
+                    scanButton = scanStatsButton;
                 } else if (playerIndex === 1) {
                     placeholder = uploadPlaceholder1;
                     clearButton = clearButton1;
@@ -1454,7 +1486,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 
                 if (placeholder) placeholder.classList.add('hidden');
                 if (clearButton) clearButton.classList.remove('hidden');
-                if (scanButton) scanButton.classList.remove('hidden');
+                if (scanButton) scanButton.disabled = false;
 
                 for (const file of imageFiles) {
                     processFile(file, playerIndex);
@@ -1475,7 +1507,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     updateAnalyzeButtonState();
                     hideError();
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(file); // Corrected function name
             }
 
             function addImageToPreview(dataUrl, playerIndex) {
@@ -1499,7 +1531,6 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     imagePreviewContainerSingle.innerHTML = '';
                     uploadPlaceholderSingle.classList.remove('hidden');
                     clearButtonSingle.classList.add('hidden');
-                    scanImagesButton.classList.add('hidden');
                     textStatsSingle.value = '';
                     matchContextSingle.value = '';
                     playerName.value = '';
@@ -1513,6 +1544,7 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                         statsChartInstance = null;
                     }
                     visualizeStatsButton.disabled = true;
+                    scanStatsButton.disabled = true;
                 } else if (playerIndex === 1) {
                     imagePreviewContainer1.innerHTML = '';
                     uploadPlaceholder1.classList.remove('hidden');
@@ -1522,7 +1554,6 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     playerName1.value = '';
                     playerAge1.value = '';
                     playerClub1.value = '';
-                    playerLeague1.value = '';
                 } else if (playerIndex === 2) {
                     imagePreviewContainer2.innerHTML = '';
                     uploadPlaceholder2.classList.remove('hidden');
@@ -1532,7 +1563,6 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     playerName2.value = '';
                     playerAge2.value = '';
                     playerClub2.value = '';
-                    playerLeague2.value = '';
                 } else if (playerIndex === 3) {
                     imagePreviewContainerOpponent.innerHTML = '';
                     uploadPlaceholderOpponent.classList.remove('hidden');
@@ -1557,6 +1587,34 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     const hasText = (opponentName && opponentName.value.trim() !== '') || (textStatsOpponent && textStatsOpponent.value.trim() !== '');
                     const hasImages = playerData[3].images.length > 0;
                     analyzeButton.disabled = !hasText && !hasImages;
+                }
+            }
+            
+            // --- Scan Stats from Image ---
+            async function handleScanStats() {
+                if (playerData[0].images.length === 0) {
+                    showError("Please upload at least one image to scan.");
+                    return;
+                }
+                
+                scanStatsButton.disabled = true;
+                scanSpinner.classList.remove('hidden');
+                hideError();
+                
+                const parts = [{ text: statsScanPrompt }];
+                playerData[0].images.forEach((imgData, i) => {
+                    parts.push({ inlineData: { mimeType: playerData[0].mimes[i], data: imgData } });
+                });
+                
+                try {
+                    const statsText = await callGenericApi(parts, systemPrompt, false);
+                    textStatsSingle.value += (textStatsSingle.value.trim() ? '\n' : '') + statsText;
+                    visualizeStatsButton.disabled = false;
+                } catch (error) {
+                    showError(`Failed to scan stats: ${error.message}`);
+                } finally {
+                    scanStatsButton.disabled = false;
+                    scanSpinner.classList.add('hidden');
                 }
             }
 
@@ -1627,46 +1685,6 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     }
                 });
             }
-            
-            // --- New "Scan Images for Stats" Function ---
-            async function handleScanImages() {
-                if (playerData[0].images.length === 0) {
-                    showError("Please upload at least one image to scan.");
-                    return;
-                }
-                
-                scanImagesButton.disabled = true;
-                scanButtonText.textContent = "Scanning...";
-                scanSpinner.classList.remove('hidden');
-                hideError();
-
-                const parts = [];
-                parts.push({ text: scanStatsQuery });
-                playerData[0].images.forEach((imgData, i) => {
-                    parts.push({ inlineData: { mimeType: playerData[0].mimes[i], data: imgData } });
-                });
-
-                try {
-                    const extractedStats = await callGenericApi(parts);
-                    const currentStats = textStatsSingle.value.trim();
-                    if (currentStats) {
-                        textStatsSingle.value = currentStats + "\n" + extractedStats;
-                    } else {
-                        textStatsSingle.value = extractedStats;
-                    }
-                    // Trigger input event to enable visualize button
-                    textStatsSingle.dispatchEvent(new Event('input'));
-                    // Automatically visualize the new stats
-                    visualizeStats();
-                } catch (error) {
-                    showError(`Failed to scan stats: ${error.message}`);
-                } finally {
-                    scanImagesButton.disabled = false;
-                    scanButtonText.textContent = "Scan Images for Stats";
-                    scanSpinner.classList.add('hidden');
-                }
-            }
-
 
             // --- Analysis & API Call ---
             function handleAnalysis() {
@@ -1684,12 +1702,12 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     
                     const pName = playerName.value || "Not specified";
                     query = (reportType === 'quick' ? quickReportQuery : proReportQuery)
-                        .replace('{PLAYER_NAME}', pName)
-                        .replace('{PLAYER_AGE}', playerAge.value || "Not specified")
-                        .replace('{PLAYER_CLUB}', playerClub.value || "Not specified")
-                        .replace('{PLAYER_LEAGUE}', playerLeague.value || "Not specified")
-                        .replace('{PLAYER_POSITION}', playerPosition.value || "Not specified")
-                        .replace('{MATCH_CONTEXT}', matchContextSingle.value || "Not specified");
+                        .replace(/{PLAYER_NAME}/g, pName)
+                        .replace(/{PLAYER_AGE}/g, playerAge.value || "Not specified")
+                        .replace(/{PLAYER_CLUB}/g, playerClub.value || "Not specified")
+                        .replace(/{PLAYER_LEAGUE}/g, playerLeague.value || "Not specified")
+                        .replace(/{PLAYER_POSITION}/g, playerPosition.value || "Not specified")
+                        .replace(/{MATCH_CONTEXT}/g, matchContextSingle.value || "Not specified");
                     
                     parts.push({ text: query });
                     const stats = textStatsSingle.value;
@@ -1700,27 +1718,26 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     
                 } else if (activeTab === 'compare') {
                     query = comparisonUserQuery
-                        .replace('{PLAYER_NAME_1}', playerName1.value || "Player 1")
-                        .replace('{PLAYER_AGE_1}', playerAge1.value || "N/A")
-                        .replace('{PLAYER_CLUB_1}', playerClub1.value || "N/A")
-                        .replace('{PLAYER_LEAGUE_1}', playerLeague1.value || "N/A")
-                        .replace('{MATCH_CONTEXT_1}', matchContext1.value || "Not specified")
-                        .replace('{STATS_1}', textStats1.value || "No stats provided")
-                        .replace('{PLAYER_NAME_2}', playerName2.value || "Player 2")
-                        .replace('{PLAYER_AGE_2}', playerAge2.value || "N/A")
-                        .replace('{PLAYER_CLUB_2}', playerClub2.value || "N/A")
-                        .replace('{PLAYER_LEAGUE_2}', playerLeague2.value || "N/A")
-                        .replace('{MATCH_CONTEXT_2}', matchContext2.value || "Not specified")
-                        .replace('{STATS_2}', textStats2.value || "No stats provided");
-                        
+                        .replace(/{PLAYER_NAME_1}/g, playerName1.value || "Player 1")
+                        .replace(/{PLAYER_AGE_1}/g, playerAge1.value || "N/A")
+                        .replace(/{PLAYER_CLUB_1}/g, playerClub1.value || "N/A")
+                        .replace(/{MATCH_CONTEXT_1}/g, matchContext1.value || "Not specified")
+                        .replace(/{PLAYER_NAME_2}/g, playerName2.value || "Player 2")
+                        .replace(/{PLAYER_AGE_2}/g, playerAge2.value || "N/A")
+                        .replace(/{PLAYER_CLUB_2}/g, playerClub2.value || "N/A")
+                        .replace(/{MATCH_CONTEXT_2}/g, matchContext2.value || "Not specified");
                     parts.push({ text: query });
                     
-                    parts.push({ text: "\n\n# --- PLAYER 1 IMAGES ---" });
+                    const stats1 = textStats1.value;
+                    parts.push({ text: `\n\n# --- ${playerName1.value || "PLAYER 1"} DATA ---` });
+                    if (stats1.trim() !== "") parts.push({ text: "\n# Player 1 Stats:\n" + stats1 });
                     playerData[1].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[1].mimes[i], data: imgData } });
                     });
                     
-                    parts.push({ text: "\n\n# --- PLAYER 2 IMAGES ---" });
+                    const stats2 = textStats2.value;
+                    parts.push({ text: `\n\n# --- ${playerName2.value || "PLAYER 2"} DATA ---` });
+                    if (stats2.trim() !== "") parts.push({ text: "\n# Player 2 Stats:\n" + stats2 });
                     playerData[2].images.forEach((imgData, i) => {
                         parts.push({ inlineData: { mimeType: playerData[2].mimes[i], data: imgData } });
                     });
@@ -1738,9 +1755,21 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 
                 callReportApi(parts);
             }
+
+            async function callReportApi(parts) {
+                try {
+                    const generatedText = await callGenericApi(parts, systemPrompt, false);
+                    lastAiResponse = generatedText;
+                    displayResults(lastAiResponse);
+                } catch (error) {
+                    showError(`Failed to get analysis: ${error.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            }
             
-            async function callGenericApi(parts, retryCount = 0) {
-                // Get key from input or local storage
+            // --- Generic API Call Function ---
+            async function callGenericApi(parts, systemPromptText, useSearch, retryCount = 0) {
                 let key = apiKeyInput.value.trim();
                 if (!key) {
                     try {
@@ -1754,10 +1783,13 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
 
                 const payload = {
                     contents: [{ role: "user", parts: parts }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: { temperature: 0.1 } // Low temp for extraction
+                    systemInstruction: { parts: [{ text: systemPromptText }] },
                 };
-
+                
+                if (useSearch) {
+                    payload.tools = [{ "google_search": {} }];
+                }
+                
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -1779,13 +1811,24 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                             throw new Error(errorData.error?.message || "An unknown error occurred.");
                         }
                     }
-
-                    const result = await response.json();
                     
+                    const responseText = await response.text();
+                    if (!responseText) {
+                        throw new Error("Received an empty response from the API.");
+                    }
+                    
+                    let result;
+                    try {
+                         result = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error("Failed to parse JSON response:", responseText);
+                        throw new Error("Failed to parse API response. Raw: " + responseText);
+                    }
+
                     if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
                         return result.candidates[0].content.parts[0].text;
                     } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
-                        throw new Error("Analysis blocked due to safety settings.");
+                        throw new Error("Analysis blocked due to safety settings. Try different images or text.");
                     } else {
                         throw new Error("Invalid response structure from API. No text generated.");
                     }
@@ -1794,22 +1837,10 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                     if (retryCount < 3 && (error.message.includes("HTTP error") || error.message.includes("Failed to fetch"))) {
                         const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        return callGenericApi(parts, retryCount + 1);
+                        return callGenericApi(parts, systemPromptText, useSearch, retryCount + 1);
                     } else {
-                        throw error; // Re-throw the error to be caught by the caller
+                        throw error;
                     }
-                }
-            }
-
-            async function callReportApi(parts) {
-                try {
-                    const resultText = await callGenericApi(parts);
-                    lastAiResponse = resultText;
-                    displayResults(lastAiResponse);
-                } catch (error) {
-                    showError(`Failed to get analysis: ${error.message}`);
-                } finally {
-                    setLoading(false);
                 }
             }
             
@@ -1819,14 +1850,23 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 addMessageToChat('ai', "Hello! I'm your AI scouting assistant. How can I help you today?");
             }
 
-            function handleChat() {
+            async function handleChat() {
                 const query = chatInput.value.trim();
                 if (!query) return;
                 
                 chatInput.value = '';
                 addMessageToChat('user', query);
                 const loadingMessage = addMessageToChat('ai', '...', true);
-                callChatbotApi(query, loadingMessage, true); // true for search
+                
+                try {
+                    const generatedText = await callGenericApi([{ text: query }], chatbotSystemPrompt, true);
+                    loadingMessage.innerHTML = generatedText; // Render HTML
+                    loadingMessage.classList.remove('loading');
+                } catch (error) {
+                    loadingMessage.innerHTML = `Error: ${error.message}`; // Render HTML
+                    loadingMessage.classList.remove('loading');
+                    loadingMessage.style.color = '#f87171'; // red-400
+                }
             }
             
             function addMessageToChat(role, text, isLoading = false) {
@@ -1845,106 +1885,8 @@ Provide 3-5 brief, actionable points on how *our* team can exploit these weaknes
                 return messageDiv;
             }
             
-            async function callChatbotApi(query, loadingMessageElement, useSearch, retryCount = 0) {
-                let key = apiKeyInput.value.trim();
-                if (!key) {
-                    try {
-                        key = localStorage.getItem('geminiApiKey') || "";
-                    } catch (e) {
-                        key = "";
-                    }
-                }
-                
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
-                
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: query }] }],
-                    systemInstruction: { parts: [{ text: chatbotSystemPrompt }] },
-                };
-                
-                if (useSearch) {
-                    payload.tools = [{ "google_search": {} }];
-                }
-                
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    if (!response.ok) {
-                        if (response.status === 429 || response.status >= 500) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        } else {
-                            const errorText = await response.text();
-                            let errorData;
-                            try {
-                                errorData = JSON.parse(errorText);
-                            } catch (e) {
-                                // Handle non-JSON error responses
-                                throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);
-                            }
-                            throw new Error(errorData.error?.message || "An unknown error occurred.");
-                        }
-                    }
-
-                    // Fix for "Unexpected end of input"
-                    const responseText = await response.text();
-                    if (!responseText) {
-                        throw new Error("Received an empty response from the API.");
-                    }
-                    
-                    let result;
-                    try {
-                         result = JSON.parse(responseText);
-                    } catch (e) {
-                        console.error("Failed to parse JSON response:", responseText);
-                        throw new Error("Failed to parse API response. Raw: " + responseText);
-                    }
-
-                    
-                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        const generatedText = result.candidates[0].content.parts[0].text;
-                        
-                        if (loadingMessageElement) { // For chatbot
-                            loadingMessageElement.innerHTML = generatedText; // Render HTML
-                            loadingMessageElement.classList.remove('loading');
-                        } else if (activeTab === 'search') { // For search tab
-                            lastSearchResponse = generatedText;
-                            displaySearchResults(generatedText);
-                        }
-                    } else if (result.candidates?.[0]?.finishReason === "SAFETY") {
-                        throw new Error("Response blocked due to safety settings.");
-                    } else {
-                        throw new Error("Invalid response from API (no text).");
-                    }
-                    
-                } catch (error) {
-                    if (retryCount < 3 && (error.message.includes("HTTP error") || error.message.includes("Failed to fetch"))) {
-                        const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        callChatbotApi(query, loadingMessageElement, useSearch, retryCount + 1);
-                    } else {
-                        if (loadingMessageElement) {
-                            loadingMessageElement.innerHTML = `Error: ${error.message}`; // Render HTML
-                            loadingMessageElement.classList.remove('loading');
-                            loadingMessageElement.style.color = '#f87171'; // red-400
-                        } else if (activeTab === 'search') {
-                            showSearchError(`Failed to get results: ${error.message}`);
-                        }
-                    }
-                } finally {
-                    if (activeTab === 'search' && retryCount === 0) {
-                        searchButton.disabled = false;
-                        searchButton.innerHTML = `<svg data-lucide="search" class="h-5 w-5"></svg> Search Players`;
-                        if (typeof lucide !== 'undefined') lucide.createIcons();
-                    }
-                }
-            }
-            
             // --- Search Tab Functions ---
-            function handleSearch() {
+            async function handleSearch() {
                 // Build the query from the form fields
                 let queryParts = [];
                 if (searchPosition.value.trim()) queryParts.push(`Position: ${searchPosition.value.trim()}`);
@@ -1988,7 +1930,17 @@ If a value is unknown, use "N/A".
                 searchResultsContainer.classList.add('hidden');
                 searchErrorMessage.classList.add('hidden');
                 
-                callChatbotApi(fullQuery, null, true); // null for loading element, true for search
+                try {
+                    const generatedText = await callGenericApi([{ text: fullQuery }], chatbotSystemPrompt, true);
+                    lastSearchResponse = generatedText;
+                    displaySearchResults(generatedText);
+                } catch (error) {
+                    showSearchError(`Failed to get results: ${error.message}`);
+                } finally {
+                    searchButton.disabled = false;
+                    searchButton.innerHTML = `<svg data-lucide="search" class="h-5 w-5"></svg> Search Players`;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
             }
             
             function displaySearchResults(htmlTable) {
@@ -2072,6 +2024,10 @@ If a value is unknown, use "N/A".
 
                 analysisOutput.innerHTML = html;
                 resultsSection.classList.remove('hidden');
+                
+                // Show success pop-up
+                if (successModalOverlay) successModalOverlay.classList.add('visible');
+                
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
             
@@ -2094,29 +2050,41 @@ If a value is unknown, use "N/A".
             
             // --- New PDF Generation ---
             
-            // This function safely parses the report, even if section numbers are missing.
+            // This function safely parses the report, even if section numbers are missing or titles have ()
             function parseProReport(rawText) {
                 const reportData = {};
-                
-                // V2: AI-calculated rating
                 const sections = [
                     "Player Information", "Player Rating", "Summary",
-                    "Positional Play", "Key Actions (PMDS Framework)",
-                    "Tactical Awareness (Four Phases Framework)", "Mentality", "Conclusion"
+                    "Positional Play", "Key Actions", // Simplified key
+                    "Tactical Awareness", // Simplified key
+                    "Mentality", "Conclusion"
                 ];
+                
+                // Keywords to look for in the text
+                const sectionKeywords = {
+                    "Player Information": "Player Information",
+                    "Player Rating": "Player Rating",
+                    "Summary": "Summary",
+                    "Positional Play": "Positional Play",
+                    "Key Actions": "Key Actions",
+                    "Tactical Awareness": "Tactical Awareness",
+                    "Mentality": "Mentality",
+                    "Conclusion": "Conclusion"
+                };
 
                 let remainingText = rawText;
                 
                 for (let i = 0; i < sections.length; i++) {
-                    const sectionTitle = sections[i];
-                    // Create a regex to find the section title, potentially preceded by #, number, dot.
-                    const regex = new RegExp(`^#\\s*\\d*\\.?\\s*${sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
+                    const sectionName = sections[i];
+                    const sectionKey = sectionKeywords[sectionName];
+                    
+                    // Create a regex to find the section title, case-insensitive, ignoring " (PMDS...)"
+                    const regex = new RegExp(`^#\\s*\\d*\\.?\\s*${sectionKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
                     const match = remainingText.match(regex);
                     
                     if (!match) {
-                        // If a section is not found, log it and continue
-                        console.warn(`PDF generator could not find section: "${sectionTitle}"`);
-                        reportData[sectionTitle.toLowerCase().split(' ')[0]] = "N/A (Section not found in AI response)";
+                        console.warn(`PDF generator could not find section: "${sectionName}"`);
+                        reportData[sectionName.toLowerCase().split(' ')[0]] = "N/A (Section not found in AI response)";
                         continue;
                     }
                     
@@ -2126,8 +2094,8 @@ If a value is unknown, use "N/A".
                     let endIndex = -1;
                     // Find the start of the *next* section
                     if (i < sections.length - 1) {
-                        const nextSectionTitle = sections[i+1];
-                        const nextRegex = new RegExp(`^#\\s*\\d*\\.?\\s*${nextSectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
+                        const nextSectionKey = sectionKeywords[sections[i+1]];
+                        const nextRegex = new RegExp(`^#\\s*\\d*\\.?\\s*${nextSectionKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
                         const nextMatch = textAfterTitle.match(nextRegex);
                         if (nextMatch) {
                             endIndex = nextMatch.index;
@@ -2144,7 +2112,7 @@ If a value is unknown, use "N/A".
                         remainingText = "";
                     }
                     
-                    reportData[sectionTitle.toLowerCase().split('(')[0].trim().split(' ')[0]] = sectionContent;
+                    reportData[sectionName.toLowerCase().split(' ')[0]] = sectionContent;
                 }
                 
                 return reportData;
@@ -2233,7 +2201,7 @@ If a value is unknown, use "N/A".
                     }
                     
                     if (!reportData.conclusion) {
-                         throw new Error("Could not parse Pro Scout Report. AI response was incomplete. Please try again.");
+                         throw new Error("Could not parse the AI report. Key sections (like Conclusion) are missing. Please try again.");
                     }
 
 
@@ -2277,28 +2245,6 @@ If a value is unknown, use "N/A".
                     // == Section 1: Player Rating & Summary ==
                     checkPageBreak(30);
                     addHeader("Summary & Rating");
-                    
-                    // Rating - Extract from AI response
-                    let aiRating = "N/A";
-                    if (reportData.rating) {
-                        const ratingMatch = reportData.rating.match(/AI Performance Rating.*?:\s*(.*?)\n/i);
-                        if (ratingMatch && ratingMatch[1]) {
-                            aiRating = ratingMatch[1].trim();
-                        }
-                    }
-                    
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(10);
-                    doc.text("PERFORMANCE RATING:", margin, currentY);
-                    
-                    const ratingWidth = doc.getTextWidth(aiRating) + 8;
-                    doc.setFillColor(56, 189, 248); // sky-400
-                    doc.setDrawColor(56, 189, 248);
-                    doc.roundedRect(margin + 50, currentY - 4.5, ratingWidth, 7, 2, 2, 'F');
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(12);
-                    doc.text(aiRating, margin + 54, currentY + 1);
-                    currentY += 8;
 
                     addBodyText(reportData.rating || "N/A");
                     addBodyText(reportData.summary || "N/A");
@@ -2353,7 +2299,7 @@ If a value is unknown, use "N/A".
                     // == Sections 3-7: Detailed Analysis ==
                     const analysisSections = [
                         { title: "Positional Play", text: reportData.positional },
-                        { title: "Key Actions (PMDS Framework)", text: reportData.keyactions },
+                        { title: "Key Actions (PMDS Framework)", text: reportData.key },
                         { title: "Tactical Awareness (Four Phases Framework)", text: reportData.tactical },
                         { title: "Mentality", text: reportData.mentality },
                     ];
@@ -2469,6 +2415,7 @@ If a value is unknown, use "N/A".
 
             updateAnalyzeButtonState(); // Set initial button state
             if (visualizeStatsButton) visualizeStatsButton.disabled = true; // Disabled until user types
+            if (scanStatsButton) scanStatsButton.disabled = true; // Disabled until images are loaded
         });
     </script>
 </body>
