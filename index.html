@@ -185,7 +185,7 @@
                         <!-- API Key Input -->
                         <div id="apiKeySection" class="mb-4">
                             <label for="apiKey" class="block text-sm font-medium text-slate-300 mb-1">Optional API Key</label>
-                            <div class="flex space-x-2">
+                            <div id="apiKeyInputGroup" class="flex space-x-2">
                                 <input type="password" id="apiKey" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Enter your Gemini API key">
                                 <button id="saveApiKeyBtn" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg" title="Save Key">
                                     <i data-lucide="save" class="h-5 w-5"></i>
@@ -505,6 +505,7 @@
         const analyzeBtn = document.getElementById('analyzeBtn');
         const clearBtn = document.getElementById('clearBtn');
         const apiKeyInput = document.getElementById('apiKey');
+        const apiKeyInputGroup = document.getElementById('apiKeyInputGroup');
         const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
         const apiKeyMessage = document.getElementById('apiKeyMessage');
         const apiKeySection = document.getElementById('apiKeySection');
@@ -694,16 +695,15 @@
                 const savedKey = localStorage.getItem('geminiApiKey');
                 if (savedKey) {
                     userApiKey = savedKey;
-                    apiKeyInput.value = "******************";
-                    apiKeyInput.disabled = true;
-                    apiKeyMessage.innerHTML = 'Saved key loaded. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
+                    apiKeyInputGroup.classList.add('hidden');
+                    apiKeyMessage.innerHTML = 'API Key saved. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
                     apiKeyMessage.classList.remove('hidden');
                     
                     document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
                         localStorage.removeItem('geminiApiKey');
                         userApiKey = "";
                         apiKeyInput.value = "";
-                        apiKeyInput.disabled = false;
+                        apiKeyInputGroup.classList.remove('hidden');
                         apiKeyMessage.classList.add('hidden');
                     });
                 }
@@ -718,18 +718,19 @@
                 if (key) {
                     userApiKey = key;
                     localStorage.setItem('geminiApiKey', key);
-                    apiKeyInput.value = "******************";
-                    apiKeyInput.disabled = true;
-                    apiKeyMessage.innerHTML = 'Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">Clear Key</button>';
+                    apiKeyInputGroup.classList.add('hidden');
+                    apiKeyMessage.innerHTML = 'API Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
                     apiKeyMessage.classList.remove('hidden');
                     
                     document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
                         localStorage.removeItem('geminiApiKey');
                         userApiKey = "";
                         apiKeyInput.value = "";
-                        apiKeyInput.disabled = false;
+                        apiKeyInputGroup.classList.remove('hidden');
                         apiKeyMessage.classList.add('hidden');
                     });
+                } else {
+                    showError("Please enter an API key to save.");
                 }
             } catch (e) {
                 console.error("Could not save API key to LocalStorage:", e);
@@ -810,7 +811,7 @@
                 // Update preview
                 updateImagePreviews(previewEl, imageArray, base64);
             };
-            reader.readAsDataURL(file); // Corrected method name
+            reader.readAsDataURL(file);
         }
 
         function updateImagePreviews(previewEl, imageArray, newImageBase64) {
@@ -914,7 +915,7 @@
             const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
             
             // Use the non-streaming endpoint
-            const apiUrl = `https://generativethinking.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: [{
@@ -1287,7 +1288,7 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userText); // userQuery was undefined, changed to userText
+                const resultText = await callChatbotApi(userText);
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
@@ -1307,7 +1308,7 @@ Do not include any text before or after the HTML table.
 
         async function callChatbotApi(userQuery) {
             const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: chatHistory, // Send the whole history
@@ -1539,7 +1540,7 @@ Do not include any text before or after the HTML table.
         // --- PDF Generation ---
         
         async function generatePDF() {
-            if (typeof jsPDF === 'undefined') {
+            if (typeof window.jspdf === 'undefined') {
                 showError("jsPDF library is not loaded.");
                 return;
             }
@@ -1598,7 +1599,7 @@ Do not include any text before or after the HTML table.
                 };
                 
                 const addSection = (title, content) => {
-                    if (!content) return;
+                    if (!content || content === 'N/A') return;
                     
                     addPageIfNeeded(20); // Space for header + line + content
                     
@@ -1610,10 +1611,15 @@ Do not include any text before or after the HTML table.
                     y += 8;
                     
                     setBodyStyle();
-                    const lines = doc.splitTextToSize(content, contentWidth);
-                    addPageIfNeeded(lines.length * 5); // Estimate space
-                    doc.text(lines, margin, y);
-                    y += (lines.length * 5) + 6; // Add padding after section
+                    const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth); // Convert md list to bullet
+                    
+                    lines.forEach((line, index) => {
+                        addPageIfNeeded(5);
+                        doc.text(line, margin, y);
+                        y += 5;
+                    });
+                    
+                    y += 6; // Add padding after section
                 };
 
                 // --- 1. PDF Header ---
