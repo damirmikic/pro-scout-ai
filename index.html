@@ -17,6 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Use Inter font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -300,7 +301,7 @@
             color: #9ca3af; /* gray-400 */
         }
         /* Style for HTML content in chat */
-        .chat-message.ai strong {
+        .chat-message.ai strong, .chat-message.ai b {
             color: #e5e7eb; /* gray-200 */
             font-weight: 600;
         }
@@ -311,6 +312,17 @@
             margin-bottom: 0.5rem;
         }
         .chat-message.ai li {
+            margin-bottom: 0.25rem;
+        }
+        .chat-message.ai a {
+            color: #38bdf8; /* sky-400 */
+            text-decoration: underline;
+        }
+        .chat-message.ai h1, .chat-message.ai h2, .chat-message.ai h3 {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e5e7eb; /* gray-200 */
+            margin-top: 0.75rem;
             margin-bottom: 0.25rem;
         }
         
@@ -1027,7 +1039,7 @@
             // --- AI Prompts ---
             const systemPrompt = `You are an expert football (soccer) scout and tactical analyst with decades of experience at the highest level. Your task is to analyze the provided image(s) and any optional text data. You must be critical, insightful, and professional.`;
             
-            const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights. **Format your responses using simple HTML tags for readability (e.g., <strong> for headings, <ul> and <li> for lists). Do not use Markdown.**`;
+            const chatbotSystemPrompt = `You are "Scout AI," a helpful and expert football (soccer) scouting assistant. You have access to Google Search to find real-time statistics, player information, team tactics, and news. Answer user questions concisely and accurately, focusing on data and tactical insights. **Format your responses using simple HTML tags for readability (e.g., <strong> or <b> for headings, <ul> and <li> for lists, <a> for links). Do not use Markdown.**`;
 
             // Prompt 1: Quick Report
             const quickReportQuery = `Analyze the following image(s) and any provided text statistics for the player.
@@ -1929,15 +1941,12 @@ If a value is unknown, use "N/A".
 
             // --- UI Helper Functions ---
             function displayResults(text) {
-                let html = text
-                    .replace(/^# 1. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 2. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 3. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 4. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 5. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 6. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 7. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
-                    .replace(/^# 8. (.*)/gm, '<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">$1</h3>')
+                // This regex is more permissive, looking for any #, optional number, optional dot, and then text.
+                let html = text.replace(/^#\s*(\d*\.?)\s*(.*)/gm, (match, num, title) => {
+                    return `<h3 class="text-xl font-semibold text-blue-300 mt-4 mb-2">${title.trim()}</h3>`;
+                });
+
+                html = html
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>');
 
@@ -1964,6 +1973,62 @@ If a value is unknown, use "N/A".
             }
             
             // --- New PDF Generation ---
+            
+            // This function safely parses the report, even if section numbers are missing.
+            function parseProReport(rawText) {
+                const reportData = {};
+                const sections = [
+                    "Player Information", "Player Rating", "Summary",
+                    "Positional Play", "Key Actions (PMDS Framework)",
+                    "Tactical Awareness (Four Phases Framework)", "Mentality", "Conclusion"
+                ];
+
+                let remainingText = rawText;
+                
+                for (let i = 0; i < sections.length; i++) {
+                    const sectionTitle = sections[i];
+                    // Create a regex to find the section title, potentially preceded by #, number, dot.
+                    const regex = new RegExp(`^#\\s*\\d*\\.?\\s*${sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
+                    const match = remainingText.match(regex);
+                    
+                    if (!match) {
+                        // If a section is not found, log it and continue
+                        console.warn(`PDF generator could not find section: "${sectionTitle}"`);
+                        reportData[sectionTitle.toLowerCase().split(' ')[0]] = "N/A (Section not found in AI response)";
+                        continue;
+                    }
+                    
+                    const startIndex = match.index;
+                    let textAfterTitle = remainingText.substring(startIndex + match[0].length).trim();
+                    
+                    let endIndex = -1;
+                    // Find the start of the *next* section
+                    if (i < sections.length - 1) {
+                        const nextSectionTitle = sections[i+1];
+                        const nextRegex = new RegExp(`^#\\s*\\d*\\.?\\s*${nextSectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'im');
+                        const nextMatch = textAfterTitle.match(nextRegex);
+                        if (nextMatch) {
+                            endIndex = nextMatch.index;
+                        }
+                    }
+                    
+                    let sectionContent;
+                    if (endIndex !== -1) {
+                        sectionContent = textAfterTitle.substring(0, endIndex).trim();
+                        remainingText = textAfterTitle.substring(endIndex);
+                    } else {
+                        // This is the last section
+                        sectionContent = textAfterTitle;
+                        remainingText = "";
+                    }
+                    
+                    reportData[sectionTitle.toLowerCase().split('(')[0].trim().split(' ')[0]] = sectionContent;
+                }
+                
+                return reportData;
+            }
+            
+            
             async function handlePdfPreview() {
                 if (!lastAiResponse) {
                     showError("Please generate a report first.");
@@ -2036,21 +2101,19 @@ If a value is unknown, use "N/A".
                         return false;
                     };
 
-                    // --- 1. Parse AI Response ---
-                    // Split the report into sections.
-                    const sections = lastAiResponse.split(/^# \d. /m).filter(Boolean).map(s => s.trim());
-                    if (sections.length < 8) throw new Error("Could not parse Pro Scout Report. AI response was incomplete. Please try again.");
+                    // --- 1. Parse AI Response (Robustly) ---
+                    let reportData;
+                    try {
+                        reportData = parseProReport(lastAiResponse);
+                    } catch (e) {
+                        console.error("Parsing failed:", e);
+                        throw new Error("Could not parse the AI report. It might be incomplete or in an unexpected format. Please try again.");
+                    }
+                    
+                    if (!reportData.conclusion) {
+                         throw new Error("Could not parse the AI report. Key sections (like Conclusion) are missing. Please try again.");
+                    }
 
-                    const reportData = {
-                        info: sections[0],
-                        rating: sections[1],
-                        summary: sections[2],
-                        positional: sections[3],
-                        keyActions: sections[4],
-                        tactical: sections[5],
-                        mentality: sections[6],
-                        conclusion: sections[7]
-                    };
 
                     // --- 2. Build PDF Document ---
                     currentY = margin;
@@ -2108,8 +2171,8 @@ If a value is unknown, use "N/A".
                     doc.text(ratingText, margin + 54, currentY + 1);
                     currentY += 8;
 
-                    addBodyText(reportData.rating.substring(reportData.rating.indexOf('\n') + 1)); // Skip title
-                    addBodyText(reportData.summary.substring(reportData.summary.indexOf('\n') + 1)); // Skip title
+                    addBodyText(reportData.rating || "N/A");
+                    addBodyText(reportData.summary || "N/A");
 
                     // == Section 2: Visuals (Charts & Images) ==
                     checkPageBreak(16);
@@ -2160,22 +2223,22 @@ If a value is unknown, use "N/A".
 
                     // == Sections 3-7: Detailed Analysis ==
                     const analysisSections = [
-                        { title: reportData.positional.split('\n')[0], text: reportData.positional.substring(reportData.positional.indexOf('\n') + 1) },
-                        { title: reportData.keyActions.split('\n')[0], text: reportData.keyActions.substring(reportData.keyActions.indexOf('\n') + 1) },
-                        { title: reportData.tactical.split('\n')[0], text: reportData.tactical.substring(reportData.tactical.indexOf('\n') + 1) },
-                        { title: reportData.mentality.split('\n')[0], text: reportData.mentality.substring(reportData.mentality.indexOf('\n') + 1) },
+                        { title: "Positional Play", text: reportData.positional },
+                        { title: "Key Actions (PMDS Framework)", text: reportData.keyactions },
+                        { title: "Tactical Awareness (Four Phases Framework)", text: reportData.tactical },
+                        { title: "Mentality", text: reportData.mentality },
                     ];
                     
                     for (const section of analysisSections) {
                         checkPageBreak(16); // Header + buffer
                         addHeader(section.title);
-                        addBodyText(section.text);
+                        addBodyText(section.text || "N/A");
                     }
 
                     // == Section 8: Conclusion & Recommendation ==
                     checkPageBreak(16);
                     addHeader("Conclusion & Recommendation");
-                    addBodyText(reportData.conclusion.substring(reportData.conclusion.indexOf('\n') + 1));
+                    addBodyText(reportData.conclusion || "N/A");
                     
                     
                     generatedPdfDoc = doc;
