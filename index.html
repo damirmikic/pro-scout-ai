@@ -58,6 +58,12 @@
                 page-break-after: always;
             }
         }
+        
+        /* Focus ring for contenteditable */
+        [contenteditable="true"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #0ea5e9; /* Equivalent to ring-2 ring-sky-500 */
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-300 font-sans antialiased">
@@ -217,6 +223,17 @@
 
             <!-- TAB: Player Comparison -->
             <div id="comparisonTab" class="tab-content hidden">
+                 <!-- Comparison Controls -->
+                <div class="flex items-center space-x-2 mb-4">
+                    <button id="analyzeCompareBtn" class="flex-1 flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                        <i data-lucide="sparkles" class="h-5 w-5 mr-2"></i>
+                        Analyze Comparison
+                    </button>
+                    <button id="clearCompareBtn" class="flex-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        <i data-lucide="trash-2" class="h-5 w-5 mr-2"></i>
+                        Clear Comparison
+                    </button>
+                </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Player 1 Column -->
                     <div class="flex flex-col space-y-6">
@@ -259,7 +276,7 @@
                 <div class="mt-6 bg-slate-800 p-5 rounded-lg shadow-lg">
                     <h2 class="text-xl font-semibold text-white mb-4">Head-to-Head Analysis</h2>
                     <div id="analysisOutputCompare" class="w-full h-[60vh] overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300">
-                        <p class="text-slate-400">Your comparison will appear here. Add data for both players and click "Analyze Player" (on the right).</p>
+                        <p class="text-slate-400">Your comparison will appear here. Add data for both players and click "Analyze Comparison".</p>
                     </div>
                 </div>
             </div>
@@ -288,9 +305,28 @@
                     </div>
                     <!-- Output -->
                     <div class="bg-slate-800 p-5 rounded-lg shadow-lg">
+                        <!-- Opposition Controls -->
+                        <div class="flex items-center space-x-2 mb-4">
+                            <button id="analyzeOpponentBtn" class="flex-1 flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                                <i data-lucide="sparkles" class="h-5 w-5 mr-2"></i>
+                                Analyze Opponent
+                            </button>
+                            <button id="clearOpponentBtn" class="flex-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                <i data-lucide="trash-2" class="h-5 w-5 mr-2"></i>
+                                Clear
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <button id="saveOpponentAnalysisBtn" class="flex-1 flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                <i data-lucide="save" class="h-5 w-5 mr-2"></i>Save
+                            </button>
+                            <button id="loadOpponentAnalysisBtn" class="flex-1 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                <i data-lucide="folder-down" class="h-5 w-5 mr-2"></i>Load
+                            </button>
+                        </div>
                         <h2 class="text-xl font-semibold text-white mb-4">Tactical Report & Exploitation Plan</h2>
-                        <div id="analysisOutputOpponent" class="w-full h-[60vh] overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300">
-                            <p class="text-slate-400">Your opposition analysis will appear here. Add info and click "Analyze Player" (on the main tab).</p>
+                        <div id="analysisOutputOpponent" contenteditable="true" class="w-full h-[60vh] overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <p class="text-slate-400">Your opposition analysis will appear here. Add info and click "Analyze Opponent".</p>
                         </div>
                     </div>
                 </div>
@@ -309,7 +345,13 @@
                         <input id="searchContract" type="text" placeholder="Contract Expires (e.g., < 1 year)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <input id="searchMatches" type="text" placeholder="Matches Played (e.g., > 20)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <input id="searchLeague" type="text" placeholder="Suitable for League (e.g., Serie A)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <input id="searchClub" type="text" placeholder="Suitable for Club (e.g., Liverpool)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <textarea id="searchStats" rows="3" class="md:col-span-2 lg:col-span-3 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Specific Stats (e.g., > 5 goals, > 80% pass accuracy, high pressing stats)..."></textarea>
+                        
+                        <button id="suggestStatsBtn" class="md:col-span-2 lg:col-span-3 w-full flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50" disabled>
+                            <i data-lucide="lightbulb" class="h-5 w-5 mr-2"></i>
+                            Suggest Stats Based on Position
+                        </button>
                     </div>
                     <button id="searchButton" class="mt-6 w-full flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
                         <i data-lucide="search" class="h-5 w-5 mr-2"></i>
@@ -425,7 +467,7 @@
                 <ol>
                     <li>Fill in the <strong>Player Information</strong>.</li>
                     <li>Select a <strong>Report Type</strong> (Quick or Pro).</li>
-                    <li>Upload heatmap/stats images (you can drag, click, or paste).</li>
+                    <li>Upload heatmap/stats images (you can drag, click, or paste anywhere on the tab).</li>
                     <li>Click <strong>"Scan Images for Stats"</strong> to let the AI read stats from your images.</li>
                     <li>(Optional) Add more stats to the <strong>"Paste Additional Stats"</strong> box. Click <strong>"Visualize"</strong> to see a chart.</li>
                     <li>Click <strong>"Analyze Player"</strong>. The AI will generate a report.</li>
@@ -435,20 +477,23 @@
                 <h4>Player Comparison</h4>
                 <ol>
                     <li>Add info, images, and stats for <strong>Player 1</strong> and <strong>Player 2</strong>.</li>
-                    <li>Go to the "Single Player" tab and click the <strong>"Analyze Player"</strong> button (it controls all analyses).</li>
+                    <li>Click the <strong>"Analyze Comparison"</strong> button on this tab.</li>
                     <li>Your Head-to-Head report will appear.</li>
                 </ol>
                 
                 <h4>Opposition Analysis</h4>
                 <ol>
                     <li>Add the opponent's name, tactical images, and team stats.</li>
-                    <li>Click the <strong>"Analyze Player"</strong> button.</li>
-                    <li>A tactical report and exploitation plan will be generated.</li>
+                    <li>For a quick search, just enter the <strong>Opponent Name</strong>.</li>
+                    <li>Click the <strong>"Analyze Opponent"</strong> button on this tab.</li>
+                    <li>A tactical report will be generated. You can <strong>edit</strong> this report.</li>
+                    <li>Click <strong>"Save"</strong> to store it in your browser. Click <strong>"Load"</strong> to see saved reports.</li>
                 </ol>
 
                 <h4>Advanced Player Search</h4>
                 <ol>
-                    <li>Fill in any criteria you want to search for. "Suitable for League" is for potential/style, not their current league.</li>
+                    <li>Fill in any criteria you want to search for.</li>
+                    <li>Enter a position and click <strong>"Suggest Stats"</strong> for AI-powered help.</li>
                     <li>Click <strong>"Search Players"</strong>. The AI will use Google Search to find real players.</li>
                     <li>Results will appear in a table. You can then <strong>Download CSV</strong>.</li>
                 </ol>
@@ -482,6 +527,23 @@
         </div>
     </div>
 
+    <!-- Load Opponent Analysis Modal -->
+    <div id="loadOpponentModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[101] flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-lg shadow-2xl max-w-xl w-full p-6 border border-slate-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold text-white">Load Saved Analysis</h3>
+                <button id="closeLoadOpponentModalBtn" class="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-700">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="loadOpponentList" class="max-h-[60vh] overflow-y-auto space-y-2">
+                <!-- Saved analyses will be listed here -->
+                <p class="text-slate-400">No saved analyses found.</p>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Hidden element for PDF generation -->
     <div id="pdf-content" class="a4-page" style="position: absolute; left: -9999px; width: 210mm; font-family: 'Times New Roman', serif; color: black; background: white;">
         <!-- This will be populated by JS -->
@@ -502,8 +564,6 @@
         // --- DOM Elements ---
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const clearBtn = document.getElementById('clearBtn');
         const apiKeyInput = document.getElementById('apiKey');
         const apiKeyInputGroup = document.getElementById('apiKeyInputGroup');
         const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
@@ -519,6 +579,9 @@
         const errorMessage = document.getElementById('errorMessage');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const loadingText = document.getElementById('loadingText');
+        const loadOpponentModal = document.getElementById('loadOpponentModal');
+        const closeLoadOpponentModalBtn = document.getElementById('closeLoadOpponentModalBtn');
+        const loadOpponentList = document.getElementById('loadOpponentList');
 
         // PDF Modal
         const pdfBtn = document.getElementById('pdfBtn');
@@ -534,6 +597,8 @@
         const videoBtn = document.getElementById('videoBtn');
         
         // --- Single Player Tab ---
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const clearBtn = document.getElementById('clearBtn');
         const playerName = document.getElementById('playerName');
         const playerAge = document.getElementById('playerAge');
         const playerClub = document.getElementById('playerClub');
@@ -553,6 +618,8 @@
         let singlePlayerImages = []; // Store base64 images
 
         // --- Comparison Tab ---
+        const analyzeCompareBtn = document.getElementById('analyzeCompareBtn');
+        const clearCompareBtn = document.getElementById('clearCompareBtn');
         const dropZoneCompare1 = document.getElementById('dropZoneCompare1');
         const fileUploadCompare1 = document.getElementById('fileUploadCompare1');
         const imagePreviewCompare1 = document.getElementById('imagePreviewCompare1');
@@ -575,6 +642,10 @@
         const analysisOutputCompare = document.getElementById('analysisOutputCompare');
         
         // --- Opposition Tab ---
+        const analyzeOpponentBtn = document.getElementById('analyzeOpponentBtn');
+        const clearOpponentBtn = document.getElementById('clearOpponentBtn');
+        const saveOpponentAnalysisBtn = document.getElementById('saveOpponentAnalysisBtn');
+        const loadOpponentAnalysisBtn = document.getElementById('loadOpponentAnalysisBtn');
         const opponentName = document.getElementById('opponentName');
         const dropZoneOpponent = document.getElementById('dropZoneOpponent');
         const fileUploadOpponent = document.getElementById('fileUploadOpponent');
@@ -594,7 +665,9 @@
         const searchContract = document.getElementById('searchContract');
         const searchMatches = document.getElementById('searchMatches');
         const searchLeague = document.getElementById('searchLeague');
+        const searchClub = document.getElementById('searchClub');
         const searchStats = document.getElementById('searchStats');
+        const suggestStatsBtn = document.getElementById('suggestStatsBtn');
         const downloadCsvBtn = document.getElementById('downloadCsvBtn');
         let csvContent = "";
         
@@ -608,11 +681,26 @@
         // --- State ---
         let currentTab = 'singlePlayer';
         let userApiKey = "";
+        const funnyLoadingMessages = [
+            "Brewing some tactical tea...",
+            "Analyzing... Did he really just try that flick?",
+            "Asking the VAR... just kidding.",
+            "Calculating xG (Expected Genius)...",
+            "Polishing the heatmap...",
+            "Finding similar players... not just his cousin.",
+            "Scouting for hidden gems...",
+            "Checking contract clauses... mostly the buyout one.",
+            "Re-watching the match... at 2x speed."
+        ];
 
         // --- Utility Functions ---
 
-        function showLoading(text = "Analyzing...") {
-            loadingText.textContent = text;
+        function showLoading(text) {
+            if (text) {
+                loadingText.textContent = text;
+            } else {
+                loadingText.textContent = funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
+            }
             loadingSpinner.classList.remove('hidden');
         }
 
@@ -651,6 +739,15 @@
             pdfPreviewFrame.src = 'about:blank';
         }
 
+        function showLoadOpponentModal() {
+            loadOpponentAnalyses(); // Populate list
+            loadOpponentModal.classList.remove('hidden');
+        }
+
+        function closeLoadOpponentModal() {
+            loadOpponentModal.classList.add('hidden');
+        }
+
         function showTab(tabId) {
             // Hide all content
             tabContents.forEach(content => content.classList.add('hidden'));
@@ -674,18 +771,6 @@
                 buttonToActivate.classList.remove('border-transparent', 'text-slate-400');
             }
             
-            // Toggle visibility of analysis button and API key
-            const analysisControlsTabs = ['singlePlayer', 'comparison', 'opposition'];
-            const controlsToToggle = [analyzeBtn, clearBtn, apiKeySection];
-            
-            if (controlsToToggle.every(el => el)) { // Check if elements exist
-                if (analysisControlsTabs.includes(tabId)) {
-                    controlsToToggle.forEach(el => el.classList.remove('hidden'));
-                } else {
-                    controlsToToggle.forEach(el => el.classList.add('hidden'));
-                }
-            }
-
             currentTab = tabId;
         }
 
@@ -841,9 +926,8 @@
         }
 
 
-        // --- Clear All Inputs ---
-        function clearAllInputs() {
-            // Single Player
+        // --- Clear Inputs Functions ---
+        function clearSinglePlayerInputs() {
             if(playerName) playerName.value = '';
             if(playerAge) playerAge.value = '';
             if(playerClub) playerClub.value = '';
@@ -860,8 +944,10 @@
                 statsChart = null;
             }
             if(visualizeStatsBtn) visualizeStatsBtn.disabled = true;
+            if(exportButtons) exportButtons.classList.add('hidden');
+        }
 
-            // Comparison
+        function clearCompareInputs() {
             if(p1Name) p1Name.value = '';
             if(p1Age) p1Age.value = '';
             if(p1Club) p1Club.value = '';
@@ -877,34 +963,34 @@
             compare2Images = [];
             if(textStatsCompare2) textStatsCompare2.value = '';
             if(analysisOutputCompare) analysisOutputCompare.innerHTML = '<p class="text-slate-400">Comparison cleared.</p>';
+        }
 
-            // Opposition
+        function clearOpponentInputs() {
             if(opponentName) opponentName.value = '';
             if(imagePreviewOpponent) imagePreviewOpponent.innerHTML = '';
             opponentImages = [];
             if(textStatsOpponent) textStatsOpponent.value = '';
             if(analysisOutputOpponent) analysisOutputOpponent.innerHTML = '<p class="text-slate-400">Opposition analysis cleared.</p>';
-            
-            // Hide export buttons
-            if(exportButtons) exportButtons.classList.add('hidden');
+        }
+
+        function clearSearchInputs() {
+             if(searchPosition) searchPosition.value = '';
+            if(searchAge) searchAge.value = '';
+            if(searchNationality) searchNationality.value = '';
+            if(searchMarketValue) searchMarketValue.value = '';
+            if(searchContract) searchContract.value = '';
+            if(searchMatches) searchMatches.value = '';
+            if(searchLeague) searchLeague.value = '';
+            if(searchClub) searchClub.value = '';
+            if(searchStats) searchStats.value = '';
+            if(suggestStatsBtn) suggestStatsBtn.disabled = true;
+            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Your search results will appear here.</p>';
+            if(searchError) searchError.classList.add('hidden');
+            if(downloadCsvBtn) downloadCsvBtn.classList.add('hidden');
         }
 
         // --- Main Analysis Logic ---
         
-        async function handleAnalysis() {
-            switch(currentTab) {
-                case 'singlePlayer':
-                    await analyzeSinglePlayer();
-                    break;
-                case 'comparison':
-                    await analyzeComparison();
-                    break;
-                case 'opposition':
-                    await analyzeOpposition();
-                    break;
-            }
-        }
-
         /**
          * Calls the Gemini API.
          * @param {Array<Object>} parts - The content parts (text and images).
@@ -1021,7 +1107,7 @@
 
 
         async function analyzeSinglePlayer() {
-            showLoading("Generating single player analysis...");
+            showLoading(); // Show random funny message
             if(analysisOutput) analysisOutput.innerHTML = '';
             if(exportButtons) exportButtons.classList.add('hidden');
 
@@ -1052,24 +1138,24 @@
             prompt += "Analyze the heatmap images, stats images, and text data.\n";
 
             if (reportType.value === 'quick') {
-                prompt += "Generate a 'Quick Report' using the following 7-point template. Be detailed and insightful for each section.\n";
-                prompt += "# 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., B+, 7.5/10) and 1-2 sentences justifying it based on the data.)\n";
-                prompt += "# 2. Likely Position(s) & Role\n(Based on the heatmap and stats, what is their most likely position and tactical role? e.g., 'Deep-Lying Playmaker', 'Inverted Winger')\n";
-                prompt += "# 3. Key Duties & Playstyle\n(Describe their main actions and style. e.g., 'Controls tempo, progressive passer, avoids 1v1 duels.')\n";
-                prompt += "# 4. Key Strengths (Pros)\n(List 3-4 bullet points based on the data.)\n";
-                prompt += "# 5. Key Weaknesses (Cons)\n(List 2-3 bullet points based on the data.)\n";
-                prompt += "# 6. Suggested Similar Player\n(Suggest ONE well-known player with a similar playstyle and justify it.)\n";
-                prompt += "# 7. Suggested Development Plan\n(Based on the 'Cons', suggest 2-3 actionable development points.)\n";
+                prompt += "Generate a 'Quick Report' using the following 7-point template. Be detailed and insightful for each section. Use markdown headers (e.g., '## 1. Title') and '---' separators.\n";
+                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., B+, 7.5/10) and 1-2 sentences justifying it based on the data.)\n\n---\n\n";
+                prompt += "## 2. Likely Position(s) & Role\n(Based on the heatmap and stats, what is their most likely position and tactical role? e.g., 'Deep-Lying Playmaker', 'Inverted Winger')\n\n---\n\n";
+                prompt += "## 3. Key Duties & Playstyle\n(Describe their main actions and style. e.g., 'Controls tempo, progressive passer, avoids 1v1 duels.')\n\n---\n\n";
+                prompt += "## 4. Key Strengths (Pros)\n(List 3-4 bullet points based on the data.)\n\n---\n\n";
+                prompt += "## 5. Key Weaknesses (Cons)\n(List 2-3 bullet points based on the data.)\n\n---\n\n";
+                prompt += "## 6. Suggested Similar Player\n(Suggest ONE well-known player with a similar playstyle and justify it.)\n\n---\n\n";
+                prompt += "## 7. Suggested Development Plan\n(Based on the 'Cons', suggest 2-3 actionable development points.)\n";
             } else {
-                prompt += "Generate a 'Pro Scout Report' using the following 8-point professional template. Be extremely detailed, analytical, and use scouting terminology.\n\n";
-                prompt += "# 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., 'A- ' or '8.0/10') and a 1-2 sentence justification based *only* on the provided match data.)\n\n";
-                prompt += "# 2. Summary (Overview)\n(A brief overview of the player's performance, role, key strengths, and areas for improvement.)\n\n";
-                prompt += "# 3. Positional Play\n(Analyze positioning in Offensive, Defensive, and Transition phases based on the heatmap and stats.)\n\n";
-                prompt += "# 4. Key Actions (PMDS Framework)\n(Break down their most critical actions using PMDS: Position, Moment, Direction, Speed. e.g., 'Pressing: Showed good speed to close down, but his direction was poor, opening a passing lane.')\n\n";
-                prompt += "# 5. Tactical Awareness (Four Phases)\n(Assess their decision-making. Communication: Did they scan? Decision (What): Pass, dribble, shoot? Decision (How): Type of pass/dribble? Execution: Technical outcome.)\n\n";
-                prompt += "# 6. Mentality\n(Infer qualities from the data. Work rate (from heatmap), Composure (from pass % under pressure), Leadership, etc.)\n\n";
-                prompt += "# 7. Conclusion & Recommendation\n(Summarize potential, system suitability (e.g., 'Suits a high-press system'), and a final recommendation (e.g., 'Monitor', 'Sign').)\n\n";
-                prompt += "# 8. Similar Player Matrix\n(Provide 4 player comparisons:\n- **Top 5 League:** [Player Name] (e.g., Premier League, La Liga)\n- **Mid-Tier League:** [Player Name] (e.g., Eredivisie, MLS, Championship)\n- **Current League:** [Player Name] (A top player in their *current* league)\n- **Historical:** [Player Name] (A retired player))\n";
+                prompt += "Generate a 'Pro Scout Report' using the following 8-point professional template. Be extremely detailed, analytical, and use scouting terminology. Use markdown headers (e.g., '## 1. Title') and '---' separators between sections.\n\n";
+                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., 'A- ' or '8.0/10') and a 1-2 sentence justification based *only* on the provided match data.)\n\n---\n\n";
+                prompt += "## 2. Summary (Overview)\n(A brief overview of the player's performance, role, key strengths, and areas for improvement.)\n\n---\n\n";
+                prompt += "## 3. Positional Play\n(Analyze positioning in Offensive, Defensive, and Transition phases based on the heatmap and stats.)\n\n---\n\n";
+                prompt += "## 4. Key Actions (PMDS Framework)\n(Break down their most critical actions using PMDS: Position, Moment, Direction, Speed. e.g., 'Pressing: Showed good speed to close down, but his direction was poor, opening a passing lane.')\n\n---\n\n";
+                prompt += "## 5. Tactical Awareness (Four Phases)\n(Assess their decision-making. Communication: Did they scan? Decision (What): Pass, dribble, shoot? Decision (How): Type of pass/dribble? Execution: Technical outcome.)\n\n---\n\n";
+                prompt += "## 6. Mentality\n(Infer qualities from the data. Work rate (from heatmap), Composure (from pass % under pressure), Leadership, etc.)\n\n---\n\n";
+                prompt += "## 7. Conclusion & Recommendation\n(Summarize potential, system suitability (e.g., 'Suits a high-press system'), and a final recommendation (e.g., 'Monitor', 'Sign').)\n\n---\n\n";
+                prompt += "## 8. Similar Player Matrix\n(Provide 4 player comparisons in a markdown table:\n- **Top 5 League:** [Player Name] (e.g., Premier League, La Liga)\n- **Mid-Tier League:** [Player Name] (e.g., Eredivisie, MLS, Championship)\n- **Current League:** [Player Name] (A top player in their *current* league)\n- **Historical:** [Player Name] (A retired player))\n";
             }
             
             parts.push({ text: prompt });
@@ -1101,7 +1187,7 @@
         }
         
         async function analyzeComparison() {
-            showLoading("Generating player comparison...");
+            showLoading(); // Show random funny message
             if(analysisOutputCompare) analysisOutputCompare.innerHTML = '';
 
             const parts = [];
@@ -1110,12 +1196,12 @@
             const p2Info = `Player 2: ${p2Name.value || 'P2'} (Age: ${p2Age.value || 'N/A'}, Club: ${p2Club.value || 'N/A'}, League: ${p2League.value || 'N/A'})`;
             
             let prompt = `You are a professional scout. Create a Head-to-Head analysis of two players.\n\n${p1Info}\n${p2Info}\n\n--- INSTRUCTIONS ---\n`;
-            prompt += "Analyze all the provided data for both players. Create a detailed comparison using the following template:\n\n";
-            prompt += "# 1. Role & Playstyle Comparison\n(Describe and contrast their tactical roles and style of play.)\n\n";
-            prompt += "# 2. Head-to-Head: Key Strengths\n(Compare their pros in a side-by-side manner.)\n\n";
-            prompt += "# 3. Head-to-Head: Key Weaknesses\n(Compare their cons in a side-by-side manner.)\n\n";
-            prompt += "# 4. Statistical Standout\n(Which player has the more impressive statistical profile and why?)\n\n";
-            prompt += "# 5. Verdict & Recommendation\n(Conclude with a final summary of who is the better prospect or a better fit for a specific tactical system.)\n\n";
+            prompt += "Analyze all the provided data for both players. Create a detailed comparison using the following template. Use markdown headers (e.g., '## 1. Title') and '---' separators.\n\n";
+            prompt += "## 1. Role & Playstyle Comparison\n(Describe and contrast their tactical roles and style of play.)\n\n---\n\n";
+            prompt += "## 2. Head-to-Head: Key Strengths\n(Compare their pros in a side-by-side manner.)\n\n---\n\n";
+            prompt += "## 3. Head-to-Head: Key Weaknesses\n(Compare their cons in a side-by-side manner.)\n\n---\n\n";
+            prompt += "## 4. Statistical Standout\n(Which player has the more impressive statistical profile and why?)\n\n---\n\n";
+            prompt += "## 5. Verdict & Recommendation\n(Conclude with a final summary of who is the better prospect or a better fit for a specific tactical system.)\n\n";
             
             prompt += "--- Player 1 Data ---\n";
             prompt += `Stats: ${textStatsCompare1.value.trim() || 'N/A'}\n\n`;
@@ -1148,29 +1234,44 @@
         }
         
         async function analyzeOpposition() {
-            showLoading("Generating opposition analysis...");
+            showLoading(); // Show random funny message
             if(analysisOutputOpponent) analysisOutputOpponent.innerHTML = '';
             
             const parts = [];
-            let prompt = `You are a professional tactical analyst. Create an opposition scouting report for ${opponentName.value.trim() || 'the opponent'}.\n\n`;
-            prompt += "--- Provided Data ---\n";
-            prompt += `Stats/Notes: ${textStatsOpponent.value.trim() || 'N/A'}\n\n`;
-            prompt += "--- INSTRUCTIONS ---\n";
-            prompt += "Analyze the provided images (formations, heatmaps) and text notes. Generate a concise tactical report using this template:\n\n";
-            prompt += "# 1. Tactical Setup & Playstyle\n(Describe their likely formation, style in possession, and defensive structure.)\n\n";
-            prompt += "# 2. Key Strengths & Threats\n(List 3-4 key tactical strengths or dangerous players.)\n\n";
-            prompt += "# 3. Key Weaknesses & Vulnerabilities\n(List 2-3 exploitable weaknesses in their system or personnel.)\n\n";
-            prompt += "# 4. Suggested Exploitation Plan\n(Provide actionable advice on how to beat this team. e.g., 'Exploit high press with balls over the top', 'Target their weak left-back in 2v1 situations'.)\n";
+            const oppName = opponentName.value.trim();
+            const oppStats = textStatsOpponent.value.trim();
+            const nameOnly = oppName && !oppStats && opponentImages.length === 0;
+            
+            let prompt = `You are a professional tactical analyst. Create an opposition scouting report for ${oppName || 'the opponent'}.\n\n`;
+            
+            if (nameOnly) {
+                prompt += "--- INSTRUCTIONS ---\n";
+                prompt += "You have *only* been given the opponent's name. Use Google Search to find public information about their recent tactical setup, playstyle, strengths, and weaknesses.\n";
+                prompt += "Then, generate a concise tactical report using this template. Use markdown headers (e.g., '## 1. Title') and '---' separators.\n\n";
+                prompt += `If you cannot find *any* useful tactical information on "${oppName}", please return *only* a funny, lighthearted message. For example: 'Sorry, boss, my scouts came up empty on ${oppName}. They must be using invisible ink for their tactics!' or 'Couldn't find any data on ${oppName}. Are we sure they're not a U-12 team?'\n\n`;
+            } else {
+                 prompt += "--- Provided Data ---\n";
+                prompt += `Stats/Notes: ${oppStats || 'N/A'}\n\n`;
+                prompt += "--- INSTRUCTIONS ---\n";
+                prompt += "Analyze the provided images (formations, heatmaps) and text notes. \n";
+            }
+            
+            prompt += "## 1. Tactical Setup & Playstyle\n(Describe their likely formation, style in possession, and defensive structure.)\n\n---\n\n";
+            prompt += "## 2. Key Strengths & Threats\n(List 3-4 key tactical strengths or dangerous players.)\n\n---\n\n";
+            prompt += "## 3. Key Weaknesses & Vulnerabilities\n(List 2-3 exploitable weaknesses in their system or personnel.)\n\n---\n\n";
+            prompt += "## 4. Suggested Exploitation Plan\n(Provide actionable advice on how to beat this team. e.g., 'Exploit high press with balls over the top', 'Target their weak left-back in 2v1 situations'.)\n";
             
             parts.push({ text: prompt });
             
-            if (opponentImages.length === 0) parts.push({ text: "No images provided."});
-            opponentImages.forEach(img => {
-                parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
-            });
+            if (!nameOnly) {
+                if (opponentImages.length === 0) parts.push({ text: "No images provided."});
+                opponentImages.forEach(img => {
+                    parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
+                });
+            }
             
             try {
-                const resultText = await callGeminiApi(parts);
+                const resultText = await callGeminiApi(parts, nameOnly); // Use grounding if nameOnly is true
                 displayResults(resultText, analysisOutputOpponent);
             } catch (error) {
                 showError(`Opposition analysis failed: ${error.message}`);
@@ -1194,6 +1295,7 @@
             if (searchStats.value.trim()) queryParts.push(`Specific Stats: ${searchStats.value.trim()}`);
             if (searchMatches.value.trim()) queryParts.push(`Matches/Minutes: ${searchMatches.value.trim()}`);
             if (searchLeague.value.trim()) queryParts.push(`Has the potential quality or playstyle suitable for: ${searchLeague.value.trim()} (This is a scout assessment, they don't have to be playing in that league currently).`);
+            if (searchClub.value.trim()) queryParts.push(`Has the potential quality or playstyle suitable for: ${searchClub.value.trim()} (This is a scout assessment of tactical fit).`);
             
             if (queryParts.length === 0) {
                 showSearchError("Please enter at least one search criterion.");
@@ -1204,7 +1306,7 @@
 Based on publicly available data and tactical analysis from Google Search, find up to 25 football players who match the following criteria:
 - ${queryParts.join('\n- ')}
 
-One key criterion is "Suitable for League." This means you should assess if the player's *potential* and *playstyle* match that league, not just if they *currently* play in it.
+One key criterion is "Suitable for League/Club." This means you should assess if the player's *potential* and *playstyle* match that league/club, not just if they *currently* play in it.
 
 For each player, find their latest news headline (e.g., transfer rumors, injury update, recent performance).
 
@@ -1251,6 +1353,38 @@ Do not include any text before or after the HTML table.
                 if(searchButton) searchButton.disabled = false;
             }
         }
+
+        async function suggestStats() {
+            const position = searchPosition.value.trim();
+            if (!position) {
+                showError("Please enter a position first to get stat suggestions.");
+                return;
+            }
+
+            showLoading("Suggesting stats...");
+            if(suggestStatsBtn) suggestStatsBtn.disabled = true;
+
+            const prompt = `You are a professional football scout. Based on the position(s) "${position}", suggest 5-7 key statistics (both basic and advanced) a scout should look for.
+            Format the answer as a simple, comma-separated list.
+            Example: Goals, Assists, Pass Accuracy, Progressive Passes, Tackles Won
+            
+            Do not add any other text, just the comma-separated list.`;
+
+            try {
+                const statsList = await callGeminiApi([{ text: prompt }], false); // No grounding needed
+                
+                if (searchStats.value.trim().length > 0 && !searchStats.value.endsWith(',')) {
+                    searchStats.value += ', ';
+                }
+                searchStats.value += statsList.trim();
+                
+            } catch (error) {
+                showError(`Failed to suggest stats: ${error.message}`);
+            } finally {
+                hideLoading();
+                if(suggestStatsBtn) suggestStatsBtn.disabled = false;
+            }
+        }
         
         function showSearchError(message) {
             if(searchError) {
@@ -1288,7 +1422,7 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userText);
+                const resultText = await callChatbotApi(userQuery);
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
@@ -1403,21 +1537,43 @@ Do not include any text before or after the HTML table.
         // --- Output Formatting ---
         function displayResults(text, element) {
             if (!element) return;
+            // Handle markdown tables
+            text = text.replace(/\|(.*?)\|/g, (match, content) => `|${content.trim()}|`); // Trim whitespace inside cells
+            text = text.replace(/(\|(?:[^\r\n\|]+\|)+)\r?\n\|(?: *\:?\-+\:? *\|)+/g, (match, headerRow) => {
+                let header = `<thead><tr class="bg-slate-700">`;
+                headerRow.split('|').filter(Boolean).forEach(h => {
+                    header += `<th class="p-2 border border-slate-600">${h.trim()}</th>`;
+                });
+                header += `</tr></thead>`;
+                return header;
+            });
+            text = text.replace(/^\|(.*?)\|$/gm, (match, rowContent) => {
+                let row = `<tr>`;
+                rowContent.split('|').filter(Boolean).forEach(cell => {
+                    row += `<td class="p-2 border border-slate-600">${cell.trim()}</td>`;
+                });
+                row += `</tr>`;
+                return row;
+            });
+            text = text.replace(/(<thead>(?:.|\n)*?<\/thead>)((?:<tr>(?:.|\n)*?<\/tr>)+)/g, '<table class="w-full text-left border-collapse border border-slate-600 my-4">$1<tbody>$2</tbody></table>');
+
+
             let html = text
-                .replace(/^# 1. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 2. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 3. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 4. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 5. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 6. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 7. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
-                .replace(/^# 8. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 1\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 2\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 3\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 4\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 5\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 6\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 7\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
+                .replace(/^#+ 8\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/^- (.*)/gm, '<li class="ml-4">$1</li>')
-                .replace(/^(?!<h3|<li)(.*)/gm, '<p>$1</p>') // Wrap non-header/list lines in <p>
+                .replace(/^(?!<h3|<li|<table|<thead|<tbody|<tr)(.*)/gm, '<p>$1</p>') // Wrap non-header/list/table lines in <p>
                 .replace(/<p><\/p>/g, '') // Remove empty paragraphs
                 .replace(/<\/li><p>/g, '</li>') // Fix spacing
-                .replace(/<\/p><p>/g, '</p><p class="mt-2">');
+                .replace(/<\/p><p>/g, '</p><p class="mt-2">')
+                .replace(/---/g, '<hr class="border-slate-700 my-4">'); // Add horizontal rules
 
             element.innerHTML = html;
         }
@@ -1611,13 +1767,58 @@ Do not include any text before or after the HTML table.
                     y += 8;
                     
                     setBodyStyle();
-                    const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth); // Convert md list to bullet
-                    
-                    lines.forEach((line, index) => {
-                        addPageIfNeeded(5);
-                        doc.text(line, margin, y);
-                        y += 5;
-                    });
+                    // Handle markdown tables
+                    if (content.includes('|')) {
+                        try {
+                            // Basic markdown table parsing
+                            const rows = content.split('\n').filter(row => row.startsWith('|') && !row.startsWith('|-') && !row.startsWith('|:'));
+                            const headers = rows.shift().split('|').filter(Boolean).map(h => h.trim());
+                            const body = rows.map(row => row.split('|').filter(Boolean).map(cell => cell.trim()));
+                            
+                            doc.autoTable({
+                                startY: y,
+                                head: [headers],
+                                body: body,
+                                theme: 'grid',
+                                styles: {
+                                    font: 'helvetica',
+                                    fontSize: 9,
+                                    cellPadding: 2,
+                                },
+                                headStyles: {
+                                    fillColor: [51, 65, 85], // slate-700
+                                    textColor: [255, 255, 255],
+                                    fontStyle: 'bold',
+                                },
+                                bodyStyles: {
+                                    fillColor: [248, 250, 252], // slate-50
+                                    textColor: [30, 41, 59],
+                                },
+                                alternateRowStyles: {
+                                    fillColor: [255, 255, 255],
+                                }
+                            });
+                            y = doc.autoTable.previous.finalY;
+
+                        } catch(tableError) {
+                            console.error("Could not parse table for PDF, printing as text.", tableError);
+                            // Fallback to text
+                            const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth);
+                            lines.forEach((line, index) => {
+                                addPageIfNeeded(5);
+                                doc.text(line, margin, y);
+                                y += 5;
+                            });
+                        }
+                    } else {
+                         // Regular text content
+                        const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth);
+                        lines.forEach((line, index) => {
+                            addPageIfNeeded(5);
+                            doc.text(line, margin, y);
+                            y += 5;
+                        });
+                    }
                     
                     y += 6; // Add padding after section
                 };
@@ -1739,16 +1940,16 @@ Do not include any text before or after the HTML table.
                     return match?.[1]?.trim() ?? 'N/A';
                 };
         
-                // Make regex flexible to ignore text in parentheses
+                // Make regex flexible to match one or more '#' and look for '---' separator
                 const report = {
-                    rating: getSection(/# 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n# 2\.|\n$)/),
-                    summary: getSection(/# 2\. Summary[\s\S]*?\n([\s\S]*?)(?=\n# 3\.|\n$)/),
-                    positional: getSection(/# 3\. Positional Play[\s\S]*?\n([\s\S]*?)(?=\n# 4\.|\n$)/),
-                    actions: getSection(/# 4\. Key Actions[\s\S]*?\n([\s\S]*?)(?=\n# 5\.|\n$)/),
-                    tactical: getSection(/# 5\. Tactical Awareness[\s\S]*?\n([\s\S]*?)(?=\n# 6\.|\n$)/),
-                    mentality: getSection(/# 6\. Mentality[\s\S]*?\n([\s\S]*?)(?=\n# 7\.|\n$)/),
-                    conclusion: getSection(/# 7\. Conclusion & Recommendation[\s\S]*?\n([\s\S]*?)(?=\n# 8\.|\n$)/),
-                    similar: getSection(/# 8\. Similar Player Matrix[\s\S]*?\n([\s\S]*?)(?=\n$)/)
+                    rating: getSection(/#+ 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n#+ 2\.|\n---\n|\n$)/),
+                    summary: getSection(/#+ 2\. Summary[\s\S]*?\n([\s\S]*?)(?=\n#+ 3\.|\n---\n|\n$)/),
+                    positional: getSection(/#+ 3\. Positional Play[\s\S]*?\n([\s\S]*?)(?=\n#+ 4\.|\n---\n|\n$)/),
+                    actions: getSection(/#+ 4\. Key Actions[\s\S]*?\n([\s\S]*?)(?=\n#+ 5\.|\n---\n|\n$)/),
+                    tactical: getSection(/#+ 5\. Tactical Awareness[\s\S]*?\n([\s\S]*?)(?=\n#+ 6\.|\n---\n|\n$)/),
+                    mentality: getSection(/#+ 6\. Mentality[\s\S]*?\n([\s\S]*?)(?=\n#+ 7\.|\n---\n|\n$)/),
+                    conclusion: getSection(/#+ 7\. Conclusion & Recommendation[\s\S]*?\n([\s\S]*?)(?=\n#+ 8\.|\n---\n|\n$)/),
+                    similar: getSection(/#+ 8\. Similar Player Matrix[\s\S]*?\n([\s\S]*?)(?=\n---|\n$)/) // Last section
                 };
                 
                 // Check if parsing failed
@@ -1771,13 +1972,13 @@ Do not include any text before or after the HTML table.
                 };
 
                 const report = {
-                    rating: getSection(/# 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n# 2\.|\n$)/),
-                    position: getSection(/# 2\. Likely Position\(s\) & Role[\s\S]*?\n([\s\S]*?)(?=\n# 3\.|\n$)/),
-                    playstyle: getSection(/# 3\. Key Duties & Playstyle[\s\S]*?\n([\s\S]*?)(?=\n# 4\.|\n$)/),
-                    pros: getSection(/# 4\. Key Strengths \(Pros\)[\s\S]*?\n([\s\S]*?)(?=\n# 5\.|\n$)/),
-                    cons: getSection(/# 5\. Key Weaknesses \(Cons\)[\s\S]*?\n([\s\S]*?)(?=\n# 6\.|\n$)/),
-                    similar: getSection(/# 6\. Suggested Similar Player[\s\S]*?\n([\s\S]*?)(?=\n# 7\.|\n$)/),
-                    development: getSection(/# 7\. Suggested Development Plan[\s\S]*?\n([\s\S]*?)(?=\n$)/)
+                    rating: getSection(/#+ 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n#+ 2\.|\n---\n|\n$)/),
+                    position: getSection(/#+ 2\. Likely Position\(s\) & Role[\s\S]*?\n([\s\S]*?)(?=\n#+ 3\.|\n---\n|\n$)/),
+                    playstyle: getSection(/#+ 3\. Key Duties & Playstyle[\s\S]*?\n([\s\S]*?)(?=\n#+ 4\.|\n---\n|\n$)/),
+                    pros: getSection(/#+ 4\. Key Strengths \(Pros\)[\s\S]*?\n([\s\S]*?)(?=\n#+ 5\.|\n---\n|\n$)/),
+                    cons: getSection(/#+ 5\. Key Weaknesses \(Cons\)[\s\S]*?\n([\s\S]*?)(?=\n#+ 6\.|\n---\n|\n$)/),
+                    similar: getSection(/#+ 6\. Suggested Similar Player[\s\S]*?\n([\s\S]*?)(?=\n#+ 7\.|\n---\n|\n$)/),
+                    development: getSection(/#+ 7\. Suggested Development Plan[\s\S]*?\n([\s\S]*?)(?=\n---|\n$)/) // Last section
                 };
                 
                 if (Object.values(report).every(val => val === 'N/A')) {
@@ -1788,6 +1989,138 @@ Do not include any text before or after the HTML table.
             } catch(e) {
                 console.error("Failed to parse quick report:", e.message, "\nRaw text:", text);
                 return null;
+            }
+        }
+        
+        // --- Opponent Analysis Save/Load ---
+        const LS_OPPONENT_KEY = 'savedOpponentAnalyses';
+
+        function getSavedOpponentAnalyses() {
+            try {
+                return JSON.parse(localStorage.getItem(LS_OPPONENT_KEY)) || [];
+            } catch (e) {
+                console.error("Could not parse saved analyses:", e);
+                return [];
+            }
+        }
+
+        function saveOpponentAnalysis() {
+            const name = opponentName.value.trim();
+            const content = analysisOutputOpponent.innerHTML;
+            if (!name) {
+                showError("Please enter an opponent name to save the analysis.");
+                return;
+            }
+            if (!content || content.includes("Your opposition analysis will appear here")) {
+                showError("There is no analysis to save.");
+                return;
+            }
+
+            try {
+                let analyses = getSavedOpponentAnalyses();
+                const existingIndex = analyses.findIndex(a => a.name === name);
+                
+                const analysisData = { name, content, savedAt: new Date().toISOString() };
+
+                if (existingIndex > -1) {
+                    // Update existing
+                    analyses[existingIndex] = analysisData;
+                } else {
+                    // Add new
+                    analyses.push(analysisData);
+                }
+
+                localStorage.setItem(LS_OPPONENT_KEY, JSON.stringify(analyses));
+                
+                // Show simple feedback
+                saveOpponentAnalysisBtn.innerHTML = '<i data-lucide="check" class="h-5 w-5 mr-2"></i>Saved!';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                setTimeout(() => {
+                    saveOpponentAnalysisBtn.innerHTML = '<i data-lucide="save" class="h-5 w-5 mr-2"></i>Save';
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }, 2000);
+
+            } catch (e) {
+                console.error("Failed to save analysis to LocalStorage:", e);
+                showError("Failed to save analysis. LocalStorage might be full or disabled.");
+            }
+        }
+
+        function loadOpponentAnalyses() {
+            const analyses = getSavedOpponentAnalyses();
+            loadOpponentList.innerHTML = ''; // Clear list
+
+            if (analyses.length === 0) {
+                loadOpponentList.innerHTML = '<p class="text-slate-400">No saved analyses found.</p>';
+                return;
+            }
+
+            analyses.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)); // Show newest first
+
+            analyses.forEach(analysis => {
+                const item = document.createElement('div');
+                item.classList.add('flex', 'justify-between', 'items-center', 'p-3', 'bg-slate-700', 'rounded-lg', 'hover:bg-slate-600');
+                
+                const info = document.createElement('div');
+                info.classList.add('flex-1', 'min-w-0'); // Fix for text overflow
+                
+                const nameEl = document.createElement('p');
+                nameEl.classList.add('text-white', 'font-semibold', 'truncate');
+                nameEl.textContent = analysis.name;
+                info.appendChild(nameEl);
+                
+                const dateEl = document.createElement('p');
+                dateEl.classList.add('text-xs', 'text-slate-400');
+                dateEl.textContent = `Saved: ${new Date(analysis.savedAt).toLocaleString()}`;
+                info.appendChild(dateEl);
+                
+                item.appendChild(info);
+                
+                const buttons = document.createElement('div');
+                buttons.classList.add('flex', 'space-x-2', 'ml-2');
+
+                const loadBtn = document.createElement('button');
+                loadBtn.classList.add('p-2', 'bg-sky-500', 'hover:bg-sky-600', 'rounded-lg', 'text-white');
+                loadBtn.innerHTML = '<i data-lucide="folder-down" class="h-5 w-5"></i>';
+                loadBtn.title = `Load "${analysis.name}"`;
+                loadBtn.onclick = () => renderOpponentAnalysis(analysis.name);
+                buttons.appendChild(loadBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('p-2', 'bg-red-500', 'hover:bg-red-600', 'rounded-lg', 'text-white');
+                deleteBtn.innerHTML = '<i data-lucide="trash-2" class="h-5 w-5"></i>';
+                deleteBtn.title = `Delete "${analysis.name}"`;
+                deleteBtn.onclick = () => deleteOpponentAnalysis(analysis.name);
+                buttons.appendChild(deleteBtn);
+                
+                item.appendChild(buttons);
+                loadOpponentList.appendChild(item);
+            });
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            showLoadOpponentModal();
+        }
+
+        function renderOpponentAnalysis(name) {
+            const analyses = getSavedOpponentAnalyses();
+            const analysis = analyses.find(a => a.name === name);
+            if (analysis) {
+                opponentName.value = analysis.name;
+                analysisOutputOpponent.innerHTML = analysis.content;
+                closeLoadOpponentModal();
+            } else {
+                showError("Could not find the saved analysis to load.");
+            }
+        }
+
+        function deleteOpponentAnalysis(name) {
+            try {
+                let analyses = getSavedOpponentAnalyses();
+                const filteredAnalyses = analyses.filter(a => a.name !== name);
+                localStorage.setItem(LS_OPPONENT_KEY, JSON.stringify(filteredAnalyses));
+                loadOpponentAnalyses(); // Refresh the list in the modal
+            } catch (e) {
+                showError("Failed to delete analysis.");
             }
         }
 
@@ -1808,14 +2141,24 @@ Do not include any text before or after the HTML table.
             if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveApiKey);
             loadApiKey(); // Load after button listener is attached
             
-            // Main controls
-            if (analyzeBtn) analyzeBtn.addEventListener('click', handleAnalysis);
-            if (clearBtn) clearBtn.addEventListener('click', clearAllInputs);
+            // --- Main Controls ---
+            // Single Player
+            if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeSinglePlayer);
+            if (clearBtn) clearBtn.addEventListener('click', clearSinglePlayerInputs);
+            // Comparison
+            if (analyzeCompareBtn) analyzeCompareBtn.addEventListener('click', analyzeComparison);
+            if (clearCompareBtn) clearCompareBtn.addEventListener('click', clearCompareInputs);
+            // Opposition
+            if (analyzeOpponentBtn) analyzeOpponentBtn.addEventListener('click', analyzeOpposition);
+            if (clearOpponentBtn) clearOpponentBtn.addEventListener('click', clearOpponentInputs);
+            if (saveOpponentAnalysisBtn) saveOpponentAnalysisBtn.addEventListener('click', saveOpponentAnalysis);
+            if (loadOpponentAnalysisBtn) loadOpponentAnalysisBtn.addEventListener('click', showLoadOpponentModal);
 
             // Modals
             if (howToUseBtn) howToUseBtn.addEventListener('click', showHowToUse);
             if (closeHowToUseBtn) closeHowToUseBtn.addEventListener('click', closeHowToUse);
             if (closeErrorBtn) closeErrorBtn.addEventListener('click', closeError);
+            if (closeLoadOpponentModalBtn) closeLoadOpponentModalBtn.addEventListener('click', closeLoadOpponentModal);
             if (pdfBtn) pdfBtn.addEventListener('click', generatePDF);
             if (closePdfPreviewBtn) closePdfPreviewBtn.addEventListener('click', closePdfPreview);
             if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => {
@@ -1848,6 +2191,12 @@ Do not include any text before or after the HTML table.
             
             // Search Tab
             if (searchButton) searchButton.addEventListener('click', handleSearch);
+            if (suggestStatsBtn) suggestStatsBtn.addEventListener('click', suggestStats);
+            if (searchPosition) searchPosition.addEventListener('input', () => {
+                if (suggestStatsBtn) {
+                    suggestStatsBtn.disabled = searchPosition.value.trim().length === 0;
+                }
+            });
             if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', downloadCSV);
 
             // Chatbot Tab
@@ -1859,10 +2208,33 @@ Do not include any text before or after the HTML table.
             });
             if (newChatBtn) newChatBtn.addEventListener('click', newChat);
             
+            // Global Paste for Single Player Tab
+            document.addEventListener('paste', (e) => {
+                if (currentTab !== 'singlePlayer') return; // Only on single player tab
+
+                const target = e.target;
+                if (!target) return;
+
+                const targetTag = target.tagName.toUpperCase();
+                // Let inputs/textareas handle their own paste
+                if (targetTag === 'INPUT' || targetTag === 'TEXTAREA') return; 
+                
+                // Don't re-handle if pasting *on* the dropzone (it has its own listener)
+                if (target.id === 'dropZoneSingle' || target.closest('#dropZoneSingle')) return;
+
+                // If we're here, it's a "paste anywhere else" event on the single player tab
+                handlePaste(e, imagePreviewSingle, singlePlayerImages);
+            });
+            
             // Initialize lucide icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
+            
+            // Load jspdf-autotable
+            const autoTableScript = document.createElement('script');
+            autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+            document.head.appendChild(autoTableScript);
         });
 
     </script>
