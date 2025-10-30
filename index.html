@@ -1502,7 +1502,7 @@ Do not include any text before or after the HTML table.
             const senderNameClass = sender === 'User' ? 'text-teal-300' : 'text-sky-300';
 
             const messageEl = document.createElement('div');
-            messageEl.classList.add('p-3', 'rounded-lg', 'max-w-3/4', 'w-fit', senderClass); // Added w-fit
+            messageEl.classList.add('p-3', 'rounded-lg', 'max-w-3/4', 'w-fit', ...senderClass.split(' '));
             messageEl.innerHTML = `
                 <p class="font-semibold ${senderNameClass} mb-1">${sender}</p>
                 <div class="chat-content prose prose-sm prose-invert max-w-none">${formatChatText(text)}</div>
