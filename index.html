@@ -1422,7 +1422,7 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userQuery);
+                const resultText = await callChatbotApi(userText);;
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
