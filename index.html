@@ -156,37 +156,37 @@
             transform: translateY(0);
         }
 
-        .loading-steps {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            width: min(480px, 90vw);
+        .loading-progress-track {
+            width: min(440px, 80vw);
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            position: relative;
         }
 
-        .loading-step {
-            border: 1px solid rgba(71, 85, 105, 0.6);
-            background-color: rgba(15, 23, 42, 0.65);
-            border-radius: 0.85rem;
-            padding: 0.75rem 0.5rem;
-            text-align: center;
-            font-size: 0.7rem;
-            letter-spacing: 0.08em;
+        .loading-progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(59, 130, 246, 0.95));
+            transition: width 0.4s ease;
+        }
+
+        .loading-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            width: min(440px, 80vw);
+            margin-top: 0.75rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            color: #94a3b8;
-            transition: all 0.2s ease;
+            letter-spacing: 0.2em;
+            color: #64748b;
         }
 
-        .loading-step.active {
-            border-color: #38bdf8;
+        .loading-progress-labels span.active {
             color: #e0f2fe;
-            background-color: rgba(56, 189, 248, 0.18);
-        }
-
-        .loading-step.completed {
-            border-color: #22c55e;
-            color: #bbf7d0;
-            background-color: rgba(34, 197, 94, 0.18);
         }
 
         .analysis-theme {
@@ -219,8 +219,9 @@
                 bottom: 1rem;
             }
 
-            .loading-steps {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+            .loading-progress-track,
+            .loading-progress-labels {
+                width: min(360px, 90vw);
             }
         }
     </style>
@@ -553,10 +554,10 @@
 
                     <div class="bg-slate-800/90 border border-slate-700 rounded-2xl shadow-xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-semibold text-white">AI Narrative Builder</h2>
+                            <h2 class="text-xl font-semibold text-white">AI Narrative Video Creator</h2>
                             <span class="text-xs uppercase tracking-[0.25em] text-slate-500">Player Story</span>
                         </div>
-                        <p class="text-sm text-slate-400 leading-relaxed">Transform the latest scouting report into a short-form script. Choose a tone, adjust duration, and preview the generated narration without leaving the workspace.</p>
+                        <p class="text-sm text-slate-400 leading-relaxed">Transform the latest scouting report into a short-form video script. Choose a tone, adjust duration, and preview narration, on-screen prompts, and recommended B-roll without leaving the workspace.</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
                                 Narrative Tone
@@ -588,9 +589,17 @@
                                 <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
                             </button>
                         </div>
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-3">
-                            <h3 class="text-sm font-semibold text-white">Narrative Preview</h3>
-                            <div id="playerNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-48 overflow-y-auto"></div>
+                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-4">
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Voice-Over Preview</h3>
+                                <div id="playerNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-40 overflow-y-auto"></div>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Storyboard Planner</h3>
+                                <div id="playerNarrativeStoryboard" class="space-y-3 text-sm text-slate-300">
+                                    <p class="text-xs text-slate-500">Generate a narrative to view suggested scenes and camera cues.</p>
+                                </div>
+                            </div>
                             <p class="text-xs text-slate-500">Audio playback uses your browser voice engine. Export visuals separately for final edits.</p>
                         </div>
                     </div>
@@ -727,10 +736,10 @@
 
                 <div class="mt-6 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-xl p-5 space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-white">AI Narrative Builder</h2>
+                        <h2 class="text-xl font-semibold text-white">AI Narrative Video Creator</h2>
                         <span class="text-xs uppercase tracking-[0.25em] text-slate-500">Opposition Brief</span>
                     </div>
-                    <p class="text-sm text-slate-400 leading-relaxed">Spin your tactical analysis into a briefing-ready script. Perfect for pre-match presentations or quick handovers to the coaching staff.</p>
+                    <p class="text-sm text-slate-400 leading-relaxed">Spin your tactical analysis into a briefing-ready video outline. Generate narration, slide prompts, and closing reminders for coaching presentations.</p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
                             Narrative Tone
@@ -756,15 +765,23 @@
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <button id="opponentGenerateNarrativeBtn" class="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-900 font-semibold px-4 py-2 rounded-xl transition">
-                            <i data-lucide="video" class="h-4 w-4"></i>Build Briefing Script
+                            <i data-lucide="video" class="h-4 w-4"></i>Build Briefing Video
                         </button>
                         <button id="opponentStopNarrativeBtn" class="flex items-center gap-2 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl font-medium transition hidden">
                             <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
                         </button>
                     </div>
-                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-white">Briefing Preview</h3>
-                        <div id="opponentNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-48 overflow-y-auto"></div>
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Briefing Script</h3>
+                            <div id="opponentNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-40 overflow-y-auto"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Storyboard Planner</h3>
+                            <div id="opponentNarrativeStoryboard" class="space-y-3 text-sm text-slate-300">
+                                <p class="text-xs text-slate-500">Run the AI briefing to populate slide prompts and closing reminders.</p>
+                            </div>
+                        </div>
                         <p class="text-xs text-slate-500">Use this script alongside match clips or tactical boards to deliver a concise message.</p>
                     </div>
                 </div>
@@ -880,11 +897,15 @@
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-500"></div>
             <p id="loadingText" class="text-white text-xl mt-4">Analyzing...</p>
-            <div id="loadingStepper" class="loading-steps mt-6">
-                <div class="loading-step active" data-loading-step="upload">Upload</div>
-                <div class="loading-step" data-loading-step="analysis">Analysis</div>
-                <div class="loading-step" data-loading-step="summary">Summary</div>
-                <div class="loading-step" data-loading-step="download">Download</div>
+            <p id="loadingStageLabel" class="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 mt-3">Preparing Assets</p>
+            <div class="loading-progress-track mt-4">
+                <div id="loadingProgressBar" class="loading-progress-bar"></div>
+            </div>
+            <div class="loading-progress-labels">
+                <span data-loading-label="upload">Upload</span>
+                <span data-loading-label="analysis">Analysis</span>
+                <span data-loading-label="summary">Summary</span>
+                <span data-loading-label="download">Export</span>
             </div>
         </div>
     </div>
@@ -976,6 +997,8 @@
         </div>
     </div>
 
+    <div id="pdfContent" class="hidden"></div>
+
     <!-- Load Opponent Analysis Modal -->
     <div id="loadOpponentModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[101] flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-lg shadow-2xl max-w-xl w-full p-6 border border-slate-700">
@@ -1066,6 +1089,7 @@
                 duration: document.getElementById('playerNarrativeDuration'),
                 voice: document.getElementById('playerNarrativeVoice'),
                 script: document.getElementById('playerNarrativeScript'),
+                storyboard: document.getElementById('playerNarrativeStoryboard'),
                 generateBtn: document.getElementById('playerGenerateNarrativeBtn'),
                 stopBtn: document.getElementById('playerStopNarrativeBtn'),
                 context: 'player'
@@ -1075,12 +1099,15 @@
                 duration: document.getElementById('opponentNarrativeDuration'),
                 voice: document.getElementById('opponentNarrativeVoice'),
                 script: document.getElementById('opponentNarrativeScript'),
+                storyboard: document.getElementById('opponentNarrativeStoryboard'),
                 generateBtn: document.getElementById('opponentGenerateNarrativeBtn'),
                 stopBtn: document.getElementById('opponentStopNarrativeBtn'),
                 context: 'opponent'
             }
         };
-        const loadingSteps = document.querySelectorAll('[data-loading-step]');
+        const loadingProgressBar = document.getElementById('loadingProgressBar');
+        const loadingStageLabel = document.getElementById('loadingStageLabel');
+        const loadingProgressLabels = document.querySelectorAll('[data-loading-label]');
         const quickActionButtons = document.querySelectorAll('[data-open-tab]');
 
         // PDF Modal
@@ -1089,6 +1116,7 @@
         const closePdfPreviewBtn = document.getElementById('closePdfPreviewBtn');
         const pdfPreviewFrame = document.getElementById('pdfPreviewFrame');
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const pdfContent = document.getElementById('pdfContent');
         let generatedPdfBlobUrl = null;
 
         // Export Buttons
@@ -1184,6 +1212,12 @@
         let userApiKey = "";
         const LS_REPORT_KEY = 'proScoutSingleReports';
         const STAGE_ORDER = ['upload', 'analysis', 'summary', 'download'];
+        const STAGE_TITLES = {
+            upload: 'Preparing Assets',
+            analysis: 'Running Analysis',
+            summary: 'Building Summary',
+            download: 'Finalizing Export'
+        };
         let savedReports = [];
         let analysisViews = { summary: '', detailed: '', tactical: '', data: '' };
         let currentAnalysisView = 'summary';
@@ -1208,28 +1242,44 @@
             } else {
                 loadingText.textContent = funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
             }
-            if (stage) {
-                updateWorkflowStage(stage);
-            }
+            updateWorkflowStage(stage || 'upload');
             loadingSpinner.classList.remove('hidden');
         }
 
         function hideLoading() {
             loadingSpinner.classList.add('hidden');
+            if (loadingProgressBar) {
+                loadingProgressBar.style.width = '0%';
+            }
+            if (loadingStageLabel) {
+                loadingStageLabel.textContent = STAGE_TITLES.upload;
+            }
+            if (loadingProgressLabels && loadingProgressLabels.length) {
+                loadingProgressLabels.forEach(label => label.classList.remove('active'));
+            }
         }
 
         function updateWorkflowStage(stage) {
             const stageIndex = STAGE_ORDER.indexOf(stage);
             if (stageIndex === -1) return;
 
-            if (loadingSteps && loadingSteps.length) {
-                loadingSteps.forEach((step, index) => {
-                    step.classList.remove('active', 'completed');
-                    if (index < stageIndex) {
-                        step.classList.add('completed');
-                    } else if (index === stageIndex) {
-                        step.classList.add('active');
-                    }
+            if (loadingProgressBar) {
+                const progress = STAGE_ORDER.length > 1
+                    ? (stageIndex / (STAGE_ORDER.length - 1)) * 100
+                    : 100;
+                loadingProgressBar.style.width = `${Math.max(progress, 0)}%`;
+            }
+
+            if (loadingStageLabel) {
+                loadingStageLabel.textContent = STAGE_TITLES[stage] || stage.toUpperCase();
+            }
+
+            if (loadingProgressLabels && loadingProgressLabels.length) {
+                loadingProgressLabels.forEach(label => {
+                    const labelStage = label.dataset.loadingLabel;
+                    const labelIndex = STAGE_ORDER.indexOf(labelStage);
+                    if (labelIndex === -1) return;
+                    label.classList.toggle('active', labelIndex <= stageIndex);
                 });
             }
 
@@ -1358,6 +1408,44 @@
             updateHighlights();
         }
 
+        function getSectionPalette(title = '') {
+            const lower = title.toLowerCase();
+            if (lower.includes('strength')) {
+                return { accent: '#14b8a6', text: '#5eead4', icon: '✅' };
+            }
+            if (lower.includes('weak')) {
+                return { accent: '#f87171', text: '#fca5a5', icon: '⚠️' };
+            }
+            if (lower.includes('tactic')) {
+                return { accent: '#6366f1', text: '#c7d2fe', icon: '♟️' };
+            }
+            if (lower.includes('position')) {
+                return { accent: '#0ea5e9', text: '#bae6fd', icon: '📍' };
+            }
+            if (lower.includes('action')) {
+                return { accent: '#a855f7', text: '#e9d5ff', icon: '🎯' };
+            }
+            if (lower.includes('mentality')) {
+                return { accent: '#f97316', text: '#fed7aa', icon: '🧠' };
+            }
+            if (lower.includes('conclusion') || lower.includes('recommend')) {
+                return { accent: '#22d3ee', text: '#bae6fd', icon: '📌' };
+            }
+            if (lower.includes('similar')) {
+                return { accent: '#22c55e', text: '#bbf7d0', icon: '🤝' };
+            }
+            if (lower.includes('development') || lower.includes('plan')) {
+                return { accent: '#38bdf8', text: '#bae6fd', icon: '📈' };
+            }
+            if (lower.includes('rating')) {
+                return { accent: '#38bdf8', text: '#bae6fd', icon: '⭐' };
+            }
+            if (lower.includes('summary') || lower.includes('overview')) {
+                return { accent: '#0ea5e9', text: '#bae6fd', icon: '📝' };
+            }
+            return { accent: '#7dd3fc', text: '#e0f2fe', icon: '📊' };
+        }
+
         function buildAnalysisSections(html) {
             const views = { summary: '', detailed: html, tactical: '', data: '' };
             const parser = new DOMParser();
@@ -1373,16 +1461,15 @@
             const sections = [];
             const headings = container.querySelectorAll('h3');
             headings.forEach(heading => {
-                const sectionWrapper = document.createElement('div');
-                sectionWrapper.appendChild(heading.cloneNode(true));
+                const sectionContent = document.createElement('div');
                 let next = heading.nextElementSibling;
                 while (next && next.tagName !== 'H3') {
-                    sectionWrapper.appendChild(next.cloneNode(true));
+                    sectionContent.appendChild(next.cloneNode(true));
                     next = next.nextElementSibling;
                 }
                 sections.push({
                     title: heading.textContent || '',
-                    html: sectionWrapper.innerHTML
+                    html: sectionContent.innerHTML.trim()
                 });
             });
 
@@ -1393,19 +1480,40 @@
                 views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
             }
 
+            const renderCard = (section) => {
+                const palette = getSectionPalette(section.title);
+                const safeTitle = escapeHtml(section.title || 'Untitled Section');
+                const body = section.html && section.html.trim()
+                    ? section.html
+                    : '<p class="text-slate-500 text-sm">No insights provided.</p>';
+                return `
+                    <article class="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-lg shadow-slate-900/30">
+                        <span class="absolute inset-y-0 left-0 w-1.5" style="background:${palette.accent};"></span>
+                        <div class="pl-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">${palette.icon || '📊'}</span>
+                                <h4 class="text-lg font-semibold" style="color:${palette.text};">${safeTitle}</h4>
+                            </div>
+                            <div class="mt-3 prose prose-sm prose-invert max-w-none leading-relaxed space-y-3">${body}</div>
+                        </div>
+                    </article>
+                `;
+            };
+
+            const renderGrid = (list) => {
+                if (!list.length) return '';
+                return `<div class="grid gap-4 lg:grid-cols-2 auto-rows-fr">${list.map(renderCard).join('')}</div>`;
+            };
+
             const summarySections = sections.filter(section => /summary|overview|highlights|rating|conclusion|recommendation/i.test(section.title));
             const tacticalSections = sections.filter(section => /tactic|position|positional|phase|action|mentality|role|structure/i.test(section.title));
 
-            if (!summarySections.length && sections.length) {
-                summarySections.push(sections[0]);
-            }
+            const summarySelection = summarySections.length ? summarySections : sections.slice(0, Math.min(sections.length, 3));
+            const tacticalSelection = tacticalSections.length ? tacticalSections : sections.filter(section => /tactic|position|action|mentality|phase/i.test(section.title)).slice(0, 4);
 
-            if (!tacticalSections.length && sections.length > 1) {
-                tacticalSections.push(...sections.slice(1, Math.min(sections.length, 3)));
-            }
-
-            views.summary = summarySections.map(section => section.html).join('') || html;
-            views.tactical = tacticalSections.map(section => section.html).join('') || html;
+            views.summary = summarySelection.length ? renderGrid(summarySelection) : html;
+            views.tactical = tacticalSelection.length ? renderGrid(tacticalSelection) : (sections.length ? renderGrid(sections.slice(1, Math.min(sections.length, 4))) : html);
+            views.detailed = sections.length ? renderGrid(sections) : html;
 
             return views;
         }
@@ -1730,6 +1838,69 @@
             if (builder?.stopBtn) builder.stopBtn.classList.remove('hidden');
         }
 
+        function renderNarrativeStoryboard(rawText = '', builderKey) {
+            const builder = narrativeBuilders[builderKey];
+            if (!builder?.storyboard) return;
+
+            const config = builderKey === 'player'
+                ? {
+                    voice: 'Voice-Over Script',
+                    prompts: 'On-Screen Prompts',
+                    visuals: 'Recommended B-Roll',
+                    labels: ['Voice-Over Beats', 'On-Screen Prompts', 'B-Roll Ideas']
+                }
+                : {
+                    voice: 'Briefing Script',
+                    prompts: 'Key Slides',
+                    visuals: 'Final Reminder',
+                    labels: ['Briefing Beats', 'Slide Prompts', 'Closing Reminders']
+                };
+
+            const extractSection = (heading) => {
+                if (!rawText) return '';
+                const regex = new RegExp(`##\\s*${heading}[\\s\\S]*?(?=\\n##|$)`, 'i');
+                const match = rawText.match(regex);
+                if (!match) return '';
+                return match[0].replace(/##[^\n]*\n?/, '').trim();
+            };
+
+            const cleanLine = (line) => escapeHtml(line.replace(/^[*-]\s*/, '').replace(/[*_`]/g, '').trim());
+            const toItems = (block) => block
+                .split(/\n+/)
+                .map(cleanLine)
+                .filter(Boolean);
+
+            const voiceItems = toItems(extractSection(config.voice));
+            const promptItems = toItems(extractSection(config.prompts));
+            const visualItems = toItems(extractSection(config.visuals));
+
+            const buildList = (items, ordered = false) => {
+                if (!items.length) {
+                    return '<p class="text-xs text-slate-500">Will populate after generation.</p>';
+                }
+                const listTag = ordered ? 'ol' : 'ul';
+                const listClass = ordered ? 'list-decimal' : 'list-disc';
+                return `<${listTag} class="${listClass} pl-4 space-y-2 text-sm text-slate-200">${items.map(item => `<li>${item}</li>`).join('')}</${listTag}>`;
+            };
+
+            builder.storyboard.innerHTML = `
+                <div class="grid gap-3 lg:grid-cols-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[0]}</h4>
+                        ${buildList(voiceItems, true)}
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[1]}</h4>
+                        ${buildList(promptItems)}
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[2]}</h4>
+                        ${buildList(visualItems)}
+                    </div>
+                </div>
+            `;
+        }
+
         async function generateNarrativeVideo(builderKey) {
             const builder = narrativeBuilders[builderKey];
             if (!builder) return;
@@ -1745,6 +1916,9 @@
 
                 const theme = reportTheme?.value || 'default';
                 showLoading('Generating narrative storyboard...', 'analysis');
+                if (builder.storyboard) {
+                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                }
 
                 const prompt = `You are a creative football storyteller. Using the following scouting report, craft a ${duration}-second voice-over script with scene cues. Tone: ${tone}. Theme: ${theme}.\n\nReport:\n${analysisOutput.dataset.rawMarkdown}\n\nReturn Markdown with sections: \n## Voice-Over Script (2-3 paragraphs)\n## On-Screen Prompts (bullet list)\n## Recommended B-Roll (bullet list).`;
 
@@ -1754,6 +1928,7 @@
                     if (builder.script) {
                         builder.script.innerHTML = formatted;
                     }
+                    renderNarrativeStoryboard(narrative, builderKey);
                     speakNarrative(narrative, builderKey);
                     updateWorkflowStage('summary');
                 } catch (error) {
@@ -1769,6 +1944,9 @@
                 }
 
                 showLoading('Drafting opposition briefing...', 'analysis');
+                if (builder.storyboard) {
+                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                }
 
                 const prompt = `You are an elite tactical presenter. Summarize the following opposition scouting report into a ${duration}-second voice-over script with actionable cues. Tone: ${tone}.\n\nReport:\n${opponentContent}\n\nReturn Markdown with sections: \n## Briefing Script (2-3 paragraphs)\n## Key Slides (bullet list)\n## Final Reminder (1-2 bullet points).`;
 
@@ -1778,6 +1956,7 @@
                     if (builder.script) {
                         builder.script.innerHTML = formatted;
                     }
+                    renderNarrativeStoryboard(narrative, builderKey);
                     speakNarrative(narrative, builderKey);
                     updateWorkflowStage('summary');
                 } catch (error) {
@@ -2919,6 +3098,10 @@ Do not include any text before or after the HTML table.
             }
             if (typeof html2canvas === 'undefined') {
                 showError("html2canvas library is not loaded.");
+                return;
+            }
+            if (!pdfContent) {
+                showError("PDF export container is missing. Please refresh and try again.");
                 return;
             }
 
