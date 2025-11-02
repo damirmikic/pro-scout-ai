@@ -64,6 +64,222 @@
             outline: none;
             box-shadow: 0 0 0 2px #0ea5e9; /* Equivalent to ring-2 ring-sky-500 */
         }
+
+        .progress-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            border-radius: 1rem;
+            border: 1px solid #334155;
+            background-color: rgba(15, 23, 42, 0.6);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            color: #cbd5f5;
+        }
+
+        .progress-pill.active {
+            border-color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.12);
+            color: #bae6fd;
+        }
+
+        .progress-pill.completed {
+            border-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.12);
+            color: #bbf7d0;
+        }
+
+        .progress-index {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2rem;
+            width: 2rem;
+            border-radius: 9999px;
+            background-color: #0f172a;
+            color: #cbd5f5;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .progress-pill.active .progress-index {
+            background-color: #38bdf8;
+            color: #0f172a;
+        }
+
+        .progress-pill.completed .progress-index {
+            background-color: #22c55e;
+            color: #0f172a;
+        }
+
+        .progress-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .progress-pill.active .progress-label {
+            color: #e0f2fe;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #334155;
+            background-color: rgba(15, 23, 42, 0.7);
+            padding: 0.75rem 1rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action:hover {
+            border-color: #38bdf8;
+            color: #bae6fd;
+            background-color: rgba(30, 41, 59, 0.9);
+        }
+
+        .analysis-view-btn {
+            padding: 0.6rem 1rem;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid #334155;
+            color: #cbd5f5;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .analysis-view-btn.active,
+        .analysis-view-btn:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8;
+            color: #e0f2fe;
+        }
+
+        .analysis-view {
+            display: block;
+        }
+
+        .analysis-view.hidden {
+            display: none;
+        }
+
+        .tab-nav-scroll {
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            scroll-snap-align: center;
+            flex-shrink: 0;
+        }
+
+        #floatingGenerateBtn {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.4rem;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(59, 130, 246, 0.95));
+            color: #0f172a;
+            font-weight: 700;
+            box-shadow: 0 15px 35px rgba(15, 118, 210, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #floatingGenerateBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(14, 116, 144, 0.45);
+        }
+
+        #floatingGenerateBtn:active {
+            transform: translateY(0);
+        }
+
+        .loading-steps {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            width: min(480px, 90vw);
+        }
+
+        .loading-step {
+            border: 1px solid rgba(71, 85, 105, 0.6);
+            background-color: rgba(15, 23, 42, 0.65);
+            border-radius: 0.85rem;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+
+        .loading-step.active {
+            border-color: #38bdf8;
+            color: #e0f2fe;
+            background-color: rgba(56, 189, 248, 0.18);
+        }
+
+        .loading-step.completed {
+            border-color: #22c55e;
+            color: #bbf7d0;
+            background-color: rgba(34, 197, 94, 0.18);
+        }
+
+        .analysis-theme {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .analysis-theme.theme-default {
+            border-color: #334155;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.6);
+        }
+
+        .analysis-theme.theme-club {
+            border-color: #38bdf8;
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
+        }
+
+        .analysis-theme.theme-agency {
+            border-color: #f97316;
+            box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+        }
+
+        .analysis-theme.theme-academy {
+            border-color: #22c55e;
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
+        }
+
+        @media (max-width: 1024px) {
+            #floatingGenerateBtn {
+                right: 1rem;
+                bottom: 1rem;
+            }
+
+            .loading-steps {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-300 font-sans antialiased">
@@ -88,7 +304,10 @@
             <!-- Tab Navigation -->
             <div class="bg-slate-800 border-t border-slate-700">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex space-x-2 sm:space-x-4 overflow-x-auto" style="-ms-overflow-style: none; scrollbar-width: none;">
+                    <div class="flex space-x-2 sm:space-x-4 overflow-x-auto tab-nav-scroll" style="-ms-overflow-style: none; scrollbar-width: none;">
+                        <button class="tab-btn" data-tab="dashboard">
+                            <i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i>Dashboard
+                        </button>
                         <button class="tab-btn" data-tab="singlePlayer">
                             <i data-lucide="user" class="h-4 w-4 mr-2"></i>Single Player
                         </button>
@@ -114,6 +333,162 @@
 
         <!-- Main Content -->
         <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+
+            <!-- TAB: Dashboard -->
+            <div id="dashboardTab" class="tab-content space-y-6">
+                <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                    <article class="bg-slate-800/70 rounded-2xl border border-slate-700/60 shadow-xl hover:shadow-sky-500/10 transition transform hover:-translate-y-1 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-sky-500/20 text-sky-300">
+                                    <i data-lucide="user-check" class="h-5 w-5"></i>
+                                </span>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Player Focus</span>
+                            </div>
+                            <h2 class="text-lg font-semibold text-white">Player Analysis</h2>
+                            <p class="mt-2 text-sm text-slate-400">Deep dive into individual performances with multimedia insights and tactical context.</p>
+                        </div>
+                        <button class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500/90 hover:bg-sky-400 text-white py-2.5 px-4 font-medium transition" data-open-tab="singlePlayer">
+                            Launch
+                            <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+                        </button>
+                    </article>
+                    <article class="bg-slate-800/70 rounded-2xl border border-slate-700/60 shadow-xl hover:shadow-teal-500/10 transition transform hover:-translate-y-1 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-teal-500/20 text-teal-300">
+                                    <i data-lucide="shield" class="h-5 w-5"></i>
+                                </span>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Collective IQ</span>
+                            </div>
+                            <h2 class="text-lg font-semibold text-white">Team Analysis</h2>
+                            <p class="mt-2 text-sm text-slate-400">Assess squad structure, phases of play, and opposition tendencies in a unified workspace.</p>
+                        </div>
+                        <button class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500/90 hover:bg-teal-400 text-white py-2.5 px-4 font-medium transition" data-open-tab="opposition">
+                            Explore
+                            <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+                        </button>
+                    </article>
+                    <article class="bg-slate-800/70 rounded-2xl border border-slate-700/60 shadow-xl hover:shadow-indigo-500/10 transition transform hover:-translate-y-1 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500/20 text-indigo-300">
+                                    <i data-lucide="users" class="h-5 w-5"></i>
+                                </span>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Head-to-Head</span>
+                            </div>
+                            <h2 class="text-lg font-semibold text-white">Compare Players</h2>
+                            <p class="mt-2 text-sm text-slate-400">Overlay heatmaps, stats, and qualitative data to benchmark talent profiles.</p>
+                        </div>
+                        <button class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500/90 hover:bg-indigo-400 text-white py-2.5 px-4 font-medium transition" data-open-tab="comparison">
+                            Compare
+                            <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+                        </button>
+                    </article>
+                    <article class="bg-slate-800/70 rounded-2xl border border-slate-700/60 shadow-xl hover:shadow-amber-500/10 transition transform hover:-translate-y-1 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-amber-500/20 text-amber-300">
+                                    <i data-lucide="database" class="h-5 w-5"></i>
+                                </span>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Talent Radar</span>
+                            </div>
+                            <h2 class="text-lg font-semibold text-white">Search Database</h2>
+                            <p class="mt-2 text-sm text-slate-400">Query emerging prospects, filter by market fit, and surface similar profiles instantly.</p>
+                        </div>
+                        <button class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500/90 hover:bg-amber-400 text-slate-900 py-2.5 px-4 font-medium transition" data-open-tab="search">
+                            Search
+                            <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+                        </button>
+                    </article>
+                </section>
+
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-white font-semibold text-lg">Workflow Progress</h3>
+                            <span class="text-xs uppercase tracking-widest text-slate-500">Report Builder</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3" id="dashboardProgress">
+                            <div class="progress-pill active">
+                                <span class="progress-index">1</span>
+                                <p class="progress-label">Upload</p>
+                            </div>
+                            <div class="progress-pill">
+                                <span class="progress-index">2</span>
+                                <p class="progress-label">Analysis</p>
+                            </div>
+                            <div class="progress-pill">
+                                <span class="progress-index">3</span>
+                                <p class="progress-label">Summary</p>
+                            </div>
+                            <div class="progress-pill">
+                                <span class="progress-index">4</span>
+                                <p class="progress-label">Download</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-400">Kick off with assets, monitor AI insights in real time, review condensed findings, and export bespoke decks.</p>
+                    </div>
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-white font-semibold text-lg">Quick Actions</h3>
+                            <span class="text-xs uppercase tracking-widest text-slate-500">Productivity</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="quick-action" data-open-tab="singlePlayer"><i data-lucide="file-text" class="h-4 w-4"></i>New Player Report</button>
+                            <button class="quick-action" data-open-tab="opposition"><i data-lucide="flag" class="h-4 w-4"></i>Team Briefing</button>
+                            <button class="quick-action" data-open-tab="comparison"><i data-lucide="git-branch" class="h-4 w-4"></i>Compare Profiles</button>
+                            <button class="quick-action" data-open-tab="chatbot"><i data-lucide="message-circle" class="h-4 w-4"></i>Ask Scout AI</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="text-white text-xl font-semibold">AI Narrative Builder</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">Transform raw scouting outputs into cinematic video explainers with automated voice-over. Select the tone, preview narration, and ship social-ready clips for stakeholders.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs uppercase tracking-wide text-slate-400">Narrative Tone</label>
+                                <select id="narrativeTone" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                    <option value="analytical">Analytical</option>
+                                    <option value="motivational">Motivational</option>
+                                    <option value="recruitment">Recruitment Pitch</option>
+                                    <option value="academy">Academy Feedback</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs uppercase tracking-wide text-slate-400">Duration Goal</label>
+                                <select id="narrativeDuration" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                    <option value="45">45 seconds</option>
+                                    <option value="60">60 seconds</option>
+                                    <option value="90">90 seconds</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs uppercase tracking-wide text-slate-400">Voice</label>
+                                <select id="narrativeVoice" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></select>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button id="generateNarrativeBtn" class="flex items-center gap-2 bg-sky-500/90 hover:bg-sky-400 text-white px-4 py-2 rounded-xl font-medium transition">
+                                <i data-lucide="video" class="h-4 w-4"></i>Build Narrative Video
+                            </button>
+                            <button id="stopNarrativeBtn" class="flex items-center gap-2 bg-slate-800 border border-slate-600 text-slate-200 px-4 py-2 rounded-xl font-medium transition hidden">
+                                <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 flex flex-col justify-between" id="narrativePreview">
+                        <div>
+                            <h4 class="text-slate-200 font-semibold">Narrative Preview</h4>
+                            <p class="text-xs text-slate-500 mt-1">Content will adapt using the latest scouting report and tone preferences.</p>
+                        </div>
+                        <div class="mt-4 space-y-3 max-h-48 overflow-y-auto text-sm text-slate-300" id="narrativeScript"></div>
+                        <div class="mt-4 text-xs text-slate-500">Generated clips are simulated locally with dynamic overlays. Export to MP4 via your preferred editor.</div>
+                    </div>
+                </section>
+            </div>
 
             <!-- TAB: Single Player Analysis -->
             <div id="singlePlayerTab" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -175,47 +550,104 @@
 
                 <!-- Right Column: Output -->
                 <div class="flex flex-col space-y-6">
-                    <div class="bg-slate-800 p-5 rounded-lg shadow-lg sticky top-[128px]"> <!-- 128px = header + tabs height -->
-                        <h2 class="text-xl font-semibold text-white mb-4">Scouting Report</h2>
-                        <div class="flex items-center space-x-2 mb-4">
-                            <button id="analyzeBtn" class="flex-1 flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
-                                <i data-lucide="sparkles" class="h-5 w-5 mr-2"></i>
-                                Analyze Player
-                            </button>
-                            <button id="clearBtn" class="flex-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                                <i data-lucide="trash-2" class="h-5 w-5 mr-2"></i>
-                                Clear All
-                            </button>
-                        </div>
-                        
-                        <!-- API Key Input -->
-                        <div id="apiKeySection" class="mb-4">
-                            <label for="apiKey" class="block text-sm font-medium text-slate-300 mb-1">Optional API Key</label>
-                            <div id="apiKeyInputGroup" class="flex space-x-2">
-                                <input type="password" id="apiKey" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Enter your Gemini API key">
-                                <button id="saveApiKeyBtn" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg" title="Save Key">
-                                    <i data-lucide="save" class="h-5 w-5"></i>
+                    <div class="bg-slate-800 p-5 rounded-2xl shadow-xl sticky top-[128px] space-y-5"> <!-- 128px = header + tabs height -->
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-white">Scouting Report</h2>
+                            <div class="flex items-center gap-2">
+                                <button id="analyzeBtn" class="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-xl transition duration-200">
+                                    <i data-lucide="sparkles" class="h-5 w-5"></i>
+                                    Analyze
+                                </button>
+                                <button id="clearBtn" class="flex items-center gap-2 bg-red-500/90 hover:bg-red-500 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-200">
+                                    <i data-lucide="trash-2" class="h-5 w-5"></i>
+                                    Clear
                                 </button>
                             </div>
-                            <div id="apiKeyMessage" class="text-sm text-teal-400 mt-2 hidden"></div>
+                        </div>
+
+                        <!-- API Key Input -->
+                        <div id="apiKeySection" class="bg-slate-900/70 border border-slate-700 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-slate-200">Optional Gemini API Key</p>
+                                <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Personal key</span>
+                            </div>
+                            <div id="apiKeyInputGroup" class="flex flex-col sm:flex-row gap-2">
+                                <input type="password" id="apiKey" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Enter your Gemini API key">
+                                <button id="saveApiKeyBtn" class="bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2" title="Save Key">
+                                    <i data-lucide="save" class="h-5 w-5"></i>
+                                    Save
+                                </button>
+                            </div>
+                            <div id="apiKeyMessage" class="text-sm text-teal-400 hidden"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <label class="flex flex-col text-xs uppercase tracking-[0.2em] text-slate-400 gap-2">
+                                Export Theme
+                                <select id="reportTheme" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                                    <option value="club">Club Identity</option>
+                                    <option value="agency">Agency Pitch</option>
+                                    <option value="academy">Academy Review</option>
+                                    <option value="default" selected>Neutral</option>
+                                </select>
+                            </label>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs uppercase tracking-[0.2em] text-slate-400">Saved Reports</span>
+                                <div class="flex items-center gap-2">
+                                    <button id="saveReportBtn" class="flex-1 flex items-center justify-center gap-2 bg-emerald-500/90 hover:bg-emerald-400 text-slate-900 font-semibold px-3 py-2 rounded-lg">
+                                        <i data-lucide="bookmark-plus" class="h-5 w-5"></i>Save
+                                    </button>
+                                    <button id="loadReportBtn" class="flex-1 flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold px-3 py-2 rounded-lg">
+                                        <i data-lucide="folder-open" class="h-5 w-5"></i>Load
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2" id="analysisViewControls">
+                            <button class="analysis-view-btn active" data-view="summary">Summary</button>
+                            <button class="analysis-view-btn" data-view="detailed">Detailed</button>
+                            <button class="analysis-view-btn" data-view="tactical">Tactical</button>
+                            <button class="analysis-view-btn" data-view="data">Data Table</button>
                         </div>
 
                         <!-- Export Buttons -->
-                        <div id="exportButtons" class="hidden flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
-                            <button id="copyBtn" class="flex-1 flex items-center justify-center bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                        <div id="exportButtons" class="hidden flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                            <button id="copyBtn" class="flex-1 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200">
                                 <i data-lucide="clipboard" class="h-5 w-5 mr-2"></i>Copy
                             </button>
-                            <button id="pdfBtn" class="flex-1 flex items-center justify-center bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                            <button id="pdfBtn" class="flex-1 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200">
                                 <i data-lucide="file-text" class="h-5 w-5 mr-2"></i>Preview PDF
                             </button>
-                            <button id="videoBtn" class="flex-1 flex items-center justify-center bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                            <button id="videoBtn" class="flex-1 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200">
                                 <i data-lucide="youtube" class="h-5 w-5 mr-2"></i>Find Videos
                             </button>
                         </div>
 
                         <!-- Analysis Output -->
-                        <div id="analysisOutput" class="w-full h-[60vh] overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 prose-strong:text-white">
-                            <p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>
+                        <div class="analysis-theme theme-default bg-slate-900/80 border border-slate-700 rounded-2xl p-4 space-y-4">
+                            <div class="grid gap-4 lg:grid-cols-5">
+                                <div class="lg:col-span-3">
+                                    <div id="analysisOutput" class="analysis-view h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 prose-strong:text-white">
+                                        <p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>
+                                    </div>
+                                    <div id="analysisDataView" class="analysis-view hidden h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 text-sm text-slate-200"></div>
+                                </div>
+                                <div class="lg:col-span-2 flex flex-col gap-4">
+                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                            <i data-lucide="images" class="h-4 w-4 text-sky-400"></i>Visual Preview
+                                        </h3>
+                                        <div id="analysisVisuals" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+                                    </div>
+                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                            <i data-lucide="notebook-text" class="h-4 w-4 text-emerald-400"></i>Highlights
+                                        </h3>
+                                        <div id="analysisSummary" class="text-sm text-slate-300 space-y-2"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,6 +778,7 @@
                         <input id="searchMatches" type="text" placeholder="Matches Played (e.g., > 20)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <input id="searchLeague" type="text" placeholder="Suitable for League (e.g., Serie A)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <input id="searchClub" type="text" placeholder="Suitable for Club (e.g., Liverpool)" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <input id="searchSimilar" type="text" placeholder="Similar Player Target" class="bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <textarea id="searchStats" rows="3" class="md:col-span-2 lg:col-span-3 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Specific Stats (e.g., > 5 goals, > 80% pass accuracy, high pressing stats)..."></textarea>
                         
                         <button id="suggestStatsBtn" class="md:col-span-2 lg:col-span-3 w-full flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50" disabled>
@@ -430,6 +863,10 @@
             </div>
 
         </main>
+        <button id="floatingGenerateBtn" class="hidden">
+            <i data-lucide="wand2" class="h-5 w-5"></i>
+            Generate Report
+        </button>
     </div>
 
     <!-- Loading Spinner Overlay -->
@@ -437,6 +874,12 @@
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-500"></div>
             <p id="loadingText" class="text-white text-xl mt-4">Analyzing...</p>
+            <div id="loadingStepper" class="loading-steps mt-6">
+                <div class="loading-step active" data-loading-step="upload">Upload</div>
+                <div class="loading-step" data-loading-step="analysis">Analysis</div>
+                <div class="loading-step" data-loading-step="summary">Summary</div>
+                <div class="loading-step" data-loading-step="download">Download</div>
+            </div>
         </div>
     </div>
 
@@ -543,6 +986,20 @@
         </div>
     </div>
 
+    <div id="loadReportModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[101] flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-lg shadow-2xl max-w-xl w-full p-6 border border-slate-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold text-white">Saved Player Reports</h3>
+                <button id="closeLoadReportModalBtn" class="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-700">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="savedReportsList" class="max-h-[60vh] overflow-y-auto space-y-2">
+                <p class="text-slate-400">No saved reports yet.</p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Hidden element for PDF generation -->
     <div id="pdf-content" class="a4-page" style="position: absolute; left: -9999px; width: 210mm; font-family: 'Times New Roman', serif; color: black; background: white;">
@@ -582,6 +1039,28 @@
         const loadOpponentModal = document.getElementById('loadOpponentModal');
         const closeLoadOpponentModalBtn = document.getElementById('closeLoadOpponentModalBtn');
         const loadOpponentList = document.getElementById('loadOpponentList');
+        const loadReportModal = document.getElementById('loadReportModal');
+        const closeLoadReportModalBtn = document.getElementById('closeLoadReportModalBtn');
+        const savedReportsList = document.getElementById('savedReportsList');
+        const floatingGenerateBtn = document.getElementById('floatingGenerateBtn');
+        const analysisViewControls = document.getElementById('analysisViewControls');
+        const analysisDataView = document.getElementById('analysisDataView');
+        const analysisSummary = document.getElementById('analysisSummary');
+        const analysisVisuals = document.getElementById('analysisVisuals');
+        const analysisContainer = document.querySelector('.analysis-theme');
+        const reportTheme = document.getElementById('reportTheme');
+        const saveReportBtn = document.getElementById('saveReportBtn');
+        const loadReportBtn = document.getElementById('loadReportBtn');
+        const narrativeTone = document.getElementById('narrativeTone');
+        const narrativeDuration = document.getElementById('narrativeDuration');
+        const narrativeVoice = document.getElementById('narrativeVoice');
+        const narrativeScript = document.getElementById('narrativeScript');
+        const generateNarrativeBtn = document.getElementById('generateNarrativeBtn');
+        const stopNarrativeBtn = document.getElementById('stopNarrativeBtn');
+        const loadingSteps = document.querySelectorAll('[data-loading-step]');
+        const dashboardProgress = document.getElementById('dashboardProgress');
+        const dashboardPills = dashboardProgress ? Array.from(dashboardProgress.querySelectorAll('.progress-pill')) : [];
+        const quickActionButtons = document.querySelectorAll('[data-open-tab]');
 
         // PDF Modal
         const pdfBtn = document.getElementById('pdfBtn');
@@ -666,6 +1145,7 @@
         const searchMatches = document.getElementById('searchMatches');
         const searchLeague = document.getElementById('searchLeague');
         const searchClub = document.getElementById('searchClub');
+        const searchSimilar = document.getElementById('searchSimilar');
         const searchStats = document.getElementById('searchStats');
         const suggestStatsBtn = document.getElementById('suggestStatsBtn');
         const downloadCsvBtn = document.getElementById('downloadCsvBtn');
@@ -679,8 +1159,14 @@
         let chatHistory = [];
 
         // --- State ---
-        let currentTab = 'singlePlayer';
+        let currentTab = 'dashboard';
         let userApiKey = "";
+        const LS_REPORT_KEY = 'proScoutSingleReports';
+        const STAGE_ORDER = ['upload', 'analysis', 'summary', 'download'];
+        let savedReports = [];
+        let analysisViews = { summary: '', detailed: '', tactical: '', data: '' };
+        let currentAnalysisView = 'summary';
+        let speechUtterance = null;
         const funnyLoadingMessages = [
             "Brewing some tactical tea...",
             "Analyzing... Did he really just try that flick?",
@@ -695,17 +1181,48 @@
 
         // --- Utility Functions ---
 
-        function showLoading(text) {
+        function showLoading(text, stage) {
             if (text) {
                 loadingText.textContent = text;
             } else {
                 loadingText.textContent = funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
+            }
+            if (stage) {
+                updateWorkflowStage(stage);
             }
             loadingSpinner.classList.remove('hidden');
         }
 
         function hideLoading() {
             loadingSpinner.classList.add('hidden');
+        }
+
+        function updateWorkflowStage(stage) {
+            const stageIndex = STAGE_ORDER.indexOf(stage);
+            if (stageIndex === -1) return;
+
+            if (loadingSteps && loadingSteps.length) {
+                loadingSteps.forEach((step, index) => {
+                    step.classList.remove('active', 'completed');
+                    if (index < stageIndex) {
+                        step.classList.add('completed');
+                    } else if (index === stageIndex) {
+                        step.classList.add('active');
+                    }
+                });
+            }
+
+            if (dashboardPills && dashboardPills.length) {
+                dashboardPills.forEach((pill, index) => {
+                    pill.classList.remove('active', 'completed');
+                    if (index < stageIndex) {
+                        pill.classList.add('completed');
+                    }
+                    if (index === stageIndex) {
+                        pill.classList.add('active');
+                    }
+                });
+            }
         }
 
         function showError(message) {
@@ -751,7 +1268,7 @@
         function showTab(tabId) {
             // Hide all content
             tabContents.forEach(content => content.classList.add('hidden'));
-            
+
             // Deactivate all buttons
             tabButtons.forEach(button => {
                 button.classList.remove('border-sky-400', 'text-white');
@@ -772,6 +1289,401 @@
             }
             
             currentTab = tabId;
+        }
+
+        function getAnalysisViewButtons() {
+            return analysisViewControls ? analysisViewControls.querySelectorAll('.analysis-view-btn') : [];
+        }
+
+        function updateViewButtons(activeView) {
+            const buttons = getAnalysisViewButtons();
+            buttons.forEach(button => {
+                if (button.dataset.view === activeView) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        function applyReportTheme(theme) {
+            if (!analysisContainer) return;
+            analysisContainer.classList.remove('theme-default', 'theme-club', 'theme-agency', 'theme-academy');
+            const themeClass = theme && theme !== 'default' ? `theme-${theme}` : 'theme-default';
+            analysisContainer.classList.add(themeClass);
+        }
+
+        function renderAnalysisVisuals() {
+            if (!analysisVisuals) return;
+            analysisVisuals.innerHTML = '';
+            if (!singlePlayerImages.length) {
+                analysisVisuals.innerHTML = '<p class="text-xs text-slate-500">Upload heatmaps or stat boards to preview them alongside the report.</p>';
+                return;
+            }
+
+            singlePlayerImages.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.classList.add('relative', 'overflow-hidden', 'rounded-lg', 'border', 'border-slate-800', 'bg-slate-900/80');
+
+                const image = document.createElement('img');
+                image.src = img.preview || `data:${img.mimeType};base64,${img.base64}`;
+                image.classList.add('w-full', 'h-28', 'object-cover', 'transition', 'duration-200', 'hover:scale-105');
+                card.appendChild(image);
+
+                const caption = document.createElement('div');
+                caption.classList.add('absolute', 'bottom-0', 'left-0', 'right-0', 'bg-slate-900/75', 'text-[0.65rem]', 'text-slate-100', 'py-1', 'text-center', 'tracking-wide');
+                caption.textContent = `Asset ${index + 1}`;
+                card.appendChild(caption);
+
+                analysisVisuals.appendChild(card);
+            });
+        }
+
+        function prepareAnalysisViews(html, markdown) {
+            analysisViews = buildAnalysisSections(html);
+            if (analysisDataView) {
+                analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500">No structured data tables detected.</p>';
+            }
+            showAnalysisView('summary');
+            updateHighlights();
+        }
+
+        function buildAnalysisSections(html) {
+            const views = { summary: '', detailed: html, tactical: '', data: '' };
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+            const container = doc.body.firstElementChild;
+            if (!container) {
+                views.summary = html;
+                views.tactical = html;
+                views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
+                return views;
+            }
+
+            const sections = [];
+            const headings = container.querySelectorAll('h3');
+            headings.forEach(heading => {
+                const sectionWrapper = document.createElement('div');
+                sectionWrapper.appendChild(heading.cloneNode(true));
+                let next = heading.nextElementSibling;
+                while (next && next.tagName !== 'H3') {
+                    sectionWrapper.appendChild(next.cloneNode(true));
+                    next = next.nextElementSibling;
+                }
+                sections.push({
+                    title: heading.textContent || '',
+                    html: sectionWrapper.innerHTML
+                });
+            });
+
+            const tables = container.querySelectorAll('table');
+            if (tables.length) {
+                views.data = Array.from(tables).map(table => table.outerHTML).join('');
+            } else {
+                views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
+            }
+
+            const summarySections = sections.filter(section => /summary|overview|highlights|rating|conclusion|recommendation/i.test(section.title));
+            const tacticalSections = sections.filter(section => /tactic|position|positional|phase|action|mentality|role|structure/i.test(section.title));
+
+            if (!summarySections.length && sections.length) {
+                summarySections.push(sections[0]);
+            }
+
+            if (!tacticalSections.length && sections.length > 1) {
+                tacticalSections.push(...sections.slice(1, Math.min(sections.length, 3)));
+            }
+
+            views.summary = summarySections.map(section => section.html).join('') || html;
+            views.tactical = tacticalSections.map(section => section.html).join('') || html;
+
+            return views;
+        }
+
+        function showAnalysisView(view) {
+            currentAnalysisView = view;
+            updateViewButtons(view);
+
+            if (!analysisOutput) return;
+
+            if (view === 'data') {
+                analysisOutput.classList.add('hidden');
+                if (analysisDataView) {
+                    analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500 text-sm">No structured data tables detected.</p>';
+                    analysisDataView.classList.remove('hidden');
+                }
+            } else {
+                analysisOutput.classList.remove('hidden');
+                if (analysisDataView) analysisDataView.classList.add('hidden');
+                const content = analysisViews[view] || '<p class="text-slate-400">Run an analysis to populate this view.</p>';
+                analysisOutput.innerHTML = content;
+            }
+        }
+
+        function updateHighlights() {
+            if (!analysisSummary) return;
+            const summaryHtml = analysisViews.summary;
+            if (!summaryHtml) {
+                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Generate a scouting report to see instant highlights.</p>';
+                return;
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<div>${summaryHtml}</div>`, 'text/html');
+            const bullets = Array.from(doc.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
+            const paragraphs = Array.from(doc.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
+
+            if (bullets.length) {
+                const list = document.createElement('ul');
+                list.classList.add('list-disc', 'pl-4', 'space-y-1');
+                bullets.slice(0, 4).forEach(text => {
+                    const item = document.createElement('li');
+                    item.textContent = text;
+                    list.appendChild(item);
+                });
+                analysisSummary.innerHTML = '';
+                analysisSummary.appendChild(list);
+            } else if (paragraphs.length) {
+                analysisSummary.innerHTML = paragraphs.slice(0, 3).map(text => `<p>${text}</p>`).join('');
+            } else {
+                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>';
+            }
+        }
+
+        function resetAnalysisViews() {
+            analysisViews = { summary: '', detailed: '', tactical: '', data: '' };
+            if (analysisOutput) {
+                analysisOutput.innerHTML = '<p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>';
+                analysisOutput.classList.remove('hidden');
+            }
+            if (analysisDataView) {
+                analysisDataView.innerHTML = '<p class="text-slate-500 text-sm">Switch back after running an analysis to view data tables here.</p>';
+                analysisDataView.classList.add('hidden');
+            }
+            if (analysisSummary) {
+                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>';
+            }
+            updateViewButtons('summary');
+            currentAnalysisView = 'summary';
+        }
+
+        function loadSavedReports() {
+            if (typeof localStorage === 'undefined') {
+                savedReports = [];
+                renderSavedReports();
+                return;
+            }
+            try {
+                const stored = localStorage.getItem(LS_REPORT_KEY);
+                savedReports = stored ? JSON.parse(stored) : [];
+            } catch (error) {
+                console.error('Failed to load saved reports', error);
+                savedReports = [];
+            }
+            renderSavedReports();
+        }
+
+        function renderSavedReports() {
+            if (!savedReportsList) return;
+            savedReportsList.innerHTML = '';
+
+            if (!savedReports.length) {
+                savedReportsList.innerHTML = '<p class="text-slate-400">No saved reports yet.</p>';
+                return;
+            }
+
+            savedReports.forEach(report => {
+                const card = document.createElement('div');
+                card.classList.add('bg-slate-900/80', 'border', 'border-slate-700', 'rounded-xl', 'p-4', 'flex', 'flex-col', 'gap-3');
+
+                const header = document.createElement('div');
+                header.classList.add('flex', 'items-center', 'justify-between');
+                const title = document.createElement('p');
+                title.classList.add('text-sm', 'font-semibold', 'text-white');
+                title.textContent = report.playerName || 'Unnamed Player';
+                const meta = document.createElement('span');
+                meta.classList.add('text-xs', 'uppercase', 'tracking-wide', 'text-slate-500');
+                meta.textContent = new Date(report.timestamp).toLocaleString();
+                header.appendChild(title);
+                header.appendChild(meta);
+
+                const details = document.createElement('p');
+                details.classList.add('text-xs', 'text-slate-400');
+                details.textContent = `${report.reportType === 'pro' ? 'Pro Report' : 'Quick Report'} • Theme: ${report.theme || 'default'}`;
+
+                const actions = document.createElement('div');
+                actions.classList.add('flex', 'items-center', 'gap-2');
+
+                const loadBtn = document.createElement('button');
+                loadBtn.classList.add('flex-1', 'bg-sky-500/90', 'hover:bg-sky-400', 'text-slate-900', 'font-semibold', 'px-3', 'py-2', 'rounded-lg', 'transition');
+                loadBtn.dataset.loadReport = report.id;
+                loadBtn.textContent = 'Load';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('flex-1', 'bg-slate-700', 'hover:bg-slate-600', 'text-white', 'font-semibold', 'px-3', 'py-2', 'rounded-lg', 'transition');
+                deleteBtn.dataset.deleteReport = report.id;
+                deleteBtn.textContent = 'Delete';
+
+                actions.appendChild(loadBtn);
+                actions.appendChild(deleteBtn);
+
+                card.appendChild(header);
+                card.appendChild(details);
+                if (report.notes) {
+                    const notes = document.createElement('p');
+                    notes.classList.add('text-xs', 'text-slate-300');
+                    notes.textContent = report.notes;
+                    card.appendChild(notes);
+                }
+                card.appendChild(actions);
+
+                savedReportsList.appendChild(card);
+            });
+        }
+
+        function saveCurrentReport() {
+            if (!analysisOutput || !analysisOutput.dataset.rawMarkdown) {
+                showError('Generate a scouting report before saving.');
+                return;
+            }
+
+            if (typeof localStorage === 'undefined') {
+                showError('Saving reports is not supported in this environment.');
+                return;
+            }
+
+            const report = {
+                id: Date.now().toString(),
+                playerName: playerName?.value?.trim() || 'Unnamed Player',
+                age: playerAge?.value?.trim() || '',
+                club: playerClub?.value?.trim() || '',
+                league: playerLeague?.value?.trim() || '',
+                positions: playerPositions?.value?.trim() || '',
+                reportType: reportType?.value || 'quick',
+                theme: reportTheme?.value || 'default',
+                markdown: analysisOutput.dataset.rawMarkdown,
+                timestamp: new Date().toISOString()
+            };
+
+            savedReports.unshift(report);
+            localStorage.setItem(LS_REPORT_KEY, JSON.stringify(savedReports));
+            renderSavedReports();
+
+            if (saveReportBtn) {
+                const original = saveReportBtn.innerHTML;
+                saveReportBtn.innerHTML = '<i data-lucide="check" class="h-5 w-5"></i>Saved';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                setTimeout(() => {
+                    saveReportBtn.innerHTML = original;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }, 2000);
+            }
+        }
+
+        function loadReportById(id) {
+            const report = savedReports.find(item => item.id === id);
+            if (!report) return;
+
+            if (playerName) playerName.value = report.playerName || '';
+            if (playerAge) playerAge.value = report.age || '';
+            if (playerClub) playerClub.value = report.club || '';
+            if (playerLeague) playerLeague.value = report.league || '';
+            if (playerPositions) playerPositions.value = report.positions || '';
+            if (reportType) reportType.value = report.reportType || 'quick';
+            if (reportTheme) reportTheme.value = report.theme || 'default';
+            applyReportTheme(reportTheme.value);
+
+            analysisOutput.dataset.rawMarkdown = report.markdown;
+            displayResults(report.markdown, analysisOutput);
+            updateWorkflowStage('summary');
+            closeReportModal();
+        }
+
+        function deleteReportById(id) {
+            savedReports = savedReports.filter(report => report.id !== id);
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem(LS_REPORT_KEY, JSON.stringify(savedReports));
+            }
+            renderSavedReports();
+        }
+
+        function openReportModal() {
+            if (loadReportModal) loadReportModal.classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            if (loadReportModal) loadReportModal.classList.add('hidden');
+        }
+
+        function populateNarrativeVoices() {
+            if (!narrativeVoice || typeof window.speechSynthesis === 'undefined') {
+                if (narrativeVoice) {
+                    narrativeVoice.innerHTML = '<option value="">System Default</option>';
+                }
+                return;
+            }
+
+            const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('en'));
+            if (!voices.length) {
+                narrativeVoice.innerHTML = '<option value="">System Default</option>';
+                return;
+            }
+
+            narrativeVoice.innerHTML = voices.map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`).join('');
+        }
+
+        function stopNarrativePlayback() {
+            if (typeof window.speechSynthesis !== 'undefined') {
+                window.speechSynthesis.cancel();
+            }
+            speechUtterance = null;
+            if (stopNarrativeBtn) stopNarrativeBtn.classList.add('hidden');
+        }
+
+        function speakNarrative(text) {
+            if (typeof window.speechSynthesis === 'undefined') return;
+            stopNarrativePlayback();
+            speechUtterance = new SpeechSynthesisUtterance(text.replace(/[*_`]/g, ''));
+            const duration = parseInt(narrativeDuration?.value || '60', 10);
+            speechUtterance.rate = duration <= 45 ? 1.2 : duration >= 90 ? 0.9 : 1;
+            if (narrativeVoice && narrativeVoice.value) {
+                const targetVoice = window.speechSynthesis.getVoices().find(voice => voice.name === narrativeVoice.value);
+                if (targetVoice) speechUtterance.voice = targetVoice;
+            }
+            speechUtterance.onend = () => {
+                if (stopNarrativeBtn) stopNarrativeBtn.classList.add('hidden');
+            };
+            window.speechSynthesis.speak(speechUtterance);
+            if (stopNarrativeBtn) stopNarrativeBtn.classList.remove('hidden');
+        }
+
+        async function generateNarrativeVideo() {
+            if (!analysisOutput || !analysisOutput.dataset.rawMarkdown) {
+                showError('Generate a scouting report before building the narrative.');
+                return;
+            }
+
+            const tone = narrativeTone?.value || 'analytical';
+            const duration = narrativeDuration?.value || '60';
+            const theme = reportTheme?.value || 'default';
+
+            showLoading('Generating narrative storyboard...', 'analysis');
+
+            const prompt = `You are a creative football storyteller. Using the following scouting report, craft a ${duration}-second voice-over script with scene cues. Tone: ${tone}. Theme: ${theme}.\n\nReport:\n${analysisOutput.dataset.rawMarkdown}\n\nReturn Markdown with sections: \n## Voice-Over Script (2-3 paragraphs)\n## On-Screen Prompts (bullet list)\n## Recommended B-Roll (bullet list).`;
+
+            try {
+                const narrative = await callGeminiApi([{ text: prompt }], false);
+                const formatted = formatChatText(narrative);
+                if (narrativeScript) {
+                    narrativeScript.innerHTML = formatted;
+                }
+                speakNarrative(narrative);
+                updateWorkflowStage('summary');
+            } catch (error) {
+                showError(`Failed to build narrative: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
         }
 
         // --- API Key Management ---
@@ -885,44 +1797,50 @@
             reader.onload = (e) => {
                 const base64 = e.target.result;
                 const mimeType = file.type;
-                
+
                 // Store base64 string without data prefix for the API
                 const apiData = {
                     base64: base64.split(',')[1],
-                    mimeType: mimeType
+                    mimeType: mimeType,
+                    preview: base64
                 };
                 imageArray.push(apiData);
 
                 // Update preview
-                updateImagePreviews(previewEl, imageArray, base64);
+                updateImagePreviews(previewEl, imageArray);
             };
             reader.readAsDataURL(file);
         }
 
-        function updateImagePreviews(previewEl, imageArray, newImageBase64) {
-            const div = document.createElement('div');
-            div.classList.add('relative', 'group');
-            
-            const img = document.createElement('img');
-            img.src = newImageBase64;
-            img.classList.add('w-full', 'h-24', 'object-cover', 'rounded-lg', 'shadow-md');
-            div.appendChild(img);
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '&times;';
-            removeBtn.classList.add('absolute', 'top-1', 'right-1', 'bg-red-600', 'text-white', 'rounded-full', 'w-5', 'h-5', 'flex', 'items-center', 'justify-center', 'text-xs', 'font-bold', 'opacity-0', 'group-hover:opacity-100', 'transition-opacity');
-            removeBtn.onclick = () => {
-                const b64Data = img.src.split(',')[1];
-                const dataIndex = imageArray.findIndex(item => item.base64 === b64Data);
-                
-                if (dataIndex > -1) {
-                    imageArray.splice(dataIndex, 1);
-                }
-                div.remove();
-            };
-            div.appendChild(removeBtn);
-            
-            previewEl.appendChild(div);
+        function updateImagePreviews(previewEl, imageArray) {
+            if (!previewEl) return;
+            previewEl.innerHTML = '';
+
+            imageArray.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.classList.add('relative', 'group');
+
+                const img = document.createElement('img');
+                const src = item.preview || `data:${item.mimeType};base64,${item.base64}`;
+                img.src = src;
+                img.classList.add('w-full', 'h-24', 'object-cover', 'rounded-lg', 'shadow-md');
+                div.appendChild(img);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.classList.add('absolute', 'top-1', 'right-1', 'bg-red-600', 'text-white', 'rounded-full', 'w-5', 'h-5', 'flex', 'items-center', 'justify-center', 'text-xs', 'font-bold', 'opacity-0', 'group-hover:opacity-100', 'transition-opacity');
+                removeBtn.onclick = () => {
+                    imageArray.splice(index, 1);
+                    updateImagePreviews(previewEl, imageArray);
+                };
+                div.appendChild(removeBtn);
+
+                previewEl.appendChild(div);
+            });
+
+            if (previewEl === imagePreviewSingle) {
+                renderAnalysisVisuals();
+            }
         }
 
 
@@ -935,19 +1853,25 @@
             if(playerPositions) playerPositions.value = '';
             if(matchContext) matchContext.value = '';
             if(reportType) reportType.value = 'quick';
+            if(reportTheme) {
+                reportTheme.value = 'default';
+                applyReportTheme('default');
+            }
             if(imagePreviewSingle) imagePreviewSingle.innerHTML = '';
             singlePlayerImages = [];
             if(textStatsSingle) textStatsSingle.value = '';
-            if(analysisOutput) {
-                analysisOutput.innerHTML = '<p class="text-slate-400">Analysis cleared.</p>';
-                delete analysisOutput.dataset.rawMarkdown;
-            }
+            if(analysisOutput) delete analysisOutput.dataset.rawMarkdown;
+            resetAnalysisViews();
+            renderAnalysisVisuals();
+            stopNarrativePlayback();
+            if(narrativeScript) narrativeScript.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
             if (statsChart) {
                 statsChart.destroy();
                 statsChart = null;
             }
             if(visualizeStatsBtn) visualizeStatsBtn.disabled = true;
             if(exportButtons) exportButtons.classList.add('hidden');
+            updateWorkflowStage('upload');
         }
 
         function clearCompareInputs() {
@@ -986,6 +1910,7 @@
             if(searchLeague) searchLeague.value = '';
             if(searchClub) searchClub.value = '';
             if(searchStats) searchStats.value = '';
+            if(searchSimilar) searchSimilar.value = '';
             if(suggestStatsBtn) suggestStatsBtn.disabled = true;
             if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Your search results will appear here.</p>';
             if(searchError) searchError.classList.add('hidden');
@@ -1110,7 +2035,8 @@
 
 
         async function analyzeSinglePlayer() {
-            showLoading(); // Show random funny message
+            updateWorkflowStage('analysis');
+            showLoading(null, 'analysis');
             if(analysisOutput) {
                 analysisOutput.innerHTML = '';
                 delete analysisOutput.dataset.rawMarkdown;
@@ -1185,6 +2111,7 @@
                 const resultText = await callGeminiApi(parts);
                 displayResults(resultText, analysisOutput);
                 if(exportButtons) exportButtons.classList.remove('hidden');
+                updateWorkflowStage('summary');
             } catch (error) {
                 showError(`Analysis failed: ${error.message}`);
             } finally {
@@ -1302,6 +2229,7 @@
             if (searchMatches.value.trim()) queryParts.push(`Matches/Minutes: ${searchMatches.value.trim()}`);
             if (searchLeague.value.trim()) queryParts.push(`Has the potential quality or playstyle suitable for: ${searchLeague.value.trim()} (This is a scout assessment, they don't have to be playing in that league currently).`);
             if (searchClub.value.trim()) queryParts.push(`Has the potential quality or playstyle suitable for: ${searchClub.value.trim()} (This is a scout assessment of tactical fit).`);
+            if (searchSimilar && searchSimilar.value.trim()) queryParts.push(`Search for players stylistically similar to: ${searchSimilar.value.trim()}`);
             
             if (queryParts.length === 0) {
                 showSearchError("Please enter at least one search criterion.");
@@ -1586,12 +2514,19 @@ Do not include any text before or after the HTML table.
                 .replace(/---/g, '<hr class="border-slate-700 my-4">'); // Add horizontal rules
 
             element.dataset.rawMarkdown = rawText;
-            element.innerHTML = html;
+
+            if (element.id === 'analysisOutput') {
+                prepareAnalysisViews(html, rawText);
+            } else {
+                element.innerHTML = html;
+            }
         }
 
         function copyToClipboard() {
             if (!analysisOutput) return;
-            const reportText = analysisOutput.innerText;
+            const reportText = currentAnalysisView === 'data' && analysisDataView
+                ? analysisDataView.innerText
+                : analysisOutput.innerText;
             navigator.clipboard.writeText(reportText).then(() => {
                 copyBtn.innerHTML = '<i data-lucide="check" class="h-5 w-5 mr-2"></i>Copied!';
                 if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1712,7 +2647,7 @@ Do not include any text before or after the HTML table.
                 return;
             }
             const { jsPDF } = window.jspdf;
-            showLoading("Generating PDF preview...");
+            showLoading("Generating PDF preview...", 'download');
             
             try {
                 const rawReportText = analysisOutput?.dataset?.rawMarkdown || '';
@@ -2156,8 +3091,30 @@ Do not include any text before or after the HTML table.
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default tab
-            showTab('singlePlayer');
+            updateWorkflowStage('upload');
+            resetAnalysisViews();
+            renderAnalysisVisuals();
+            if (narrativeScript) narrativeScript.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
+
+            // Set default tab to dashboard
+            showTab('dashboard');
+
+            if (floatingGenerateBtn) {
+                floatingGenerateBtn.classList.remove('hidden');
+                floatingGenerateBtn.addEventListener('click', () => {
+                    showTab('singlePlayer');
+                    analyzeSinglePlayer();
+                });
+            }
+
+            // Quick links to tabs
+            quickActionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.dataset.openTab) {
+                        showTab(button.dataset.openTab);
+                    }
+                });
+            });
 
             // Tab navigation
             tabButtons.forEach(button => {
@@ -2165,15 +3122,53 @@ Do not include any text before or after the HTML table.
                     showTab(button.dataset.tab);
                 });
             });
-            
+
             // API Key management
             if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveApiKey);
-            loadApiKey(); // Load after button listener is attached
-            
+            loadApiKey();
+
             // --- Main Controls ---
-            // Single Player
             if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeSinglePlayer);
             if (clearBtn) clearBtn.addEventListener('click', clearSinglePlayerInputs);
+            if (analysisViewControls) {
+                getAnalysisViewButtons().forEach(button => {
+                    button.addEventListener('click', () => showAnalysisView(button.dataset.view));
+                });
+            }
+            if (reportTheme) {
+                applyReportTheme(reportTheme.value);
+                reportTheme.addEventListener('change', () => applyReportTheme(reportTheme.value));
+            }
+            if (saveReportBtn) saveReportBtn.addEventListener('click', saveCurrentReport);
+            if (loadReportBtn) loadReportBtn.addEventListener('click', () => {
+                renderSavedReports();
+                openReportModal();
+            });
+            if (closeLoadReportModalBtn) closeLoadReportModalBtn.addEventListener('click', closeReportModal);
+            if (savedReportsList) {
+                savedReportsList.addEventListener('click', (event) => {
+                    const loadTarget = event.target.closest('[data-load-report]');
+                    if (loadTarget) {
+                        loadReportById(loadTarget.dataset.loadReport);
+                        return;
+                    }
+                    const deleteTarget = event.target.closest('[data-delete-report]');
+                    if (deleteTarget) {
+                        deleteReportById(deleteTarget.dataset.deleteReport);
+                    }
+                });
+            }
+
+            if (generateNarrativeBtn) generateNarrativeBtn.addEventListener('click', generateNarrativeVideo);
+            if (stopNarrativeBtn) stopNarrativeBtn.addEventListener('click', stopNarrativePlayback);
+
+            if (typeof window.speechSynthesis !== 'undefined') {
+                populateNarrativeVoices();
+                window.speechSynthesis.onvoiceschanged = populateNarrativeVoices;
+            } else {
+                populateNarrativeVoices();
+            }
+
             // Comparison
             if (analyzeCompareBtn) analyzeCompareBtn.addEventListener('click', analyzeComparison);
             if (clearCompareBtn) clearCompareBtn.addEventListener('click', clearCompareInputs);
@@ -2188,7 +3183,10 @@ Do not include any text before or after the HTML table.
             if (closeHowToUseBtn) closeHowToUseBtn.addEventListener('click', closeHowToUse);
             if (closeErrorBtn) closeErrorBtn.addEventListener('click', closeError);
             if (closeLoadOpponentModalBtn) closeLoadOpponentModalBtn.addEventListener('click', closeLoadOpponentModal);
-            if (pdfBtn) pdfBtn.addEventListener('click', generatePDF);
+            if (pdfBtn) pdfBtn.addEventListener('click', () => {
+                updateWorkflowStage('download');
+                generatePDF();
+            });
             if (closePdfPreviewBtn) closePdfPreviewBtn.addEventListener('click', closePdfPreview);
             if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => {
                 if (generatedPdfBlobUrl) {
@@ -2202,22 +3200,19 @@ Do not include any text before or after the HTML table.
             // Export Buttons
             if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
             if (videoBtn) videoBtn.addEventListener('click', findVideos);
-            
-            // Single Player Tab
+
+            // Upload listeners
             setupUploadListeners(dropZoneSingle, fileUploadSingle, imagePreviewSingle, singlePlayerImages);
             if (scanStatsBtn) scanStatsBtn.addEventListener('click', scanStatsFromImage);
             if (visualizeStatsBtn) visualizeStatsBtn.addEventListener('click', visualizeStats);
             if (textStatsSingle) textStatsSingle.addEventListener('input', () => {
                 visualizeStatsBtn.disabled = textStatsSingle.value.trim().length === 0;
             });
-            
-            // Comparison Tab
+
             setupUploadListeners(dropZoneCompare1, fileUploadCompare1, imagePreviewCompare1, compare1Images);
             setupUploadListeners(dropZoneCompare2, fileUploadCompare2, imagePreviewCompare2, compare2Images);
-            
-            // Opposition Tab
             setupUploadListeners(dropZoneOpponent, fileUploadOpponent, imagePreviewOpponent, opponentImages);
-            
+
             // Search Tab
             if (searchButton) searchButton.addEventListener('click', handleSearch);
             if (suggestStatsBtn) suggestStatsBtn.addEventListener('click', suggestStats);
@@ -2236,30 +3231,25 @@ Do not include any text before or after the HTML table.
                 }
             });
             if (newChatBtn) newChatBtn.addEventListener('click', newChat);
-            
+
             // Global Paste for Single Player Tab
             document.addEventListener('paste', (e) => {
-                if (currentTab !== 'singlePlayer') return; // Only on single player tab
-
+                if (currentTab !== 'singlePlayer') return;
                 const target = e.target;
                 if (!target) return;
-
                 const targetTag = target.tagName.toUpperCase();
-                // Let inputs/textareas handle their own paste
-                if (targetTag === 'INPUT' || targetTag === 'TEXTAREA') return; 
-                
-                // Don't re-handle if pasting *on* the dropzone (it has its own listener)
+                if (targetTag === 'INPUT' || targetTag === 'TEXTAREA') return;
                 if (target.id === 'dropZoneSingle' || target.closest('#dropZoneSingle')) return;
-
-                // If we're here, it's a "paste anywhere else" event on the single player tab
                 handlePaste(e, imagePreviewSingle, singlePlayerImages);
             });
-            
+
+            loadSavedReports();
+
             // Initialize lucide icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
-            
+
             // Load jspdf-autotable
             const autoTableScript = document.createElement('script');
             autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
