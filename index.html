@@ -9,6 +9,11 @@
     
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Global Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- Load Lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -63,68 +68,6 @@
         [contenteditable="true"]:focus {
             outline: none;
             box-shadow: 0 0 0 2px #0ea5e9; /* Equivalent to ring-2 ring-sky-500 */
-        }
-
-        .progress-pill {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            border-radius: 1rem;
-            border: 1px solid #334155;
-            background-color: rgba(15, 23, 42, 0.6);
-            padding: 0.75rem 1rem;
-            text-align: center;
-            transition: all 0.2s ease;
-            color: #cbd5f5;
-        }
-
-        .progress-pill.active {
-            border-color: #38bdf8;
-            background-color: rgba(56, 189, 248, 0.12);
-            color: #bae6fd;
-        }
-
-        .progress-pill.completed {
-            border-color: #22c55e;
-            background-color: rgba(34, 197, 94, 0.12);
-            color: #bbf7d0;
-        }
-
-        .progress-index {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 2rem;
-            width: 2rem;
-            border-radius: 9999px;
-            background-color: #0f172a;
-            color: #cbd5f5;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .progress-pill.active .progress-index {
-            background-color: #38bdf8;
-            color: #0f172a;
-        }
-
-        .progress-pill.completed .progress-index {
-            background-color: #22c55e;
-            color: #0f172a;
-        }
-
-        .progress-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 600;
-            color: #94a3b8;
-        }
-
-        .progress-pill.active .progress-label {
-            color: #e0f2fe;
         }
 
         .quick-action {
@@ -213,37 +156,37 @@
             transform: translateY(0);
         }
 
-        .loading-steps {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            width: min(480px, 90vw);
+        .loading-progress-track {
+            width: min(440px, 80vw);
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            position: relative;
         }
 
-        .loading-step {
-            border: 1px solid rgba(71, 85, 105, 0.6);
-            background-color: rgba(15, 23, 42, 0.65);
-            border-radius: 0.85rem;
-            padding: 0.75rem 0.5rem;
-            text-align: center;
-            font-size: 0.7rem;
-            letter-spacing: 0.08em;
+        .loading-progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(59, 130, 246, 0.95));
+            transition: width 0.4s ease;
+        }
+
+        .loading-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            width: min(440px, 80vw);
+            margin-top: 0.75rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            color: #94a3b8;
-            transition: all 0.2s ease;
+            letter-spacing: 0.2em;
+            color: #64748b;
         }
 
-        .loading-step.active {
-            border-color: #38bdf8;
+        .loading-progress-labels span.active {
             color: #e0f2fe;
-            background-color: rgba(56, 189, 248, 0.18);
-        }
-
-        .loading-step.completed {
-            border-color: #22c55e;
-            color: #bbf7d0;
-            background-color: rgba(34, 197, 94, 0.18);
         }
 
         .analysis-theme {
@@ -270,19 +213,215 @@
             box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
         }
 
+        .analysis-report-layout {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1280px) {
+            .analysis-report-layout {
+                grid-template-columns: 320px 1fr;
+                align-items: start;
+            }
+        }
+
+        .analysis-report-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .analysis-report-card {
+            position: relative;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            background: linear-gradient(155deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.65));
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            padding: 1.25rem;
+        }
+
+        .analysis-report-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(148, 163, 184, 0.05);
+            pointer-events: none;
+        }
+
+        .analysis-report-card h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .analysis-metric-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .analysis-metric {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.85rem;
+            border-radius: 14px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .analysis-metric span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .analysis-metric strong {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+
+        .analysis-grade-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 0.9rem 1rem;
+            border-radius: 16px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+
+        .analysis-grade-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #e0f2fe;
+        }
+
+        .analysis-grade-meter {
+            position: relative;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+        }
+
+        .analysis-grade-meter span {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+        }
+
+        .analysis-grade-comment {
+            font-size: 0.8rem;
+            color: #cbd5f5;
+            line-height: 1.4;
+        }
+
+        .analysis-section-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+            .analysis-section-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .analysis-section-card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
+            padding: 1.4rem 1.6rem;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: 0 24px 50px rgba(8, 47, 73, 0.35);
+        }
+
+        .analysis-section-card .analysis-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.01em;
+        }
+
+        .analysis-section-card .analysis-section-body {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #cbd5f5;
+        }
+
+        .analysis-section-card .analysis-section-body > :first-child {
+            margin-top: 0;
+        }
+
+        .analysis-section-card .analysis-section-body > :last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 6px;
+            border-radius: 22px 0 0 22px;
+            background: var(--section-accent, #38bdf8);
+        }
+
+        .analysis-section-card ul {
+            margin: 0;
+            padding-left: 1.1rem;
+        }
+
+        .analysis-section-card li {
+            margin-bottom: 0.35rem;
+        }
+
+        .analysis-hero-visual img {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
+        }
+
+        .analysis-hero-visual figcaption {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #94a3b8;
+            text-align: center;
+        }
+
         @media (max-width: 1024px) {
             #floatingGenerateBtn {
                 right: 1rem;
                 bottom: 1rem;
             }
 
-            .loading-steps {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+            .loading-progress-track,
+            .loading-progress-labels {
+                width: min(360px, 90vw);
             }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-300 font-sans antialiased">
+<body class="bg-slate-950 text-slate-300 font-sans antialiased" style="font-family: 'Inter', 'Poppins', sans-serif;">
 
     <!-- Main Container -->
     <div class="flex flex-col min-h-screen">
@@ -310,6 +449,9 @@
                         </button>
                         <button class="tab-btn" data-tab="singlePlayer">
                             <i data-lucide="user" class="h-4 w-4 mr-2"></i>Single Player
+                        </button>
+                        <button class="tab-btn" data-tab="savedReports">
+                            <i data-lucide="bookmark" class="h-4 w-4 mr-2"></i>Saved Reports
                         </button>
                         <button class="tab-btn" data-tab="comparison">
                             <i data-lucide="users" class="h-4 w-4 mr-2"></i>Comparison
@@ -406,31 +548,6 @@
                 <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-white font-semibold text-lg">Workflow Progress</h3>
-                            <span class="text-xs uppercase tracking-widest text-slate-500">Report Builder</span>
-                        </div>
-                        <div class="grid grid-cols-4 gap-3" id="dashboardProgress">
-                            <div class="progress-pill active">
-                                <span class="progress-index">1</span>
-                                <p class="progress-label">Upload</p>
-                            </div>
-                            <div class="progress-pill">
-                                <span class="progress-index">2</span>
-                                <p class="progress-label">Analysis</p>
-                            </div>
-                            <div class="progress-pill">
-                                <span class="progress-index">3</span>
-                                <p class="progress-label">Summary</p>
-                            </div>
-                            <div class="progress-pill">
-                                <span class="progress-index">4</span>
-                                <p class="progress-label">Download</p>
-                            </div>
-                        </div>
-                        <p class="text-sm text-slate-400">Kick off with assets, monitor AI insights in real time, review condensed findings, and export bespoke decks.</p>
-                    </div>
-                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col gap-4">
-                        <div class="flex items-center justify-between">
                             <h3 class="text-white font-semibold text-lg">Quick Actions</h3>
                             <span class="text-xs uppercase tracking-widest text-slate-500">Productivity</span>
                         </div>
@@ -443,49 +560,28 @@
                     </div>
                 </section>
 
-                <section class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-4">
-                        <h3 class="text-white text-xl font-semibold">AI Narrative Builder</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Transform raw scouting outputs into cinematic video explainers with automated voice-over. Select the tone, preview narration, and ship social-ready clips for stakeholders.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs uppercase tracking-wide text-slate-400">Narrative Tone</label>
-                                <select id="narrativeTone" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                                    <option value="analytical">Analytical</option>
-                                    <option value="motivational">Motivational</option>
-                                    <option value="recruitment">Recruitment Pitch</option>
-                                    <option value="academy">Academy Feedback</option>
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs uppercase tracking-wide text-slate-400">Duration Goal</label>
-                                <select id="narrativeDuration" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                                    <option value="45">45 seconds</option>
-                                    <option value="60">60 seconds</option>
-                                    <option value="90">90 seconds</option>
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs uppercase tracking-wide text-slate-400">Voice</label>
-                                <select id="narrativeVoice" class="bg-slate-900/70 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></select>
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap gap-3">
-                            <button id="generateNarrativeBtn" class="flex items-center gap-2 bg-sky-500/90 hover:bg-sky-400 text-white px-4 py-2 rounded-xl font-medium transition">
-                                <i data-lucide="video" class="h-4 w-4"></i>Build Narrative Video
-                            </button>
-                            <button id="stopNarrativeBtn" class="flex items-center gap-2 bg-slate-800 border border-slate-600 text-slate-200 px-4 py-2 rounded-xl font-medium transition hidden">
-                                <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
-                            </button>
-                        </div>
+                <section class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700 rounded-2xl p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div>
+                        <h3 class="text-white text-xl font-semibold">Workflow Tips</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed max-w-2xl">Jump into a player, comparison, or opposition workspace from the cards above. Each workspace now includes its own AI Narrative Builder for quickly packaging insights into stakeholder-ready clips.</p>
                     </div>
-                    <div class="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 flex flex-col justify-between" id="narrativePreview">
-                        <div>
-                            <h4 class="text-slate-200 font-semibold">Narrative Preview</h4>
-                            <p class="text-xs text-slate-500 mt-1">Content will adapt using the latest scouting report and tone preferences.</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-slate-300">
+                        <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2 shadow-lg shadow-sky-500/10 text-center">
+                            <p class="font-semibold text-sky-300">1</p>
+                            <p class="text-xs uppercase tracking-wide text-slate-500">Upload</p>
                         </div>
-                        <div class="mt-4 space-y-3 max-h-48 overflow-y-auto text-sm text-slate-300" id="narrativeScript"></div>
-                        <div class="mt-4 text-xs text-slate-500">Generated clips are simulated locally with dynamic overlays. Export to MP4 via your preferred editor.</div>
+                        <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2 shadow-lg shadow-sky-500/10 text-center">
+                            <p class="font-semibold text-sky-300">2</p>
+                            <p class="text-xs uppercase tracking-wide text-slate-500">Analyze</p>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2 shadow-lg shadow-sky-500/10 text-center">
+                            <p class="font-semibold text-sky-300">3</p>
+                            <p class="text-xs uppercase tracking-wide text-slate-500">Narrate</p>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2 shadow-lg shadow-sky-500/10 text-center">
+                            <p class="font-semibold text-sky-300">4</p>
+                            <p class="text-xs uppercase tracking-wide text-slate-500">Deliver</p>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -650,7 +746,77 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="bg-slate-800/90 border border-slate-700 rounded-2xl shadow-xl p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-white">AI Narrative Video Creator</h2>
+                            <span class="text-xs uppercase tracking-[0.25em] text-slate-500">Player Story</span>
+                        </div>
+                        <p class="text-sm text-slate-400 leading-relaxed">Transform the latest scouting report into a short-form video script. Choose a tone, adjust duration, and preview narration, on-screen prompts, and recommended B-roll without leaving the workspace.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                                Narrative Tone
+                                <select id="playerNarrativeTone" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                    <option value="analytical">Analytical</option>
+                                    <option value="motivational">Motivational</option>
+                                    <option value="recruitment">Recruitment Pitch</option>
+                                    <option value="academy">Academy Feedback</option>
+                                </select>
+                            </label>
+                            <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                                Duration Goal
+                                <select id="playerNarrativeDuration" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                    <option value="45">45 seconds</option>
+                                    <option value="60">60 seconds</option>
+                                    <option value="90">90 seconds</option>
+                                </select>
+                            </label>
+                            <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                                Voice
+                                <select id="playerNarrativeVoice" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></select>
+                            </label>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button id="playerGenerateNarrativeBtn" class="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-slate-900 font-semibold px-4 py-2 rounded-xl transition">
+                                <i data-lucide="video" class="h-4 w-4"></i>Build Narrative Video
+                            </button>
+                            <button id="playerStopNarrativeBtn" class="flex items-center gap-2 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl font-medium transition hidden">
+                                <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
+                            </button>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-4">
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Voice-Over Preview</h3>
+                                <div id="playerNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-40 overflow-y-auto"></div>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Storyboard Planner</h3>
+                                <div id="playerNarrativeStoryboard" class="space-y-3 text-sm text-slate-300">
+                                    <p class="text-xs text-slate-500">Generate a narrative to view suggested scenes and camera cues.</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500">Audio playback uses your browser voice engine. Export visuals separately for final edits.</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- TAB: Saved Reports -->
+            <div id="savedReportsTab" class="tab-content hidden space-y-6">
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl shadow-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Saved Player Reports</h2>
+                        <p class="text-sm text-slate-400">Quickly reload previous scouting outputs, keep track of themes, and manage your workspace library.</p>
+                    </div>
+                    <button id="openLoadReportModalBtn" class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 hover:border-sky-500 hover:text-sky-300 text-white px-4 py-2 rounded-xl transition">
+                        <i data-lucide="folder-open" class="h-4 w-4"></i>Open Modal View
+                    </button>
+                </div>
+                <div id="savedReportsEmptyState" class="bg-slate-800/60 border border-dashed border-slate-700 rounded-2xl p-10 text-center text-slate-400 text-sm hidden">
+                    <i data-lucide="bookmark-plus" class="mx-auto h-8 w-8 text-slate-500 mb-3"></i>
+                    <p>No saved reports yet. Run a player analysis and click <strong>Save</strong> to build your library.</p>
+                </div>
+                <div id="savedReportsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
             </div>
 
             <!-- TAB: Player Comparison -->
@@ -760,6 +926,58 @@
                         <div id="analysisOutputOpponent" contenteditable="true" class="w-full h-[60vh] overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             <p class="text-slate-400">Your opposition analysis will appear here. Add info and click "Analyze Opponent".</p>
                         </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-white">AI Narrative Video Creator</h2>
+                        <span class="text-xs uppercase tracking-[0.25em] text-slate-500">Opposition Brief</span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">Spin your tactical analysis into a briefing-ready video outline. Generate narration, slide prompts, and closing reminders for coaching presentations.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                            Narrative Tone
+                            <select id="opponentNarrativeTone" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                <option value="analytical">Analytical</option>
+                                <option value="motivational">Motivational</option>
+                                <option value="tactical">Tactical Briefing</option>
+                                <option value="urgent">Urgent Alert</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                            Duration Goal
+                            <select id="opponentNarrativeDuration" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                <option value="45">45 seconds</option>
+                                <option value="60">60 seconds</option>
+                                <option value="90">90 seconds</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs uppercase tracking-wide text-slate-500">
+                            Voice
+                            <select id="opponentNarrativeVoice" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></select>
+                        </label>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="opponentGenerateNarrativeBtn" class="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-900 font-semibold px-4 py-2 rounded-xl transition">
+                            <i data-lucide="video" class="h-4 w-4"></i>Build Briefing Video
+                        </button>
+                        <button id="opponentStopNarrativeBtn" class="flex items-center gap-2 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl font-medium transition hidden">
+                            <i data-lucide="square" class="h-4 w-4"></i>Stop Voice-over
+                        </button>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Briefing Script</h3>
+                            <div id="opponentNarrativeScript" class="space-y-2 text-sm text-slate-300 max-h-40 overflow-y-auto"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Storyboard Planner</h3>
+                            <div id="opponentNarrativeStoryboard" class="space-y-3 text-sm text-slate-300">
+                                <p class="text-xs text-slate-500">Run the AI briefing to populate slide prompts and closing reminders.</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500">Use this script alongside match clips or tactical boards to deliver a concise message.</p>
                     </div>
                 </div>
             </div>
@@ -874,11 +1092,15 @@
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-500"></div>
             <p id="loadingText" class="text-white text-xl mt-4">Analyzing...</p>
-            <div id="loadingStepper" class="loading-steps mt-6">
-                <div class="loading-step active" data-loading-step="upload">Upload</div>
-                <div class="loading-step" data-loading-step="analysis">Analysis</div>
-                <div class="loading-step" data-loading-step="summary">Summary</div>
-                <div class="loading-step" data-loading-step="download">Download</div>
+            <p id="loadingStageLabel" class="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500 mt-3">Preparing Assets</p>
+            <div class="loading-progress-track mt-4">
+                <div id="loadingProgressBar" class="loading-progress-bar"></div>
+            </div>
+            <div class="loading-progress-labels">
+                <span data-loading-label="upload">Upload</span>
+                <span data-loading-label="analysis">Analysis</span>
+                <span data-loading-label="summary">Summary</span>
+                <span data-loading-label="download">Export</span>
             </div>
         </div>
     </div>
@@ -970,6 +1192,8 @@
         </div>
     </div>
 
+    <div id="pdfContent" class="hidden"></div>
+
     <!-- Load Opponent Analysis Modal -->
     <div id="loadOpponentModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[101] flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-lg shadow-2xl max-w-xl w-full p-6 border border-slate-700">
@@ -1002,7 +1226,7 @@
 
 
     <!-- Hidden element for PDF generation -->
-    <div id="pdf-content" class="a4-page" style="position: absolute; left: -9999px; width: 210mm; font-family: 'Times New Roman', serif; color: black; background: white;">
+    <div id="pdf-content" class="a4-page" style="position: absolute; left: -9999px; width: 210mm; font-family: 'Inter', 'Poppins', sans-serif; color: #0f172a; background: #f8fafc;">
         <!-- This will be populated by JS -->
     </div>
 
@@ -1042,6 +1266,9 @@
         const loadReportModal = document.getElementById('loadReportModal');
         const closeLoadReportModalBtn = document.getElementById('closeLoadReportModalBtn');
         const savedReportsList = document.getElementById('savedReportsList');
+        const savedReportsGrid = document.getElementById('savedReportsGrid');
+        const savedReportsEmptyState = document.getElementById('savedReportsEmptyState');
+        const openLoadReportModalBtn = document.getElementById('openLoadReportModalBtn');
         const floatingGenerateBtn = document.getElementById('floatingGenerateBtn');
         const analysisViewControls = document.getElementById('analysisViewControls');
         const analysisDataView = document.getElementById('analysisDataView');
@@ -1051,15 +1278,31 @@
         const reportTheme = document.getElementById('reportTheme');
         const saveReportBtn = document.getElementById('saveReportBtn');
         const loadReportBtn = document.getElementById('loadReportBtn');
-        const narrativeTone = document.getElementById('narrativeTone');
-        const narrativeDuration = document.getElementById('narrativeDuration');
-        const narrativeVoice = document.getElementById('narrativeVoice');
-        const narrativeScript = document.getElementById('narrativeScript');
-        const generateNarrativeBtn = document.getElementById('generateNarrativeBtn');
-        const stopNarrativeBtn = document.getElementById('stopNarrativeBtn');
-        const loadingSteps = document.querySelectorAll('[data-loading-step]');
-        const dashboardProgress = document.getElementById('dashboardProgress');
-        const dashboardPills = dashboardProgress ? Array.from(dashboardProgress.querySelectorAll('.progress-pill')) : [];
+        const narrativeBuilders = {
+            player: {
+                tone: document.getElementById('playerNarrativeTone'),
+                duration: document.getElementById('playerNarrativeDuration'),
+                voice: document.getElementById('playerNarrativeVoice'),
+                script: document.getElementById('playerNarrativeScript'),
+                storyboard: document.getElementById('playerNarrativeStoryboard'),
+                generateBtn: document.getElementById('playerGenerateNarrativeBtn'),
+                stopBtn: document.getElementById('playerStopNarrativeBtn'),
+                context: 'player'
+            },
+            opponent: {
+                tone: document.getElementById('opponentNarrativeTone'),
+                duration: document.getElementById('opponentNarrativeDuration'),
+                voice: document.getElementById('opponentNarrativeVoice'),
+                script: document.getElementById('opponentNarrativeScript'),
+                storyboard: document.getElementById('opponentNarrativeStoryboard'),
+                generateBtn: document.getElementById('opponentGenerateNarrativeBtn'),
+                stopBtn: document.getElementById('opponentStopNarrativeBtn'),
+                context: 'opponent'
+            }
+        };
+        const loadingProgressBar = document.getElementById('loadingProgressBar');
+        const loadingStageLabel = document.getElementById('loadingStageLabel');
+        const loadingProgressLabels = document.querySelectorAll('[data-loading-label]');
         const quickActionButtons = document.querySelectorAll('[data-open-tab]');
 
         // PDF Modal
@@ -1068,6 +1311,7 @@
         const closePdfPreviewBtn = document.getElementById('closePdfPreviewBtn');
         const pdfPreviewFrame = document.getElementById('pdfPreviewFrame');
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const pdfContent = document.getElementById('pdfContent');
         let generatedPdfBlobUrl = null;
 
         // Export Buttons
@@ -1163,6 +1407,12 @@
         let userApiKey = "";
         const LS_REPORT_KEY = 'proScoutSingleReports';
         const STAGE_ORDER = ['upload', 'analysis', 'summary', 'download'];
+        const STAGE_TITLES = {
+            upload: 'Preparing Assets',
+            analysis: 'Running Analysis',
+            summary: 'Building Summary',
+            download: 'Finalizing Export'
+        };
         let savedReports = [];
         let analysisViews = { summary: '', detailed: '', tactical: '', data: '' };
         let currentAnalysisView = 'summary';
@@ -1187,42 +1437,47 @@
             } else {
                 loadingText.textContent = funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
             }
-            if (stage) {
-                updateWorkflowStage(stage);
-            }
+            updateWorkflowStage(stage || 'upload');
             loadingSpinner.classList.remove('hidden');
         }
 
         function hideLoading() {
             loadingSpinner.classList.add('hidden');
+            if (loadingProgressBar) {
+                loadingProgressBar.style.width = '0%';
+            }
+            if (loadingStageLabel) {
+                loadingStageLabel.textContent = STAGE_TITLES.upload;
+            }
+            if (loadingProgressLabels && loadingProgressLabels.length) {
+                loadingProgressLabels.forEach(label => label.classList.remove('active'));
+            }
         }
 
         function updateWorkflowStage(stage) {
             const stageIndex = STAGE_ORDER.indexOf(stage);
             if (stageIndex === -1) return;
 
-            if (loadingSteps && loadingSteps.length) {
-                loadingSteps.forEach((step, index) => {
-                    step.classList.remove('active', 'completed');
-                    if (index < stageIndex) {
-                        step.classList.add('completed');
-                    } else if (index === stageIndex) {
-                        step.classList.add('active');
-                    }
+            if (loadingProgressBar) {
+                const progress = STAGE_ORDER.length > 1
+                    ? (stageIndex / (STAGE_ORDER.length - 1)) * 100
+                    : 100;
+                loadingProgressBar.style.width = `${Math.max(progress, 0)}%`;
+            }
+
+            if (loadingStageLabel) {
+                loadingStageLabel.textContent = STAGE_TITLES[stage] || stage.toUpperCase();
+            }
+
+            if (loadingProgressLabels && loadingProgressLabels.length) {
+                loadingProgressLabels.forEach(label => {
+                    const labelStage = label.dataset.loadingLabel;
+                    const labelIndex = STAGE_ORDER.indexOf(labelStage);
+                    if (labelIndex === -1) return;
+                    label.classList.toggle('active', labelIndex <= stageIndex);
                 });
             }
 
-            if (dashboardPills && dashboardPills.length) {
-                dashboardPills.forEach((pill, index) => {
-                    pill.classList.remove('active', 'completed');
-                    if (index < stageIndex) {
-                        pill.classList.add('completed');
-                    }
-                    if (index === stageIndex) {
-                        pill.classList.add('active');
-                    }
-                });
-            }
         }
 
         function showError(message) {
@@ -1340,7 +1595,7 @@
         }
 
         function prepareAnalysisViews(html, markdown) {
-            analysisViews = buildAnalysisSections(html);
+            analysisViews = buildAnalysisSections(html, markdown);
             if (analysisDataView) {
                 analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500">No structured data tables detected.</p>';
             }
@@ -1348,7 +1603,130 @@
             updateHighlights();
         }
 
-        function buildAnalysisSections(html) {
+        function getSectionPalette(title = '') {
+            const lower = title.toLowerCase();
+            if (lower.includes('strength')) {
+                return { accent: '#14b8a6', text: '#5eead4', icon: '✅' };
+            }
+            if (lower.includes('weak')) {
+                return { accent: '#f87171', text: '#fca5a5', icon: '⚠️' };
+            }
+            if (lower.includes('tactic')) {
+                return { accent: '#6366f1', text: '#c7d2fe', icon: '♟️' };
+            }
+            if (lower.includes('position')) {
+                return { accent: '#0ea5e9', text: '#bae6fd', icon: '📍' };
+            }
+            if (lower.includes('action')) {
+                return { accent: '#a855f7', text: '#e9d5ff', icon: '🎯' };
+            }
+            if (lower.includes('mentality')) {
+                return { accent: '#f97316', text: '#fed7aa', icon: '🧠' };
+            }
+            if (lower.includes('conclusion') || lower.includes('recommend')) {
+                return { accent: '#22d3ee', text: '#bae6fd', icon: '📌' };
+            }
+            if (lower.includes('similar')) {
+                return { accent: '#22c55e', text: '#bbf7d0', icon: '🤝' };
+            }
+            if (lower.includes('development') || lower.includes('plan')) {
+                return { accent: '#38bdf8', text: '#bae6fd', icon: '📈' };
+            }
+            if (lower.includes('rating')) {
+                return { accent: '#38bdf8', text: '#bae6fd', icon: '⭐' };
+            }
+            if (lower.includes('summary') || lower.includes('overview')) {
+                return { accent: '#0ea5e9', text: '#bae6fd', icon: '📝' };
+            }
+            return { accent: '#7dd3fc', text: '#e0f2fe', icon: '📊' };
+        }
+
+        function gradeLetterToScore(grade = '') {
+            if (!grade) return 0;
+            const normalized = grade.trim().toUpperCase();
+            const baseLetter = normalized.charAt(0);
+            const baseScores = { A: 95, B: 85, C: 75, D: 65, E: 55, F: 45 };
+            let score = baseScores[baseLetter] ?? 60;
+            if (normalized.includes('+')) score += 4;
+            if (normalized.includes('-')) score -= 4;
+            return Math.max(0, Math.min(100, score));
+        }
+
+        function gradeLetterColor(grade = '') {
+            const letter = (grade || '').trim().charAt(0).toUpperCase();
+            switch (letter) {
+                case 'A':
+                    return '#2dd4bf';
+                case 'B':
+                    return '#38bdf8';
+                case 'C':
+                    return '#fbbf24';
+                case 'D':
+                    return '#fb7185';
+                default:
+                    return '#94a3b8';
+            }
+        }
+
+        function extractCategoryGrades(markdown = '') {
+            if (!markdown) return [];
+            const lines = markdown.split(/\r?\n/);
+            const headerIndex = lines.findIndex(line => /\|\s*Category\s*\|\s*Grade\s*\|\s*Comment\s*\|/i.test(line));
+            if (headerIndex === -1) return [];
+
+            const grades = [];
+            for (let i = headerIndex + 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line.startsWith('|')) break;
+                if (/^\|\s*:?-+/.test(line)) continue;
+                const rawCells = line.replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+                if (rawCells.length >= 3) {
+                    const [category, grade, comment] = rawCells;
+                    if (category && grade) {
+                        grades.push({ category, grade, comment: comment || '' });
+                    }
+                }
+            }
+            return grades;
+        }
+
+        function extractKeyMetrics(markdown = '') {
+            if (!markdown) return [];
+            const metricPatterns = [
+                { label: 'Goals', icon: '⚽', regex: /(goals?)[^\d]*(\d+(?:\.\d+)?)/i },
+                { label: 'Assists', icon: '🎯', regex: /(assists?)[^\d]*(\d+(?:\.\d+)?)/i },
+                { label: 'Tackles', icon: '🛡️', regex: /(tackles?)[^\d]*(\d+(?:\.\d+)?)/i },
+                { label: 'xG', icon: '📊', regex: /(xg)[^\d]*(\d+(?:\.\d+)?)/i },
+                { label: 'xA', icon: '🧠', regex: /(xa)[^\d]*(\d+(?:\.\d+)?)/i },
+                { label: 'Rating', icon: '⭐', regex: /(rating|match rating|score)[^\d]*(\d+(?:\.\d+)?)/i }
+            ];
+
+            const found = [];
+            metricPatterns.forEach(pattern => {
+                const match = markdown.match(pattern.regex);
+                if (match) {
+                    found.push({ label: pattern.label, value: match[2], icon: pattern.icon });
+                }
+            });
+
+            return found.filter((metric, index, self) =>
+                index === self.findIndex(other => other.label === metric.label)
+            ).slice(0, 6);
+        }
+
+        function pickCategoryIcon(category = '') {
+            const lower = category.toLowerCase();
+            if (/defen|duel|press/i.test(lower)) return '🛡️';
+            if (/attack|final|chance/i.test(lower)) return '⚡';
+            if (/tactic|fit|role|system/i.test(lower)) return '♟️';
+            if (/passing|build|distribution/i.test(lower)) return '🎯';
+            if (/mentality|focus|psych/i.test(lower)) return '🧠';
+            if (/physical|athletic|pace|power/i.test(lower)) return '💪';
+            if (/development|potential/i.test(lower)) return '🌱';
+            return '📈';
+        }
+
+        function buildAnalysisSections(html, rawMarkdown = '') {
             const views = { summary: '', detailed: html, tactical: '', data: '' };
             const parser = new DOMParser();
             const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
@@ -1363,16 +1741,15 @@
             const sections = [];
             const headings = container.querySelectorAll('h3');
             headings.forEach(heading => {
-                const sectionWrapper = document.createElement('div');
-                sectionWrapper.appendChild(heading.cloneNode(true));
+                const sectionContent = document.createElement('div');
                 let next = heading.nextElementSibling;
                 while (next && next.tagName !== 'H3') {
-                    sectionWrapper.appendChild(next.cloneNode(true));
+                    sectionContent.appendChild(next.cloneNode(true));
                     next = next.nextElementSibling;
                 }
                 sections.push({
                     title: heading.textContent || '',
-                    html: sectionWrapper.innerHTML
+                    html: sectionContent.innerHTML.trim()
                 });
             });
 
@@ -1383,19 +1760,128 @@
                 views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
             }
 
+            const renderCard = (section) => {
+                const palette = getSectionPalette(section.title);
+                const safeTitle = escapeHtml(section.title || 'Untitled Section');
+                const body = section.html && section.html.trim()
+                    ? section.html
+                    : '<p class="text-slate-500 text-sm">No insights provided.</p>';
+                return `
+                    <article class="analysis-section-card" style="--section-accent:${palette.accent};">
+                        <div class="analysis-section-title">
+                            <span>${palette.icon || '📊'}</span>
+                            <span>${safeTitle}</span>
+                        </div>
+                        <div class="analysis-section-body prose prose-invert prose-sm max-w-none">${body}</div>
+                    </article>
+                `;
+            };
+
+            const renderGrid = (list) => {
+                if (!list.length) return '';
+                return `<div class="analysis-section-grid">${list.map(renderCard).join('')}</div>`;
+            };
+
+            const metrics = extractKeyMetrics(rawMarkdown);
+            const grades = extractCategoryGrades(rawMarkdown);
+
+            const identityCard = (() => {
+                const pieces = [];
+                if (playerName?.value) pieces.push(`<div class="text-2xl font-semibold text-white">${escapeHtml(playerName.value)}</div>`);
+                const metaBits = [];
+                if (playerAge?.value) metaBits.push(`Age ${escapeHtml(playerAge.value)}`);
+                if (playerClub?.value) metaBits.push(escapeHtml(playerClub.value));
+                if (playerLeague?.value) metaBits.push(escapeHtml(playerLeague.value));
+                const subtitle = metaBits.length ? `<p class="text-sm text-slate-300/80">${metaBits.join(' • ')}</p>` : '';
+                const details = [];
+                if (playerPositions?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Role</span><p class="text-sm text-slate-200">${escapeHtml(playerPositions.value)}</p></div>`);
+                if (matchContext?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Context</span><p class="text-sm text-slate-200">${escapeHtml(matchContext.value)}</p></div>`);
+                if (reportType?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Template</span><p class="text-sm text-slate-200">${escapeHtml(reportType.options[reportType.selectedIndex]?.text || reportType.value)}</p></div>`);
+                return `
+                    <div class="analysis-report-card">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.35em] text-sky-400/70">Player Profile</p>
+                                ${pieces.join('') || '<div class="text-xl font-semibold text-white">Player Name</div>'}
+                                ${subtitle}
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-500/30 text-xs font-semibold tracking-wide text-sky-200">AI Report</span>
+                        </div>
+                        ${details.length ? `<div class="mt-4 grid grid-cols-1 gap-3 text-sm">${details.join('')}</div>` : ''}
+                    </div>
+                `;
+            })();
+
+            const metricsCard = metrics.length ? `
+                <div class="analysis-report-card">
+                    <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Match Metrics</h4>
+                    <div class="analysis-metric-list mt-3">
+                        ${metrics.map(metric => `<div class="analysis-metric"><span>${metric.icon} ${escapeHtml(metric.label)}</span><strong>${escapeHtml(metric.value)}</strong></div>`).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            const gradesCard = grades.length ? `
+                <div class="analysis-report-card">
+                    <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Category Grades</h4>
+                    <div class="mt-3 flex flex-col gap-3">
+                        ${grades.map(grade => {
+                            const score = gradeLetterToScore(grade.grade);
+                            const color = gradeLetterColor(grade.grade);
+                            return `
+                                <div class="analysis-grade-card">
+                                    <div class="analysis-grade-header">
+                                        <span>${pickCategoryIcon(grade.category)} ${escapeHtml(grade.category)}</span>
+                                        <span>${escapeHtml(grade.grade)}</span>
+                                    </div>
+                                    <div class="analysis-grade-meter">
+                                        <span style="width:${score}%; background:${color};"></span>
+                                    </div>
+                                    ${grade.comment ? `<p class="analysis-grade-comment">${escapeHtml(grade.comment)}</p>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            const heroCard = (() => {
+                if (!singlePlayerImages.length) return '';
+                const primary = singlePlayerImages[0];
+                const src = primary.preview || `data:${primary.mimeType};base64,${primary.base64}`;
+                return `
+                    <div class="analysis-report-card">
+                        <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Match Visual</h4>
+                        <figure class="analysis-hero-visual mt-3">
+                            <img src="${src}" alt="Player visual asset">
+                            <figcaption>Uploaded reference</figcaption>
+                        </figure>
+                    </div>
+                `;
+            })();
+
             const summarySections = sections.filter(section => /summary|overview|highlights|rating|conclusion|recommendation/i.test(section.title));
             const tacticalSections = sections.filter(section => /tactic|position|positional|phase|action|mentality|role|structure/i.test(section.title));
 
-            if (!summarySections.length && sections.length) {
-                summarySections.push(sections[0]);
-            }
+            const summarySelection = summarySections.length ? summarySections : sections.slice(0, Math.min(sections.length, 3));
+            const tacticalSelection = tacticalSections.length ? tacticalSections : sections.filter(section => /tactic|position|action|mentality|phase/i.test(section.title)).slice(0, 4);
 
-            if (!tacticalSections.length && sections.length > 1) {
-                tacticalSections.push(...sections.slice(1, Math.min(sections.length, 3)));
-            }
+            const summaryGrid = summarySelection.length ? renderGrid(summarySelection) : '';
+            const leftColumn = [identityCard, metricsCard, gradesCard || '', heroCard].filter(Boolean).join('');
 
-            views.summary = summarySections.map(section => section.html).join('') || html;
-            views.tactical = tacticalSections.map(section => section.html).join('') || html;
+            views.summary = `
+                <div class="analysis-report-layout">
+                    <aside class="analysis-report-column" data-highlight-ignore="true">
+                        ${leftColumn || '<div class="analysis-report-card"><p class="text-sm text-slate-300">Player profile and metrics will populate here after generating a report.</p></div>'}
+                    </aside>
+                    <section class="analysis-report-column">
+                        ${summaryGrid || renderGrid(sections) || '<div class="analysis-report-card"><p class="text-sm text-slate-300">Run an analysis to populate insights.</p></div>'}
+                    </section>
+                </div>
+            `;
+
+            views.tactical = tacticalSelection.length ? renderGrid(tacticalSelection) : (sections.length ? renderGrid(sections.slice(1, Math.min(sections.length, 4))) : html);
+            views.detailed = sections.length ? renderGrid(sections) : html;
 
             return views;
         }
@@ -1430,6 +1916,7 @@
 
             const parser = new DOMParser();
             const doc = parser.parseFromString(`<div>${summaryHtml}</div>`, 'text/html');
+            doc.querySelectorAll('[data-highlight-ignore]').forEach(node => node.remove());
             const bullets = Array.from(doc.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
             const paragraphs = Array.from(doc.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
 
@@ -1485,10 +1972,16 @@
 
         function renderSavedReports() {
             if (!savedReportsList) return;
+
             savedReportsList.innerHTML = '';
+            if (savedReportsGrid) savedReportsGrid.innerHTML = '';
+            if (savedReportsEmptyState) savedReportsEmptyState.classList.add('hidden');
 
             if (!savedReports.length) {
                 savedReportsList.innerHTML = '<p class="text-slate-400">No saved reports yet.</p>';
+                if (savedReportsGrid) savedReportsGrid.innerHTML = '';
+                if (savedReportsEmptyState) savedReportsEmptyState.classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
                 return;
             }
 
@@ -1538,7 +2031,51 @@
                 card.appendChild(actions);
 
                 savedReportsList.appendChild(card);
+
+                if (savedReportsGrid) {
+                    const gridCard = document.createElement('article');
+                    gridCard.className = 'bg-slate-800/80 border border-slate-700 rounded-2xl shadow-lg p-5 flex flex-col gap-4 hover:border-sky-500/70 transition';
+
+                    const gridHeader = document.createElement('div');
+                    gridHeader.className = 'flex items-center justify-between';
+                    const gridTitle = document.createElement('h3');
+                    gridTitle.className = 'text-lg font-semibold text-white truncate';
+                    gridTitle.textContent = report.playerName || 'Unnamed Player';
+                    const gridBadge = document.createElement('span');
+                    gridBadge.className = 'text-xs uppercase tracking-[0.2em] text-slate-500';
+                    gridBadge.textContent = report.reportType === 'pro' ? 'Pro Report' : 'Quick Report';
+                    gridHeader.appendChild(gridTitle);
+                    gridHeader.appendChild(gridBadge);
+
+                    const gridMeta = document.createElement('p');
+                    gridMeta.className = 'text-xs text-slate-400';
+                    gridMeta.textContent = `${new Date(report.timestamp).toLocaleString()} • Theme: ${report.theme || 'default'}`;
+
+                    const gridFooter = document.createElement('div');
+                    gridFooter.className = 'flex items-center justify-between gap-2';
+
+                    const loadAction = document.createElement('button');
+                    loadAction.className = 'flex-1 inline-flex items-center justify-center gap-2 bg-sky-500/90 hover:bg-sky-400 text-slate-900 font-semibold px-3 py-2 rounded-xl transition';
+                    loadAction.dataset.loadReport = report.id;
+                    loadAction.innerHTML = '<i data-lucide="download" class="h-4 w-4"></i>Load';
+
+                    const deleteAction = document.createElement('button');
+                    deleteAction.className = 'flex items-center justify-center gap-2 bg-slate-900 border border-slate-700 hover:border-red-500 hover:text-red-300 text-slate-200 px-3 py-2 rounded-xl transition';
+                    deleteAction.dataset.deleteReport = report.id;
+                    deleteAction.innerHTML = '<i data-lucide="trash-2" class="h-4 w-4"></i>';
+
+                    gridFooter.appendChild(loadAction);
+                    gridFooter.appendChild(deleteAction);
+
+                    gridCard.appendChild(gridHeader);
+                    gridCard.appendChild(gridMeta);
+                    gridCard.appendChild(gridFooter);
+
+                    savedReportsGrid.appendChild(gridCard);
+                }
             });
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function saveCurrentReport() {
@@ -1597,6 +2134,7 @@
             displayResults(report.markdown, analysisOutput);
             updateWorkflowStage('summary');
             closeReportModal();
+            showTab('singlePlayer');
         }
 
         function deleteReportById(id) {
@@ -1615,74 +2153,186 @@
             if (loadReportModal) loadReportModal.classList.add('hidden');
         }
 
+        let activeNarrativeKey = null;
+
         function populateNarrativeVoices() {
-            if (!narrativeVoice || typeof window.speechSynthesis === 'undefined') {
-                if (narrativeVoice) {
-                    narrativeVoice.innerHTML = '<option value="">System Default</option>';
+            const voices = typeof window.speechSynthesis !== 'undefined'
+                ? window.speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('en'))
+                : [];
+
+            Object.values(narrativeBuilders).forEach(builder => {
+                if (!builder?.voice) return;
+                if (!voices.length) {
+                    builder.voice.innerHTML = '<option value="">System Default</option>';
+                    return;
                 }
-                return;
-            }
-
-            const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('en'));
-            if (!voices.length) {
-                narrativeVoice.innerHTML = '<option value="">System Default</option>';
-                return;
-            }
-
-            narrativeVoice.innerHTML = voices.map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`).join('');
+                builder.voice.innerHTML = voices.map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`).join('');
+            });
         }
 
-        function stopNarrativePlayback() {
+        function stopNarrativePlayback(builderKey = activeNarrativeKey) {
             if (typeof window.speechSynthesis !== 'undefined') {
                 window.speechSynthesis.cancel();
             }
             speechUtterance = null;
-            if (stopNarrativeBtn) stopNarrativeBtn.classList.add('hidden');
+            const builder = builderKey ? narrativeBuilders[builderKey] : null;
+            if (builder?.stopBtn) {
+                builder.stopBtn.classList.add('hidden');
+            }
+            activeNarrativeKey = null;
         }
 
-        function speakNarrative(text) {
+        function speakNarrative(text, builderKey) {
             if (typeof window.speechSynthesis === 'undefined') return;
             stopNarrativePlayback();
+            const builder = narrativeBuilders[builderKey];
+            if (!builder) return;
+
+            activeNarrativeKey = builderKey;
             speechUtterance = new SpeechSynthesisUtterance(text.replace(/[*_`]/g, ''));
-            const duration = parseInt(narrativeDuration?.value || '60', 10);
+            const duration = parseInt(builder.duration?.value || '60', 10);
             speechUtterance.rate = duration <= 45 ? 1.2 : duration >= 90 ? 0.9 : 1;
-            if (narrativeVoice && narrativeVoice.value) {
-                const targetVoice = window.speechSynthesis.getVoices().find(voice => voice.name === narrativeVoice.value);
+
+            if (builder.voice && builder.voice.value) {
+                const targetVoice = window.speechSynthesis.getVoices().find(voice => voice.name === builder.voice.value);
                 if (targetVoice) speechUtterance.voice = targetVoice;
             }
+
             speechUtterance.onend = () => {
-                if (stopNarrativeBtn) stopNarrativeBtn.classList.add('hidden');
+                if (builder?.stopBtn) builder.stopBtn.classList.add('hidden');
+                activeNarrativeKey = null;
             };
+
             window.speechSynthesis.speak(speechUtterance);
-            if (stopNarrativeBtn) stopNarrativeBtn.classList.remove('hidden');
+            if (builder?.stopBtn) builder.stopBtn.classList.remove('hidden');
         }
 
-        async function generateNarrativeVideo() {
-            if (!analysisOutput || !analysisOutput.dataset.rawMarkdown) {
-                showError('Generate a scouting report before building the narrative.');
-                return;
-            }
+        function renderNarrativeStoryboard(rawText = '', builderKey) {
+            const builder = narrativeBuilders[builderKey];
+            if (!builder?.storyboard) return;
 
-            const tone = narrativeTone?.value || 'analytical';
-            const duration = narrativeDuration?.value || '60';
-            const theme = reportTheme?.value || 'default';
-
-            showLoading('Generating narrative storyboard...', 'analysis');
-
-            const prompt = `You are a creative football storyteller. Using the following scouting report, craft a ${duration}-second voice-over script with scene cues. Tone: ${tone}. Theme: ${theme}.\n\nReport:\n${analysisOutput.dataset.rawMarkdown}\n\nReturn Markdown with sections: \n## Voice-Over Script (2-3 paragraphs)\n## On-Screen Prompts (bullet list)\n## Recommended B-Roll (bullet list).`;
-
-            try {
-                const narrative = await callGeminiApi([{ text: prompt }], false);
-                const formatted = formatChatText(narrative);
-                if (narrativeScript) {
-                    narrativeScript.innerHTML = formatted;
+            const config = builderKey === 'player'
+                ? {
+                    voice: 'Voice-Over Script',
+                    prompts: 'On-Screen Prompts',
+                    visuals: 'Recommended B-Roll',
+                    labels: ['Voice-Over Beats', 'On-Screen Prompts', 'B-Roll Ideas']
                 }
-                speakNarrative(narrative);
-                updateWorkflowStage('summary');
-            } catch (error) {
-                showError(`Failed to build narrative: ${error.message}`);
-            } finally {
-                hideLoading();
+                : {
+                    voice: 'Briefing Script',
+                    prompts: 'Key Slides',
+                    visuals: 'Final Reminder',
+                    labels: ['Briefing Beats', 'Slide Prompts', 'Closing Reminders']
+                };
+
+            const extractSection = (heading) => {
+                if (!rawText) return '';
+                const regex = new RegExp(`##\\s*${heading}[\\s\\S]*?(?=\\n##|$)`, 'i');
+                const match = rawText.match(regex);
+                if (!match) return '';
+                return match[0].replace(/##[^\n]*\n?/, '').trim();
+            };
+
+            const cleanLine = (line) => escapeHtml(line.replace(/^[*-]\s*/, '').replace(/[*_`]/g, '').trim());
+            const toItems = (block) => block
+                .split(/\n+/)
+                .map(cleanLine)
+                .filter(Boolean);
+
+            const voiceItems = toItems(extractSection(config.voice));
+            const promptItems = toItems(extractSection(config.prompts));
+            const visualItems = toItems(extractSection(config.visuals));
+
+            const buildList = (items, ordered = false) => {
+                if (!items.length) {
+                    return '<p class="text-xs text-slate-500">Will populate after generation.</p>';
+                }
+                const listTag = ordered ? 'ol' : 'ul';
+                const listClass = ordered ? 'list-decimal' : 'list-disc';
+                return `<${listTag} class="${listClass} pl-4 space-y-2 text-sm text-slate-200">${items.map(item => `<li>${item}</li>`).join('')}</${listTag}>`;
+            };
+
+            builder.storyboard.innerHTML = `
+                <div class="grid gap-3 lg:grid-cols-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[0]}</h4>
+                        ${buildList(voiceItems, true)}
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[1]}</h4>
+                        ${buildList(promptItems)}
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[2]}</h4>
+                        ${buildList(visualItems)}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function generateNarrativeVideo(builderKey) {
+            const builder = narrativeBuilders[builderKey];
+            if (!builder) return;
+
+            const duration = builder.duration?.value || '60';
+            const tone = builder.tone?.value || 'analytical';
+
+            if (builderKey === 'player') {
+                if (!analysisOutput || !analysisOutput.dataset.rawMarkdown) {
+                    showError('Generate a scouting report before building the narrative.');
+                    return;
+                }
+
+                const theme = reportTheme?.value || 'default';
+                showLoading('Generating narrative storyboard...', 'analysis');
+                if (builder.storyboard) {
+                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                }
+
+                const prompt = `You are a creative football storyteller. Using the following scouting report, craft a ${duration}-second voice-over script with scene cues. Tone: ${tone}. Theme: ${theme}.\n\nReport:\n${analysisOutput.dataset.rawMarkdown}\n\nReturn Markdown with sections: \n## Voice-Over Script (2-3 paragraphs)\n## On-Screen Prompts (bullet list)\n## Recommended B-Roll (bullet list).`;
+
+                try {
+                    const narrative = await callGeminiApi([{ text: prompt }], false);
+                    const formatted = formatChatText(narrative);
+                    if (builder.script) {
+                        builder.script.innerHTML = formatted;
+                    }
+                    renderNarrativeStoryboard(narrative, builderKey);
+                    speakNarrative(narrative, builderKey);
+                    updateWorkflowStage('summary');
+                } catch (error) {
+                    showError(`Failed to build narrative: ${error.message}`);
+                } finally {
+                    hideLoading();
+                }
+            } else if (builderKey === 'opponent') {
+                const opponentContent = analysisOutputOpponent?.innerText?.trim();
+                if (!opponentContent) {
+                    showError('Generate an opposition report before building the briefing.');
+                    return;
+                }
+
+                showLoading('Drafting opposition briefing...', 'analysis');
+                if (builder.storyboard) {
+                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                }
+
+                const prompt = `You are an elite tactical presenter. Summarize the following opposition scouting report into a ${duration}-second voice-over script with actionable cues. Tone: ${tone}.\n\nReport:\n${opponentContent}\n\nReturn Markdown with sections: \n## Briefing Script (2-3 paragraphs)\n## Key Slides (bullet list)\n## Final Reminder (1-2 bullet points).`;
+
+                try {
+                    const narrative = await callGeminiApi([{ text: prompt }], false);
+                    const formatted = formatChatText(narrative);
+                    if (builder.script) {
+                        builder.script.innerHTML = formatted;
+                    }
+                    renderNarrativeStoryboard(narrative, builderKey);
+                    speakNarrative(narrative, builderKey);
+                    updateWorkflowStage('summary');
+                } catch (error) {
+                    showError(`Failed to build briefing narrative: ${error.message}`);
+                } finally {
+                    hideLoading();
+                }
             }
         }
 
@@ -2068,10 +2718,11 @@
             
             prompt += "--- INSTRUCTIONS ---\n";
             prompt += "Analyze the heatmap images, stats images, and text data.\n";
+            prompt += "Immediately after Section 1, include a markdown table with columns | Category | Grade | Comment | covering at minimum Defensive Ability, Attacking Impact, and Tactical Fit. Use letter grades (A+ to F).\n";
 
             if (reportType.value === 'quick') {
                 prompt += "Generate a 'Quick Report' using the following 7-point template. Be detailed and insightful for each section. Use markdown headers (e.g., '## 1. Title') and '---' separators.\n";
-                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., B+, 7.5/10) and 1-2 sentences justifying it based on the data.)\n\n---\n\n";
+                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., B+, 7.5/10) and 1-2 sentences justifying it based on the data. Follow this section with the required Category/Grade/Comment table.)\n\n---\n\n";
                 prompt += "## 2. Likely Position(s) & Role\n(Based on the heatmap and stats, what is their most likely position and tactical role? e.g., 'Deep-Lying Playmaker', 'Inverted Winger')\n\n---\n\n";
                 prompt += "## 3. Key Duties & Playstyle\n(Describe their main actions and style. e.g., 'Controls tempo, progressive passer, avoids 1v1 duels.')\n\n---\n\n";
                 prompt += "## 4. Key Strengths (Pros)\n(List 3-4 bullet points based on the data.)\n\n---\n\n";
@@ -2080,7 +2731,7 @@
                 prompt += "## 7. Suggested Development Plan\n(Based on the 'Cons', suggest 2-3 actionable development points.)\n";
             } else {
                 prompt += "Generate a 'Pro Scout Report' using the following 8-point professional template. Be extremely detailed, analytical, and use scouting terminology. Use markdown headers (e.g., '## 1. Title') and '---' separators between sections.\n\n";
-                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., 'A- ' or '8.0/10') and a 1-2 sentence justification based *only* on the provided match data.)\n\n---\n\n";
+                prompt += "## 1. AI-Calculated Performance Rating\n(Provide a rating (e.g., 'A-' or '8.0/10') and a 1-2 sentence justification based *only* on the provided match data. Follow this section with the required Category/Grade/Comment table.)\n\n---\n\n";
                 prompt += "## 2. Summary (Overview)\n(A brief overview of the player's performance, role, key strengths, and areas for improvement.)\n\n---\n\n";
                 prompt += "## 3. Positional Play\n(Analyze positioning in Offensive, Defensive, and Transition phases based on the heatmap and stats.)\n\n---\n\n";
                 prompt += "## 4. Key Actions (PMDS Framework)\n(Break down their most critical actions using PMDS: Position, Moment, Direction, Speed. e.g., 'Pressing: Showed good speed to close down, but his direction was poor, opening a passing lane.')\n\n---\n\n";
@@ -2641,14 +3292,191 @@ Do not include any text before or after the HTML table.
         
         // --- PDF Generation ---
         
+        function escapeHtml(str = '') {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function convertInlineMarkdown(text = '') {
+            return escapeHtml(text)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/_(.+?)_/g, '<em>$1</em>');
+        }
+
+        function buildPdfTableHtml(lines) {
+            if (!lines.length) return '';
+            const headerCells = lines[0].split('|').filter(Boolean).map(cell => convertInlineMarkdown(cell.trim()));
+            const bodyRows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const row = lines[i].trim();
+                if (!row.startsWith('|')) break;
+                if (/^\|\s*:?-+\s*:?(\|\s*:?-+\s*:?)*\|?$/.test(row)) continue;
+                const cells = row.split('|').filter(Boolean).map(cell => convertInlineMarkdown(cell.trim()));
+                if (cells.length) bodyRows.push(`<tr>${cells.map(cell => `<td>${cell}</td>`).join('')}</tr>`);
+            }
+            if (!bodyRows.length) return '';
+            const headerHtml = `<thead><tr>${headerCells.map(cell => `<th>${cell}</th>`).join('')}</tr></thead>`;
+            return `<table>${headerHtml}<tbody>${bodyRows.join('')}</tbody></table>`;
+        }
+
+        function formatMarkdownForPdf(markdown = '') {
+            if (!markdown.trim()) return '<p class="pdf-empty">N/A</p>';
+            const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
+            const htmlParts = [];
+            let buffer = [];
+
+            const flushParagraph = () => {
+                if (!buffer.length) return;
+                htmlParts.push(`<p>${convertInlineMarkdown(buffer.join(' ').trim())}</p>`);
+                buffer = [];
+            };
+
+            for (let i = 0; i < lines.length; i++) {
+                const raw = lines[i].trim();
+                if (!raw) {
+                    flushParagraph();
+                    continue;
+                }
+
+                if (raw === '---') {
+                    flushParagraph();
+                    htmlParts.push('<div class="pdf-divider"></div>');
+                    continue;
+                }
+
+                if (raw.startsWith('|')) {
+                    flushParagraph();
+                    const tableLines = [];
+                    while (i < lines.length && lines[i].trim().startsWith('|')) {
+                        tableLines.push(lines[i].trim());
+                        i++;
+                    }
+                    i--;
+                    const tableHtml = buildPdfTableHtml(tableLines);
+                    if (tableHtml) htmlParts.push(tableHtml);
+                    continue;
+                }
+
+                if (raw.startsWith('- ')) {
+                    flushParagraph();
+                    const listItems = [];
+                    while (i < lines.length && lines[i].trim().startsWith('- ')) {
+                        listItems.push(`<li>${convertInlineMarkdown(lines[i].trim().slice(2))}</li>`);
+                        i++;
+                    }
+                    i--;
+                    if (listItems.length) htmlParts.push(`<ul>${listItems.join('')}</ul>`);
+                    continue;
+                }
+
+                buffer.push(raw);
+            }
+
+            flushParagraph();
+            return htmlParts.join('');
+        }
+
+        function extractCategoryGrades(markdown = '') {
+            const rows = [];
+            const lines = markdown.split('\n');
+            let capture = false;
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!capture && /\|\s*Category\s*\|\s*Grade\s*\|\s*Comment\s*\|/i.test(trimmed)) {
+                    capture = true;
+                    continue;
+                }
+                if (capture) {
+                    if (!trimmed.startsWith('|') || !trimmed.includes('|')) {
+                        capture = false;
+                        continue;
+                    }
+                    if (/^\|\s*:?-+\s*:?(\|\s*:?-+\s*:?)*\|?$/.test(trimmed)) {
+                        continue;
+                    }
+                    const cells = trimmed.split('|').map(cell => cell.trim()).filter(Boolean);
+                    if (cells.length >= 3) {
+                        rows.push({
+                            category: cells[0],
+                            grade: cells[1],
+                            comment: cells.slice(2).join(' | ')
+                        });
+                    }
+                }
+            }
+            return rows;
+        }
+
+        function gradeToScore(grade = '') {
+            const scale = {
+                'A+': 100, 'A': 95, 'A-': 90,
+                'B+': 85, 'B': 80, 'B-': 75,
+                'C+': 70, 'C': 65, 'C-': 60,
+                'D+': 55, 'D': 50, 'D-': 45,
+                'E': 40, 'F': 30
+            };
+            const cleaned = grade.trim().toUpperCase();
+            if (scale[cleaned] !== undefined) return scale[cleaned];
+            const numeric = parseFloat(cleaned);
+            if (!Number.isNaN(numeric)) {
+                return Math.max(0, Math.min(100, (numeric / 10) * 100));
+            }
+            return 60;
+        }
+
+        function parseKeyAttributes(statsText = '', ratingSection = '') {
+            const base = [
+                { icon: '⚽', label: 'Goals', value: '—' },
+                { icon: '🎯', label: 'Assists', value: '—' },
+                { icon: '🛡️', label: 'Tackles', value: '—' },
+                { icon: '📈', label: 'Rating', value: '—' }
+            ];
+
+            const extractValue = (text, keywords) => {
+                const pattern = new RegExp(`(?:${keywords.join('|')})\\s*[:\u2013\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:/\\s*(\\d+(?:\\.\\d+)?))?`, 'i');
+                const match = text.match(pattern);
+                if (!match) return null;
+                if (match[2]) {
+                    return `${match[1]} / ${match[2]}`;
+                }
+                return match[1];
+            };
+
+            const normalizedStats = statsText.replace(/,/g, '\n');
+            const goals = extractValue(normalizedStats, ['goals?', 'scored']);
+            const assists = extractValue(normalizedStats, ['assists?', 'created']);
+            const tackles = extractValue(normalizedStats, ['tackles?', 'duels']);
+            const ratingMatch = ratingSection.match(/([A-F][+\-]?|\d+(?:\.\d+)?\s*\/\s*10|\d+(?:\.\d+)?)/);
+
+            if (goals) base[0].value = goals;
+            if (assists) base[1].value = assists;
+            if (tackles) base[2].value = tackles;
+            if (ratingMatch) base[3].value = ratingMatch[0].replace(/\s+/g, '');
+
+            return base;
+        }
+
         async function generatePDF() {
             if (typeof window.jspdf === 'undefined') {
                 showError("jsPDF library is not loaded.");
                 return;
             }
+            if (typeof html2canvas === 'undefined') {
+                showError("html2canvas library is not loaded.");
+                return;
+            }
+            if (!pdfContent) {
+                showError("PDF export container is missing. Please refresh and try again.");
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
             showLoading("Generating PDF preview...", 'download');
-            
+
             try {
                 const rawReportText = analysisOutput?.dataset?.rawMarkdown || '';
 
@@ -2658,9 +3486,7 @@ Do not include any text before or after the HTML table.
                 }
 
                 const isProReport = reportType.value === 'pro';
-                const reportData = isProReport ?
-                                    parseProReport(rawReportText) :
-                                    parseQuickReport(rawReportText);
+                const reportData = isProReport ? parseProReport(rawReportText) : parseQuickReport(rawReportText);
 
                 if (!reportData) {
                     const errorCopy = isProReport
@@ -2670,224 +3496,189 @@ Do not include any text before or after the HTML table.
                     return;
                 }
 
-                const doc = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: 'a4'
-                });
+                const categories = extractCategoryGrades(rawReportText);
+                const attributes = parseKeyAttributes(textStatsSingle?.value || '', reportData.rating || rawReportText);
+                const statsChartImage = statsChart ? statsChart.toBase64Image() : '';
+                const galleryImages = singlePlayerImages.slice(0, 3).map((img, index) => {
+                    const src = img.preview || `data:${img.mimeType};base64,${img.base64}`;
+                    return `<figure class="pdf-visual"><img src="${src}" alt="Analysis visual ${index + 1}"><figcaption>Visual ${index + 1}</figcaption></figure>`;
+                }).join('');
 
-                const margin = 20;
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const contentWidth = pageWidth - (margin * 2);
-                let y = margin; // Current y position
+                const sections = isProReport ? [
+                    { title: 'AI Performance Rating', content: reportData.rating, accent: '#38bdf8' },
+                    { title: 'Summary', content: reportData.summary, accent: '#0ea5e9' },
+                    { title: 'Positional Play', content: reportData.positional, accent: '#6366f1' },
+                    { title: 'Key Actions (PMDS)', content: reportData.actions, accent: '#8b5cf6' },
+                    { title: 'Tactical Awareness (Four Phases)', content: reportData.tactical, accent: '#14b8a6' },
+                    { title: 'Mentality', content: reportData.mentality, accent: '#f97316' },
+                    { title: 'Conclusion & Recommendation', content: reportData.conclusion, accent: '#38bdf8' },
+                    { title: 'Similar Player Matrix', content: reportData.similar, accent: '#22d3ee' }
+                ] : [
+                    { title: 'AI Performance Rating', content: reportData.rating, accent: '#38bdf8' },
+                    { title: 'Likely Position(s) & Role', content: reportData.position, accent: '#6366f1' },
+                    { title: 'Key Duties & Playstyle', content: reportData.playstyle, accent: '#14b8a6' },
+                    { title: 'Key Strengths (Pros)', content: reportData.pros, accent: '#0ea5e9' },
+                    { title: 'Key Weaknesses (Cons)', content: reportData.cons, accent: '#ef4444' },
+                    { title: 'Suggested Similar Player', content: reportData.similar, accent: '#f59e0b' },
+                    { title: 'Suggested Development Plan', content: reportData.development, accent: '#38bdf8' }
+                ];
 
-                // --- Helper Functions ---
-                const addPageIfNeeded = (spaceNeeded) => {
-                    if (y + spaceNeeded > pageHeight - margin) {
-                        doc.addPage();
-                        y = margin;
-                        return true;
-                    }
-                    return false;
-                };
+                const sectionsHtml = sections.map(section => `
+                    <section class="pdf-section" style="--accent:${section.accent}">
+                        <h3>${escapeHtml(section.title)}</h3>
+                        <div class="pdf-section-body">${formatMarkdownForPdf(section.content)}</div>
+                    </section>
+                `).join('');
 
-                const setHeaderStyle = () => {
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(14);
-                    doc.setTextColor(30, 41, 59); // slate-800
-                };
+                const performanceHtml = categories.length ? categories.map(category => {
+                    const score = gradeToScore(category.grade);
+                    return `
+                        <div class="performance-row">
+                            <div class="performance-label">${escapeHtml(category.category)}</div>
+                            <div class="performance-bar">
+                                <div class="performance-fill" style="width:${score}%"></div>
+                            </div>
+                            <div class="performance-grade">${escapeHtml(category.grade || '—')}</div>
+                        </div>
+                        <p class="performance-comment">${escapeHtml(category.comment || '')}</p>
+                    `;
+                }).join('') : '<p class="pdf-empty">No category grades supplied.</p>';
 
-                const setSubheaderStyle = () => {
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(11);
-                    doc.setTextColor(15, 23, 42); // slate-900
-                };
-                
-                const setBodyStyle = (style = 'normal') => {
-                    doc.setFont('helvetica', style);
-                    doc.setFontSize(10);
-                    doc.setTextColor(71, 85, 105); // slate-500
-                };
-                
-                const addSection = (title, content) => {
-                    if (!content || content === 'N/A') return;
-                    
-                    addPageIfNeeded(20); // Space for header + line + content
-                    
-                    setHeaderStyle();
-                    doc.text(title, margin, y);
-                    y += 6;
-                    doc.setDrawColor(203, 213, 225); // slate-300
-                    doc.line(margin, y, pageWidth - margin, y);
-                    y += 8;
-                    
-                    setBodyStyle();
-                    // Handle markdown tables
-                    if (content.includes('|')) {
-                        try {
-                            // Basic markdown table parsing
-                            const rows = content.split('\n').filter(row => row.startsWith('|') && !row.startsWith('|-') && !row.startsWith('|:'));
-                            const headers = rows.shift().split('|').filter(Boolean).map(h => h.trim());
-                            const body = rows.map(row => row.split('|').filter(Boolean).map(cell => cell.trim()));
-                            
-                            doc.autoTable({
-                                startY: y,
-                                head: [headers],
-                                body: body,
-                                theme: 'grid',
-                                styles: {
-                                    font: 'helvetica',
-                                    fontSize: 9,
-                                    cellPadding: 2,
-                                },
-                                headStyles: {
-                                    fillColor: [51, 65, 85], // slate-700
-                                    textColor: [255, 255, 255],
-                                    fontStyle: 'bold',
-                                },
-                                bodyStyles: {
-                                    fillColor: [248, 250, 252], // slate-50
-                                    textColor: [30, 41, 59],
-                                },
-                                alternateRowStyles: {
-                                    fillColor: [255, 255, 255],
-                                }
-                            });
-                            y = doc.autoTable.previous.finalY;
+                const attributesHtml = attributes.map(attr => `
+                    <div class="attribute-chip">
+                        <span class="attribute-icon">${attr.icon}</span>
+                        <div class="attribute-text">
+                            <span class="attribute-label">${escapeHtml(attr.label)}</span>
+                            <span class="attribute-value">${escapeHtml(attr.value)}</span>
+                        </div>
+                    </div>
+                `).join('');
 
-                        } catch(tableError) {
-                            console.error("Could not parse table for PDF, printing as text.", tableError);
-                            // Fallback to text
-                            const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth);
-                            lines.forEach((line, index) => {
-                                addPageIfNeeded(5);
-                                doc.text(line, margin, y);
-                                y += 5;
-                            });
-                        }
-                    } else {
-                         // Regular text content
-                        const lines = doc.splitTextToSize(content.replace(/^- /gm, '• '), contentWidth);
-                        lines.forEach((line, index) => {
-                            addPageIfNeeded(5);
-                            doc.text(line, margin, y);
-                            y += 5;
-                        });
-                    }
-                    
-                    y += 6; // Add padding after section
-                };
+                const heroImage = singlePlayerImages[0] ? (singlePlayerImages[0].preview || `data:${singlePlayerImages[0].mimeType};base64,${singlePlayerImages[0].base64}`) : '';
 
-                // --- 1. PDF Header ---
-                doc.setFillColor(241, 245, 249); // slate-100
-                doc.rect(0, 0, pageWidth, 40, 'F');
-                
-                // Player Photo Placeholder
-                doc.setFillColor(203, 213, 225); // slate-300
-                doc.rect(margin, 15, 25, 25, 'F');
-                doc.setTextColor(100, 116, 139); // slate-400
-                doc.setFontSize(8);
-                doc.text('Photo', margin + 12.5, 28, { align: 'center' });
+                const pdfHtml = `
+                    <style>
+                        * { box-sizing: border-box; }
+                        .pdf-wrapper { width: 100%; background: #f8fafc; padding: 32px; font-family: 'Inter', 'Poppins', sans-serif; color: #0f172a; }
+                        .pdf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+                        .pdf-brand { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.25em; color: #38bdf8; }
+                        .pdf-title { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 600; color: #0b1120; margin: 0; }
+                        .pdf-meta { font-size: 12px; color: #334155; margin-top: 6px; }
+                        .pdf-columns { display: flex; gap: 20px; }
+                        .pdf-left { width: 36%; display: flex; flex-direction: column; gap: 16px; }
+                        .pdf-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+                        .pdf-card { background: #ffffff; border-radius: 18px; padding: 18px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08); }
+                        .player-hero { width: 100%; border-radius: 14px; aspect-ratio: 4/3; object-fit: cover; border: 1px solid rgba(148, 163, 184, 0.25); }
+                        .player-hero--placeholder { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.05)); color: #475569; font-weight: 500; }
+                        .player-info { display: grid; gap: 4px; font-size: 12px; margin-top: 12px; }
+                        .player-info span { display: block; }
+                        .attribute-board { display: grid; gap: 10px; }
+                        .attribute-chip { display: flex; gap: 12px; align-items: center; background: rgba(56, 189, 248, 0.08); border-radius: 14px; padding: 10px 12px; border: 1px solid rgba(14, 165, 233, 0.15); }
+                        .attribute-icon { font-size: 18px; }
+                        .attribute-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; }
+                        .attribute-value { font-size: 14px; font-weight: 600; color: #0b1120; }
+                        .performance-board { display: flex; flex-direction: column; gap: 12px; }
+                        .performance-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; align-items: center; }
+                        .performance-label { font-size: 12px; font-weight: 600; color: #0b1120; }
+                        .performance-bar { height: 8px; background: rgba(148, 163, 184, 0.25); border-radius: 999px; overflow: hidden; }
+                        .performance-fill { height: 100%; background: linear-gradient(90deg, #22d3ee, #0ea5e9); }
+                        .performance-grade { font-size: 12px; font-weight: 600; color: #0b1120; }
+                        .performance-comment { font-size: 11px; color: #475569; margin: 0 0 6px 0; }
+                        .pdf-visuals { display: flex; flex-direction: column; gap: 12px; }
+                        .pdf-visuals img { width: 100%; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.25); }
+                        .pdf-visuals figure { margin: 0; }
+                        .pdf-visuals figcaption { margin-top: 4px; font-size: 11px; color: #475569; text-align: center; }
+                        .pdf-section { position: relative; padding: 20px 24px; border-radius: 18px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08); }
+                        .pdf-section::before { content: ''; position: absolute; top: 0; left: 0; width: 8px; height: 100%; border-radius: 18px 0 0 18px; background: var(--accent, #38bdf8); }
+                        .pdf-section h3 { margin: 0 0 12px 0; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 600; color: #0b1120; }
+                        .pdf-section-body p { margin: 0 0 8px 0; font-size: 12px; line-height: 1.5; color: #1e293b; }
+                        .pdf-section-body ul { margin: 0 0 10px 18px; padding: 0; color: #1e293b; font-size: 12px; }
+                        .pdf-section-body li { margin-bottom: 4px; }
+                        .pdf-section-body table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
+                        .pdf-section-body thead th { background: rgba(14, 165, 233, 0.12); color: #0b1120; text-transform: uppercase; font-size: 11px; padding: 8px; }
+                        .pdf-section-body td { border: 1px solid rgba(148, 163, 184, 0.4); padding: 8px; color: #1e293b; }
+                        .pdf-section-body hr, .pdf-divider { border: none; height: 1px; background: rgba(148, 163, 184, 0.4); margin: 12px 0; }
+                        .pdf-empty { font-size: 12px; color: #94a3b8; margin: 0; }
+                    </style>
+                    <div class="pdf-wrapper">
+                        <div class="pdf-header">
+                            <div>
+                                <div class="pdf-brand">Pro Scout AI</div>
+                                <h1 class="pdf-title">${escapeHtml(playerName?.value || 'Unnamed Player')}</h1>
+                                <div class="pdf-meta">Age ${escapeHtml(playerAge?.value || 'N/A')} • ${escapeHtml(playerClub?.value || 'Club N/A')} • ${escapeHtml(playerLeague?.value || 'League N/A')}</div>
+                            </div>
+                            <div class="pdf-meta">
+                                ${escapeHtml(new Date().toLocaleString())}
+                            </div>
+                        </div>
+                        <div class="pdf-columns">
+                            <aside class="pdf-left">
+                                <div class="pdf-card">
+                                    ${heroImage ? `<img src="${heroImage}" alt="Player visual" class="player-hero">` : `<div class="player-hero player-hero--placeholder">Add visuals for richer exports</div>`}
+                                    <div class="player-info">
+                                        <span><strong>Positions:</strong> ${escapeHtml(playerPositions?.value || 'N/A')}</span>
+                                        <span><strong>Match Context:</strong> ${escapeHtml(matchContext?.value || 'N/A')}</span>
+                                        <span><strong>Report Type:</strong> ${reportType?.value === 'pro' ? 'Pro Scout' : 'Quick Report'}</span>
+                                    </div>
+                                </div>
+                                <div class="pdf-card attribute-board">
+                                    ${attributesHtml}
+                                </div>
+                                <div class="pdf-card">
+                                    <h3 style="font-size:14px;font-family:'Poppins',sans-serif;margin-top:0;margin-bottom:12px;color:#0b1120;">Performance Profile</h3>
+                                    <div class="performance-board">${performanceHtml}</div>
+                                </div>
+                                <div class="pdf-card pdf-visuals">
+                                    ${statsChartImage ? `<figure><img src="${statsChartImage}" alt="Stats visualization"><figcaption>Stats Breakdown</figcaption></figure>` : ''}
+                                    ${galleryImages || '<p class="pdf-empty">Upload heatmaps or stat boards to showcase visuals.</p>'}
+                                </div>
+                            </aside>
+                            <section class="pdf-right">
+                                ${sectionsHtml}
+                            </section>
+                        </div>
+                    </div>
+                `;
 
-                // Player Info
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(18);
-                doc.setTextColor(15, 23, 42); // slate-900
-                doc.text(playerName.value || 'N/A', margin + 30, 22);
-                
-                setBodyStyle();
-                doc.setFontSize(11);
-                doc.setTextColor(71, 85, 105); // slate-500
-                doc.text(`Age: ${playerAge.value || 'N/A'} | Club: ${playerClub.value || 'N/A'} | Position(s): ${playerPositions.value || 'N/A'}`, margin + 30, 29);
-                doc.text(`Match: ${matchContext.value || 'N/A'} | League: ${playerLeague.value || 'N/A'}`, margin + 30, 35);
-                
-                y = 50; // Start content below header
+                pdfContent.innerHTML = pdfHtml;
+                await new Promise(resolve => setTimeout(resolve, 50));
 
-                // --- 2. Add Key Visuals (Images & Chart) ---
-                addPageIfNeeded(20);
-                setHeaderStyle();
-                doc.text("Key Visuals", margin, y);
-                y += 6;
-                doc.setDrawColor(203, 213, 225); // slate-300
-                doc.line(margin, y, pageWidth - margin, y);
-                y += 8;
-                
-                let visualX = margin;
-                const visualWidth = (contentWidth / 2) - 5;
-                const visualHeight = (visualWidth * 9) / 16; // 16:9 aspect ratio
+                const canvas = await html2canvas(pdfContent, { scale: 2 });
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-                try {
-                    // Add Stats Chart
-                    if (statsChart) {
-                        addPageIfNeeded(visualHeight + 10);
-                        const chartImgData = statsChart.toBase64Image();
-                        doc.addImage(chartImgData, 'PNG', visualX, y, visualWidth, visualHeight);
-                        setSubheaderStyle();
-                        doc.text("Stats Visualization", visualX + visualWidth/2, y + visualHeight + 6, { align: 'center' });
-                        visualX += visualWidth + 10;
-                    }
-                    
-                    // Add Heatmap/Stats Images (up to 2)
-                    for (let i = 0; i < Math.min(singlePlayerImages.length, 2); i++) {
-                        if (visualX > margin + visualWidth) { // New row
-                            y += visualHeight + 12;
-                            visualX = margin;
-                        }
-                        addPageIfNeeded(visualHeight + 10);
-                        const img = singlePlayerImages[i];
-                        const imgData = `data:${img.mimeType};base64,${img.base64}`;
-                        doc.addImage(imgData, 'JPEG', visualX, y, visualWidth, visualHeight);
-                        setSubheaderStyle();
-                        doc.text(`Uploaded Image ${i+1}`, visualX + visualWidth/2, y + visualHeight + 6, { align: 'center' });
-                        visualX += visualWidth + 10;
-                    }
-                    
-                    y += visualHeight + 12; // Move y down past the visuals
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = pageWidth;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
 
-                } catch (imgError) {
-                    console.error("Error adding images to PDF:", imgError);
-                    setBodyStyle('italic');
-                    doc.setTextColor(239, 68, 68); // red-500
-                    doc.text("Could not embed images. Check console for errors.", margin, y);
-                    y += 10;
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
                 }
 
-                // --- 3. Add Report Sections ---
-                if (reportType.value === 'pro') {
-                    addSection("AI Performance Rating", reportData.rating);
-                    addSection("Summary", reportData.summary);
-                    addSection("Positional Play", reportData.positional);
-                    addSection("Key Actions (PMDS)", reportData.actions);
-                    addSection("Tactical Awareness (Four Phases)", reportData.tactical);
-                    addSection("Mentality", reportData.mentality);
-                    addSection("Conclusion & Recommendation", reportData.conclusion);
-                    addSection("Similar Player Matrix", reportData.similar);
-                } else {
-                    addSection("AI Performance Rating", reportData.rating);
-                    addSection("Likely Position(s) & Role", reportData.position);
-                    addSection("Key Duties & Playstyle", reportData.playstyle);
-                    addSection("Key Strengths (Pros)", reportData.pros);
-                    addSection("Key Weaknesses (Cons)", reportData.cons);
-                    addSection("Suggested Similar Player", reportData.similar);
-                    addSection("Suggested Development Plan", reportData.development);
-                }
-
-                // --- 4. Generate Blob URL and show in modal ---
-                const pdfBlob = doc.output('blob');
+                const pdfBlob = pdf.output('blob');
                 generatedPdfBlobUrl = URL.createObjectURL(pdfBlob);
                 pdfPreviewFrame.src = generatedPdfBlobUrl;
-                
+
                 showPdfPreview();
-            
+
             } catch (e) {
                 console.error("PDF Generation Failed:", e);
                 showError(`Error generating PDF: ${e.message}`);
             } finally {
+                pdfContent.innerHTML = '';
                 hideLoading();
             }
         }
-        
+
         function parseProReport(text) {
             try {
                 if (!text) return null;
@@ -2896,11 +3687,9 @@ Do not include any text before or after the HTML table.
 
                 const getSection = (regex) => {
                     const match = normalized.match(regex);
-                    // Use optional chaining and nullish coalescing
                     return match?.[1]?.trim() ?? 'N/A';
                 };
 
-                // Make regex flexible to match one or more '#' and look for '---' separator
                 const report = {
                     rating: getSection(/#+\s*1\. AI-Calculated Performance Rating[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*2\.|\n---\n|\n$)/),
                     summary: getSection(/#+\s*2\. Summary[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*3\.|\n---\n|\n$)/),
@@ -2909,23 +3698,22 @@ Do not include any text before or after the HTML table.
                     tactical: getSection(/#+\s*5\. Tactical Awareness[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*6\.|\n---\n|\n$)/),
                     mentality: getSection(/#+\s*6\. Mentality[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*7\.|\n---\n|\n$)/),
                     conclusion: getSection(/#+\s*7\. Conclusion & Recommendation[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*8\.|\n---\n|\n$)/),
-                    similar: getSection(/#+\s*8\. Similar Player Matrix[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/) // Last section
+                    similar: getSection(/#+\s*8\. Similar Player Matrix[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/)
                 };
 
-                // Check if parsing failed
                 if (Object.values(report).every(val => val === 'N/A')) {
                     throw new Error("All sections parsed as N/A.");
                 }
-                
+
                 return report;
-            } catch(e) {
+            } catch (e) {
                 console.error("Failed to parse pro report:", e.message, "\nRaw text:", text);
                 return null;
             }
         }
-        
+
         function parseQuickReport(text) {
-             try {
+            try {
                 if (!text) return null;
 
                 const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -2942,7 +3730,7 @@ Do not include any text before or after the HTML table.
                     pros: getSection(/#+\s*4\. Key Strengths \(Pros\)[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*5\.|\n---\n|\n$)/),
                     cons: getSection(/#+\s*5\. Key Weaknesses \(Cons\)[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*6\.|\n---\n|\n$)/),
                     similar: getSection(/#+\s*6\. Suggested Similar Player[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*7\.|\n---\n|\n$)/),
-                    development: getSection(/#+\s*7\. Suggested Development Plan[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/) // Last section
+                    development: getSection(/#+\s*7\. Suggested Development Plan[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/)
                 };
 
                 if (Object.values(report).every(val => val === 'N/A')) {
@@ -2950,12 +3738,12 @@ Do not include any text before or after the HTML table.
                 }
 
                 return report;
-            } catch(e) {
+            } catch (e) {
                 console.error("Failed to parse quick report:", e.message, "\nRaw text:", text);
                 return null;
             }
         }
-        
+
         // --- Opponent Analysis Save/Load ---
         const LS_OPPONENT_KEY = 'savedOpponentAnalyses';
 
@@ -3094,7 +3882,11 @@ Do not include any text before or after the HTML table.
             updateWorkflowStage('upload');
             resetAnalysisViews();
             renderAnalysisVisuals();
-            if (narrativeScript) narrativeScript.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
+            Object.values(narrativeBuilders).forEach(builder => {
+                if (builder?.script) {
+                    builder.script.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
+                }
+            });
 
             // Set default tab to dashboard
             showTab('dashboard');
@@ -3144,6 +3936,12 @@ Do not include any text before or after the HTML table.
                 renderSavedReports();
                 openReportModal();
             });
+            if (openLoadReportModalBtn) {
+                openLoadReportModalBtn.addEventListener('click', () => {
+                    renderSavedReports();
+                    openReportModal();
+                });
+            }
             if (closeLoadReportModalBtn) closeLoadReportModalBtn.addEventListener('click', closeReportModal);
             if (savedReportsList) {
                 savedReportsList.addEventListener('click', (event) => {
@@ -3158,9 +3956,28 @@ Do not include any text before or after the HTML table.
                     }
                 });
             }
+            if (savedReportsGrid) {
+                savedReportsGrid.addEventListener('click', (event) => {
+                    const loadTarget = event.target.closest('[data-load-report]');
+                    if (loadTarget) {
+                        loadReportById(loadTarget.dataset.loadReport);
+                        return;
+                    }
+                    const deleteTarget = event.target.closest('[data-delete-report]');
+                    if (deleteTarget) {
+                        deleteReportById(deleteTarget.dataset.deleteReport);
+                    }
+                });
+            }
 
-            if (generateNarrativeBtn) generateNarrativeBtn.addEventListener('click', generateNarrativeVideo);
-            if (stopNarrativeBtn) stopNarrativeBtn.addEventListener('click', stopNarrativePlayback);
+            Object.entries(narrativeBuilders).forEach(([key, builder]) => {
+                if (builder?.generateBtn) {
+                    builder.generateBtn.addEventListener('click', () => generateNarrativeVideo(key));
+                }
+                if (builder?.stopBtn) {
+                    builder.stopBtn.addEventListener('click', () => stopNarrativePlayback(key));
+                }
+            });
 
             if (typeof window.speechSynthesis !== 'undefined') {
                 populateNarrativeVoices();
