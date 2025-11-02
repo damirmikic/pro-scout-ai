@@ -819,6 +819,24 @@
                 <div id="savedReportsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
             </div>
 
+            <!-- TAB: Saved Reports -->
+            <div id="savedReportsTab" class="tab-content hidden space-y-6">
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl shadow-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Saved Player Reports</h2>
+                        <p class="text-sm text-slate-400">Quickly reload previous scouting outputs, keep track of themes, and manage your workspace library.</p>
+                    </div>
+                    <button id="openLoadReportModalBtn" class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 hover:border-sky-500 hover:text-sky-300 text-white px-4 py-2 rounded-xl transition">
+                        <i data-lucide="folder-open" class="h-4 w-4"></i>Open Modal View
+                    </button>
+                </div>
+                <div id="savedReportsEmptyState" class="bg-slate-800/60 border border-dashed border-slate-700 rounded-2xl p-10 text-center text-slate-400 text-sm hidden">
+                    <i data-lucide="bookmark-plus" class="mx-auto h-8 w-8 text-slate-500 mb-3"></i>
+                    <p>No saved reports yet. Run a player analysis and click <strong>Save</strong> to build your library.</p>
+                </div>
+                <div id="savedReportsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+            </div>
+
             <!-- TAB: Player Comparison -->
             <div id="comparisonTab" class="tab-content hidden">
                  <!-- Comparison Controls -->
@@ -1641,92 +1659,7 @@
             return { accent: '#7dd3fc', text: '#e0f2fe', icon: '📊' };
         }
 
-        function gradeLetterToScore(grade = '') {
-            if (!grade) return 0;
-            const normalized = grade.trim().toUpperCase();
-            const baseLetter = normalized.charAt(0);
-            const baseScores = { A: 95, B: 85, C: 75, D: 65, E: 55, F: 45 };
-            let score = baseScores[baseLetter] ?? 60;
-            if (normalized.includes('+')) score += 4;
-            if (normalized.includes('-')) score -= 4;
-            return Math.max(0, Math.min(100, score));
-        }
-
-        function gradeLetterColor(grade = '') {
-            const letter = (grade || '').trim().charAt(0).toUpperCase();
-            switch (letter) {
-                case 'A':
-                    return '#2dd4bf';
-                case 'B':
-                    return '#38bdf8';
-                case 'C':
-                    return '#fbbf24';
-                case 'D':
-                    return '#fb7185';
-                default:
-                    return '#94a3b8';
-            }
-        }
-
-        function extractCategoryGrades(markdown = '') {
-            if (!markdown) return [];
-            const lines = markdown.split(/\r?\n/);
-            const headerIndex = lines.findIndex(line => /\|\s*Category\s*\|\s*Grade\s*\|\s*Comment\s*\|/i.test(line));
-            if (headerIndex === -1) return [];
-
-            const grades = [];
-            for (let i = headerIndex + 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line.startsWith('|')) break;
-                if (/^\|\s*:?-+/.test(line)) continue;
-                const rawCells = line.replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
-                if (rawCells.length >= 3) {
-                    const [category, grade, comment] = rawCells;
-                    if (category && grade) {
-                        grades.push({ category, grade, comment: comment || '' });
-                    }
-                }
-            }
-            return grades;
-        }
-
-        function extractKeyMetrics(markdown = '') {
-            if (!markdown) return [];
-            const metricPatterns = [
-                { label: 'Goals', icon: '⚽', regex: /(goals?)[^\d]*(\d+(?:\.\d+)?)/i },
-                { label: 'Assists', icon: '🎯', regex: /(assists?)[^\d]*(\d+(?:\.\d+)?)/i },
-                { label: 'Tackles', icon: '🛡️', regex: /(tackles?)[^\d]*(\d+(?:\.\d+)?)/i },
-                { label: 'xG', icon: '📊', regex: /(xg)[^\d]*(\d+(?:\.\d+)?)/i },
-                { label: 'xA', icon: '🧠', regex: /(xa)[^\d]*(\d+(?:\.\d+)?)/i },
-                { label: 'Rating', icon: '⭐', regex: /(rating|match rating|score)[^\d]*(\d+(?:\.\d+)?)/i }
-            ];
-
-            const found = [];
-            metricPatterns.forEach(pattern => {
-                const match = markdown.match(pattern.regex);
-                if (match) {
-                    found.push({ label: pattern.label, value: match[2], icon: pattern.icon });
-                }
-            });
-
-            return found.filter((metric, index, self) =>
-                index === self.findIndex(other => other.label === metric.label)
-            ).slice(0, 6);
-        }
-
-        function pickCategoryIcon(category = '') {
-            const lower = category.toLowerCase();
-            if (/defen|duel|press/i.test(lower)) return '🛡️';
-            if (/attack|final|chance/i.test(lower)) return '⚡';
-            if (/tactic|fit|role|system/i.test(lower)) return '♟️';
-            if (/passing|build|distribution/i.test(lower)) return '🎯';
-            if (/mentality|focus|psych/i.test(lower)) return '🧠';
-            if (/physical|athletic|pace|power/i.test(lower)) return '💪';
-            if (/development|potential/i.test(lower)) return '🌱';
-            return '📈';
-        }
-
-        function buildAnalysisSections(html, rawMarkdown = '') {
+        function buildAnalysisSections(html) {
             const views = { summary: '', detailed: html, tactical: '', data: '' };
             const parser = new DOMParser();
             const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
@@ -1767,98 +1700,23 @@
                     ? section.html
                     : '<p class="text-slate-500 text-sm">No insights provided.</p>';
                 return `
-                    <article class="analysis-section-card" style="--section-accent:${palette.accent};">
-                        <div class="analysis-section-title">
-                            <span>${palette.icon || '📊'}</span>
-                            <span>${safeTitle}</span>
+                    <article class="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-lg shadow-slate-900/30">
+                        <span class="absolute inset-y-0 left-0 w-1.5" style="background:${palette.accent};"></span>
+                        <div class="pl-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">${palette.icon || '📊'}</span>
+                                <h4 class="text-lg font-semibold" style="color:${palette.text};">${safeTitle}</h4>
+                            </div>
+                            <div class="mt-3 prose prose-sm prose-invert max-w-none leading-relaxed space-y-3">${body}</div>
                         </div>
-                        <div class="analysis-section-body prose prose-invert prose-sm max-w-none">${body}</div>
                     </article>
                 `;
             };
 
             const renderGrid = (list) => {
                 if (!list.length) return '';
-                return `<div class="analysis-section-grid">${list.map(renderCard).join('')}</div>`;
+                return `<div class="grid gap-4 lg:grid-cols-2 auto-rows-fr">${list.map(renderCard).join('')}</div>`;
             };
-
-            const metrics = extractKeyMetrics(rawMarkdown);
-            const grades = extractCategoryGrades(rawMarkdown);
-
-            const identityCard = (() => {
-                const pieces = [];
-                if (playerName?.value) pieces.push(`<div class="text-2xl font-semibold text-white">${escapeHtml(playerName.value)}</div>`);
-                const metaBits = [];
-                if (playerAge?.value) metaBits.push(`Age ${escapeHtml(playerAge.value)}`);
-                if (playerClub?.value) metaBits.push(escapeHtml(playerClub.value));
-                if (playerLeague?.value) metaBits.push(escapeHtml(playerLeague.value));
-                const subtitle = metaBits.length ? `<p class="text-sm text-slate-300/80">${metaBits.join(' • ')}</p>` : '';
-                const details = [];
-                if (playerPositions?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Role</span><p class="text-sm text-slate-200">${escapeHtml(playerPositions.value)}</p></div>`);
-                if (matchContext?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Context</span><p class="text-sm text-slate-200">${escapeHtml(matchContext.value)}</p></div>`);
-                if (reportType?.value) details.push(`<div><span class="text-xs uppercase tracking-[0.2em] text-slate-500">Template</span><p class="text-sm text-slate-200">${escapeHtml(reportType.options[reportType.selectedIndex]?.text || reportType.value)}</p></div>`);
-                return `
-                    <div class="analysis-report-card">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <p class="text-xs uppercase tracking-[0.35em] text-sky-400/70">Player Profile</p>
-                                ${pieces.join('') || '<div class="text-xl font-semibold text-white">Player Name</div>'}
-                                ${subtitle}
-                            </div>
-                            <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-500/30 text-xs font-semibold tracking-wide text-sky-200">AI Report</span>
-                        </div>
-                        ${details.length ? `<div class="mt-4 grid grid-cols-1 gap-3 text-sm">${details.join('')}</div>` : ''}
-                    </div>
-                `;
-            })();
-
-            const metricsCard = metrics.length ? `
-                <div class="analysis-report-card">
-                    <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Match Metrics</h4>
-                    <div class="analysis-metric-list mt-3">
-                        ${metrics.map(metric => `<div class="analysis-metric"><span>${metric.icon} ${escapeHtml(metric.label)}</span><strong>${escapeHtml(metric.value)}</strong></div>`).join('')}
-                    </div>
-                </div>
-            ` : '';
-
-            const gradesCard = grades.length ? `
-                <div class="analysis-report-card">
-                    <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Category Grades</h4>
-                    <div class="mt-3 flex flex-col gap-3">
-                        ${grades.map(grade => {
-                            const score = gradeLetterToScore(grade.grade);
-                            const color = gradeLetterColor(grade.grade);
-                            return `
-                                <div class="analysis-grade-card">
-                                    <div class="analysis-grade-header">
-                                        <span>${pickCategoryIcon(grade.category)} ${escapeHtml(grade.category)}</span>
-                                        <span>${escapeHtml(grade.grade)}</span>
-                                    </div>
-                                    <div class="analysis-grade-meter">
-                                        <span style="width:${score}%; background:${color};"></span>
-                                    </div>
-                                    ${grade.comment ? `<p class="analysis-grade-comment">${escapeHtml(grade.comment)}</p>` : ''}
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            ` : '';
-
-            const heroCard = (() => {
-                if (!singlePlayerImages.length) return '';
-                const primary = singlePlayerImages[0];
-                const src = primary.preview || `data:${primary.mimeType};base64,${primary.base64}`;
-                return `
-                    <div class="analysis-report-card">
-                        <h4 class="text-sm uppercase tracking-[0.25em] text-slate-400">Match Visual</h4>
-                        <figure class="analysis-hero-visual mt-3">
-                            <img src="${src}" alt="Player visual asset">
-                            <figcaption>Uploaded reference</figcaption>
-                        </figure>
-                    </div>
-                `;
-            })();
 
             const summarySections = sections.filter(section => /summary|overview|highlights|rating|conclusion|recommendation/i.test(section.title));
             const tacticalSections = sections.filter(section => /tactic|position|positional|phase|action|mentality|role|structure/i.test(section.title));
@@ -1866,20 +1724,7 @@
             const summarySelection = summarySections.length ? summarySections : sections.slice(0, Math.min(sections.length, 3));
             const tacticalSelection = tacticalSections.length ? tacticalSections : sections.filter(section => /tactic|position|action|mentality|phase/i.test(section.title)).slice(0, 4);
 
-            const summaryGrid = summarySelection.length ? renderGrid(summarySelection) : '';
-            const leftColumn = [identityCard, metricsCard, gradesCard || '', heroCard].filter(Boolean).join('');
-
-            views.summary = `
-                <div class="analysis-report-layout">
-                    <aside class="analysis-report-column" data-highlight-ignore="true">
-                        ${leftColumn || '<div class="analysis-report-card"><p class="text-sm text-slate-300">Player profile and metrics will populate here after generating a report.</p></div>'}
-                    </aside>
-                    <section class="analysis-report-column">
-                        ${summaryGrid || renderGrid(sections) || '<div class="analysis-report-card"><p class="text-sm text-slate-300">Run an analysis to populate insights.</p></div>'}
-                    </section>
-                </div>
-            `;
-
+            views.summary = summarySelection.length ? renderGrid(summarySelection) : html;
             views.tactical = tacticalSelection.length ? renderGrid(tacticalSelection) : (sections.length ? renderGrid(sections.slice(1, Math.min(sections.length, 4))) : html);
             views.detailed = sections.length ? renderGrid(sections) : html;
 
@@ -3644,7 +3489,7 @@ Do not include any text before or after the HTML table.
                 await new Promise(resolve => setTimeout(resolve, 50));
 
                 const canvas = await html2canvas(pdfContent, { scale: 2 });
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgData = canvas.toDataURL('image/png');
 
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pageWidth = pdf.internal.pageSize.getWidth();
@@ -3654,13 +3499,13 @@ Do not include any text before or after the HTML table.
                 let heightLeft = imgHeight;
                 let position = 0;
 
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
 
                 while (heightLeft > 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                     heightLeft -= pageHeight;
                 }
 
