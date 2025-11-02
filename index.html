@@ -213,6 +213,201 @@
             box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
         }
 
+        .analysis-report-layout {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1280px) {
+            .analysis-report-layout {
+                grid-template-columns: 320px 1fr;
+                align-items: start;
+            }
+        }
+
+        .analysis-report-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .analysis-report-card {
+            position: relative;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            background: linear-gradient(155deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.65));
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            padding: 1.25rem;
+        }
+
+        .analysis-report-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(148, 163, 184, 0.05);
+            pointer-events: none;
+        }
+
+        .analysis-report-card h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .analysis-metric-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .analysis-metric {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.85rem;
+            border-radius: 14px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .analysis-metric span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .analysis-metric strong {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+
+        .analysis-grade-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 0.9rem 1rem;
+            border-radius: 16px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+
+        .analysis-grade-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #e0f2fe;
+        }
+
+        .analysis-grade-meter {
+            position: relative;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+        }
+
+        .analysis-grade-meter span {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+        }
+
+        .analysis-grade-comment {
+            font-size: 0.8rem;
+            color: #cbd5f5;
+            line-height: 1.4;
+        }
+
+        .analysis-section-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+            .analysis-section-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .analysis-section-card {
+            position: relative;
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
+            padding: 1.4rem 1.6rem;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: 0 24px 50px rgba(8, 47, 73, 0.35);
+        }
+
+        .analysis-section-card .analysis-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.01em;
+        }
+
+        .analysis-section-card .analysis-section-body {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #cbd5f5;
+        }
+
+        .analysis-section-card .analysis-section-body > :first-child {
+            margin-top: 0;
+        }
+
+        .analysis-section-card .analysis-section-body > :last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 6px;
+            border-radius: 22px 0 0 22px;
+            background: var(--section-accent, #38bdf8);
+        }
+
+        .analysis-section-card ul {
+            margin: 0;
+            padding-left: 1.1rem;
+        }
+
+        .analysis-section-card li {
+            margin-bottom: 0.35rem;
+        }
+
+        .analysis-hero-visual img {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
+        }
+
+        .analysis-hero-visual figcaption {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #94a3b8;
+            text-align: center;
+        }
+
         @media (max-width: 1024px) {
             #floatingGenerateBtn {
                 right: 1rem;
@@ -604,6 +799,24 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- TAB: Saved Reports -->
+            <div id="savedReportsTab" class="tab-content hidden space-y-6">
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl shadow-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Saved Player Reports</h2>
+                        <p class="text-sm text-slate-400">Quickly reload previous scouting outputs, keep track of themes, and manage your workspace library.</p>
+                    </div>
+                    <button id="openLoadReportModalBtn" class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 hover:border-sky-500 hover:text-sky-300 text-white px-4 py-2 rounded-xl transition">
+                        <i data-lucide="folder-open" class="h-4 w-4"></i>Open Modal View
+                    </button>
+                </div>
+                <div id="savedReportsEmptyState" class="bg-slate-800/60 border border-dashed border-slate-700 rounded-2xl p-10 text-center text-slate-400 text-sm hidden">
+                    <i data-lucide="bookmark-plus" class="mx-auto h-8 w-8 text-slate-500 mb-3"></i>
+                    <p>No saved reports yet. Run a player analysis and click <strong>Save</strong> to build your library.</p>
+                </div>
+                <div id="savedReportsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
             </div>
 
             <!-- TAB: Saved Reports -->
@@ -1400,7 +1613,7 @@
         }
 
         function prepareAnalysisViews(html, markdown) {
-            analysisViews = buildAnalysisSections(html);
+            analysisViews = buildAnalysisSections(html, markdown);
             if (analysisDataView) {
                 analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500">No structured data tables detected.</p>';
             }
@@ -1548,6 +1761,7 @@
 
             const parser = new DOMParser();
             const doc = parser.parseFromString(`<div>${summaryHtml}</div>`, 'text/html');
+            doc.querySelectorAll('[data-highlight-ignore]').forEach(node => node.remove());
             const bullets = Array.from(doc.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
             const paragraphs = Array.from(doc.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
 
