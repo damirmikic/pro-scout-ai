@@ -938,7 +938,10 @@
             if(imagePreviewSingle) imagePreviewSingle.innerHTML = '';
             singlePlayerImages = [];
             if(textStatsSingle) textStatsSingle.value = '';
-            if(analysisOutput) analysisOutput.innerHTML = '<p class="text-slate-400">Analysis cleared.</p>';
+            if(analysisOutput) {
+                analysisOutput.innerHTML = '<p class="text-slate-400">Analysis cleared.</p>';
+                delete analysisOutput.dataset.rawMarkdown;
+            }
             if (statsChart) {
                 statsChart.destroy();
                 statsChart = null;
@@ -1108,7 +1111,10 @@
 
         async function analyzeSinglePlayer() {
             showLoading(); // Show random funny message
-            if(analysisOutput) analysisOutput.innerHTML = '';
+            if(analysisOutput) {
+                analysisOutput.innerHTML = '';
+                delete analysisOutput.dataset.rawMarkdown;
+            }
             if(exportButtons) exportButtons.classList.add('hidden');
 
             const parts = [];
@@ -1537,9 +1543,13 @@ Do not include any text before or after the HTML table.
         // --- Output Formatting ---
         function displayResults(text, element) {
             if (!element) return;
+
+            const rawText = text;
+            let processedText = rawText;
+
             // Handle markdown tables
-            text = text.replace(/\|(.*?)\|/g, (match, content) => `|${content.trim()}|`); // Trim whitespace inside cells
-            text = text.replace(/(\|(?:[^\r\n\|]+\|)+)\r?\n\|(?: *\:?\-+\:? *\|)+/g, (match, headerRow) => {
+            processedText = processedText.replace(/\|(.*?)\|/g, (match, content) => `|${content.trim()}|`); // Trim whitespace inside cells
+            processedText = processedText.replace(/(\|(?:[^\r\n\|]+\|)+)\r?\n\|(?: *\:?\-+\:? *\|)+/g, (match, headerRow) => {
                 let header = `<thead><tr class="bg-slate-700">`;
                 headerRow.split('|').filter(Boolean).forEach(h => {
                     header += `<th class="p-2 border border-slate-600">${h.trim()}</th>`;
@@ -1547,7 +1557,7 @@ Do not include any text before or after the HTML table.
                 header += `</tr></thead>`;
                 return header;
             });
-            text = text.replace(/^\|(.*?)\|$/gm, (match, rowContent) => {
+            processedText = processedText.replace(/^\|(.*?)\|$/gm, (match, rowContent) => {
                 let row = `<tr>`;
                 rowContent.split('|').filter(Boolean).forEach(cell => {
                     row += `<td class="p-2 border border-slate-600">${cell.trim()}</td>`;
@@ -1555,10 +1565,10 @@ Do not include any text before or after the HTML table.
                 row += `</tr>`;
                 return row;
             });
-            text = text.replace(/(<thead>(?:.|\n)*?<\/thead>)((?:<tr>(?:.|\n)*?<\/tr>)+)/g, '<table class="w-full text-left border-collapse border border-slate-600 my-4">$1<tbody>$2</tbody></table>');
+            processedText = processedText.replace(/(<thead>(?:.|\n)*?<\/thead>)((?:<tr>(?:.|\n)*?<\/tr>)+)/g, '<table class="w-full text-left border-collapse border border-slate-600 my-4">$1<tbody>$2</tbody></table>');
 
 
-            let html = text
+            let html = processedText
                 .replace(/^#+ 1\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
                 .replace(/^#+ 2\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
                 .replace(/^#+ 3\. (.*)/gm, '<h3 class="text-xl font-semibold text-sky-300 mt-4 mb-2">$1</h3>')
@@ -1575,6 +1585,7 @@ Do not include any text before or after the HTML table.
                 .replace(/<\/p><p>/g, '</p><p class="mt-2">')
                 .replace(/---/g, '<hr class="border-slate-700 my-4">'); // Add horizontal rules
 
+            element.dataset.rawMarkdown = rawText;
             element.innerHTML = html;
         }
 
@@ -1704,13 +1715,23 @@ Do not include any text before or after the HTML table.
             showLoading("Generating PDF preview...");
             
             try {
-                const rawReportText = analysisOutput.innerText;
-                const reportData = (reportType.value === 'pro') ? 
-                                    parseProReport(rawReportText) : 
+                const rawReportText = analysisOutput?.dataset?.rawMarkdown || '';
+
+                if (!rawReportText.trim()) {
+                    showError("Error generating PDF preview: No scouting report available to export. Please run an analysis first.");
+                    return;
+                }
+
+                const isProReport = reportType.value === 'pro';
+                const reportData = isProReport ?
+                                    parseProReport(rawReportText) :
                                     parseQuickReport(rawReportText);
-                
+
                 if (!reportData) {
-                    showError("Error generating PDF preview: Could not parse Pro Scout Report. AI response was incomplete. Please try again.");
+                    const errorCopy = isProReport
+                        ? "Error generating PDF preview: Could not parse Pro Scout Report. AI response was incomplete. Please try again."
+                        : "Error generating PDF preview: Could not parse Quick Report. AI response was incomplete. Please try again.";
+                    showError(errorCopy);
                     return;
                 }
 
@@ -1934,24 +1955,28 @@ Do not include any text before or after the HTML table.
         
         function parseProReport(text) {
             try {
+                if (!text) return null;
+
+                const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
                 const getSection = (regex) => {
-                    const match = text.match(regex);
+                    const match = normalized.match(regex);
                     // Use optional chaining and nullish coalescing
                     return match?.[1]?.trim() ?? 'N/A';
                 };
-        
+
                 // Make regex flexible to match one or more '#' and look for '---' separator
                 const report = {
-                    rating: getSection(/#+ 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n#+ 2\.|\n---\n|\n$)/),
-                    summary: getSection(/#+ 2\. Summary[\s\S]*?\n([\s\S]*?)(?=\n#+ 3\.|\n---\n|\n$)/),
-                    positional: getSection(/#+ 3\. Positional Play[\s\S]*?\n([\s\S]*?)(?=\n#+ 4\.|\n---\n|\n$)/),
-                    actions: getSection(/#+ 4\. Key Actions[\s\S]*?\n([\s\S]*?)(?=\n#+ 5\.|\n---\n|\n$)/),
-                    tactical: getSection(/#+ 5\. Tactical Awareness[\s\S]*?\n([\s\S]*?)(?=\n#+ 6\.|\n---\n|\n$)/),
-                    mentality: getSection(/#+ 6\. Mentality[\s\S]*?\n([\s\S]*?)(?=\n#+ 7\.|\n---\n|\n$)/),
-                    conclusion: getSection(/#+ 7\. Conclusion & Recommendation[\s\S]*?\n([\s\S]*?)(?=\n#+ 8\.|\n---\n|\n$)/),
-                    similar: getSection(/#+ 8\. Similar Player Matrix[\s\S]*?\n([\s\S]*?)(?=\n---|\n$)/) // Last section
+                    rating: getSection(/#+\s*1\. AI-Calculated Performance Rating[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*2\.|\n---\n|\n$)/),
+                    summary: getSection(/#+\s*2\. Summary[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*3\.|\n---\n|\n$)/),
+                    positional: getSection(/#+\s*3\. Positional Play[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*4\.|\n---\n|\n$)/),
+                    actions: getSection(/#+\s*4\. Key Actions[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*5\.|\n---\n|\n$)/),
+                    tactical: getSection(/#+\s*5\. Tactical Awareness[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*6\.|\n---\n|\n$)/),
+                    mentality: getSection(/#+\s*6\. Mentality[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*7\.|\n---\n|\n$)/),
+                    conclusion: getSection(/#+\s*7\. Conclusion & Recommendation[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*8\.|\n---\n|\n$)/),
+                    similar: getSection(/#+\s*8\. Similar Player Matrix[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/) // Last section
                 };
-                
+
                 // Check if parsing failed
                 if (Object.values(report).every(val => val === 'N/A')) {
                     throw new Error("All sections parsed as N/A.");
@@ -1966,25 +1991,29 @@ Do not include any text before or after the HTML table.
         
         function parseQuickReport(text) {
              try {
+                if (!text) return null;
+
+                const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
                 const getSection = (regex) => {
-                    const match = text.match(regex);
+                    const match = normalized.match(regex);
                     return match?.[1]?.trim() ?? 'N/A';
                 };
 
                 const report = {
-                    rating: getSection(/#+ 1\. AI-Calculated Performance Rating[\s\S]*?\n([\s\S]*?)(?=\n#+ 2\.|\n---\n|\n$)/),
-                    position: getSection(/#+ 2\. Likely Position\(s\) & Role[\s\S]*?\n([\s\S]*?)(?=\n#+ 3\.|\n---\n|\n$)/),
-                    playstyle: getSection(/#+ 3\. Key Duties & Playstyle[\s\S]*?\n([\s\S]*?)(?=\n#+ 4\.|\n---\n|\n$)/),
-                    pros: getSection(/#+ 4\. Key Strengths \(Pros\)[\s\S]*?\n([\s\S]*?)(?=\n#+ 5\.|\n---\n|\n$)/),
-                    cons: getSection(/#+ 5\. Key Weaknesses \(Cons\)[\s\S]*?\n([\s\S]*?)(?=\n#+ 6\.|\n---\n|\n$)/),
-                    similar: getSection(/#+ 6\. Suggested Similar Player[\s\S]*?\n([\s\S]*?)(?=\n#+ 7\.|\n---\n|\n$)/),
-                    development: getSection(/#+ 7\. Suggested Development Plan[\s\S]*?\n([\s\S]*?)(?=\n---|\n$)/) // Last section
+                    rating: getSection(/#+\s*1\. AI-Calculated Performance Rating[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*2\.|\n---\n|\n$)/),
+                    position: getSection(/#+\s*2\. Likely Position\(s\) & Role[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*3\.|\n---\n|\n$)/),
+                    playstyle: getSection(/#+\s*3\. Key Duties & Playstyle[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*4\.|\n---\n|\n$)/),
+                    pros: getSection(/#+\s*4\. Key Strengths \(Pros\)[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*5\.|\n---\n|\n$)/),
+                    cons: getSection(/#+\s*5\. Key Weaknesses \(Cons\)[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*6\.|\n---\n|\n$)/),
+                    similar: getSection(/#+\s*6\. Suggested Similar Player[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*7\.|\n---\n|\n$)/),
+                    development: getSection(/#+\s*7\. Suggested Development Plan[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/) // Last section
                 };
-                
+
                 if (Object.values(report).every(val => val === 'N/A')) {
                     throw new Error("All sections parsed as N/A.");
                 }
-                
+
                 return report;
             } catch(e) {
                 console.error("Failed to parse quick report:", e.message, "\nRaw text:", text);
