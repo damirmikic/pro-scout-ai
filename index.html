@@ -721,27 +721,25 @@
                         </div>
 
                         <!-- Analysis Output -->
-                        <div class="analysis-theme theme-default bg-slate-900/80 border border-slate-700 rounded-2xl p-4 space-y-4">
-                            <div class="grid gap-4 lg:grid-cols-5">
-                                <div class="lg:col-span-3">
+                        <div class="analysis-theme theme-default bg-slate-900/80 border border-slate-700 rounded-2xl p-4">
+                            <div class="flex flex-col gap-4">
+                                <div class="space-y-4">
                                     <div id="analysisOutput" class="analysis-view h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 prose-strong:text-white">
                                         <p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>
                                     </div>
                                     <div id="analysisDataView" class="analysis-view hidden h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 text-sm text-slate-200"></div>
                                 </div>
-                                <div class="lg:col-span-2 flex flex-col gap-4">
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
-                                            <i data-lucide="images" class="h-4 w-4 text-sky-400"></i>Visual Preview
-                                        </h3>
-                                        <div id="analysisVisuals" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
-                                            <i data-lucide="notebook-text" class="h-4 w-4 text-emerald-400"></i>Highlights
-                                        </h3>
-                                        <div id="analysisSummary" class="text-sm text-slate-300 space-y-2"></div>
-                                    </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                        <i data-lucide="images" class="h-4 w-4 text-sky-400"></i>Visual Preview
+                                    </h3>
+                                    <div id="analysisVisuals" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+                                </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                        <i data-lucide="notebook-text" class="h-4 w-4 text-emerald-400"></i>Highlights
+                                    </h3>
+                                    <div id="analysisSummary" class="text-sm text-slate-300 space-y-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -3322,6 +3320,9 @@ Do not include any text before or after the HTML table.
             const { jsPDF } = window.jspdf;
             showLoading("Generating PDF preview...", 'download');
 
+            let wasHidden = false;
+            let previousInlineStyles = null;
+
             try {
                 const rawReportText = analysisOutput?.dataset?.rawMarkdown || '';
 
@@ -3342,6 +3343,28 @@ Do not include any text before or after the HTML table.
                 }
 
                 const categories = extractCategoryGrades(rawReportText);
+                let developmentPlanContent = reportData.development;
+                if ((!developmentPlanContent || developmentPlanContent === 'N/A') && categories.length) {
+                    const improvementAreas = categories
+                        .map(category => ({
+                            ...category,
+                            score: gradeToScore(category.grade)
+                        }))
+                        .filter(category => category.score < 85)
+                        .slice(0, 3)
+                        .map(category => {
+                            const focus = category.comment && category.comment !== 'N/A'
+                                ? category.comment
+                                : `Elevate ${category.category.toLowerCase()} to lift the current ${category.grade || 'score'}.`;
+                            return `- ${category.category}: ${focus}`;
+                        });
+                    if (improvementAreas.length) {
+                        developmentPlanContent = `Focus on the following development priorities:\n\n${improvementAreas.join('\n')}`;
+                    }
+                }
+
+                const hasDevelopmentPlan = Boolean(developmentPlanContent && developmentPlanContent.trim() !== '' && developmentPlanContent !== 'N/A');
+
                 const attributes = parseKeyAttributes(textStatsSingle?.value || '', reportData.rating || rawReportText);
                 const statsChartImage = statsChart ? statsChart.toBase64Image() : '';
                 const galleryImages = singlePlayerImages.slice(0, 3).map((img, index) => {
@@ -3356,6 +3379,7 @@ Do not include any text before or after the HTML table.
                     { title: 'Key Actions (PMDS)', content: reportData.actions, accent: '#8b5cf6' },
                     { title: 'Tactical Awareness (Four Phases)', content: reportData.tactical, accent: '#14b8a6' },
                     { title: 'Mentality', content: reportData.mentality, accent: '#f97316' },
+                    ...(hasDevelopmentPlan ? [{ title: 'Suggested Development Plan', content: developmentPlanContent, accent: '#38bdf8' }] : []),
                     { title: 'Conclusion & Recommendation', content: reportData.conclusion, accent: '#38bdf8' },
                     { title: 'Similar Player Matrix', content: reportData.similar, accent: '#22d3ee' }
                 ] : [
@@ -3365,15 +3389,18 @@ Do not include any text before or after the HTML table.
                     { title: 'Key Strengths (Pros)', content: reportData.pros, accent: '#0ea5e9' },
                     { title: 'Key Weaknesses (Cons)', content: reportData.cons, accent: '#ef4444' },
                     { title: 'Suggested Similar Player', content: reportData.similar, accent: '#f59e0b' },
-                    { title: 'Suggested Development Plan', content: reportData.development, accent: '#38bdf8' }
+                    { title: 'Suggested Development Plan', content: hasDevelopmentPlan ? developmentPlanContent : 'No development plan was generated. Translate the identified weaknesses into 2-3 actionable steps before sharing.', accent: '#38bdf8' }
                 ];
 
-                const sectionsHtml = sections.map(section => `
-                    <section class="pdf-section" style="--accent:${section.accent}">
+                const sectionsHtml = sections.map(section => {
+                    const isDevelopmentPlan = section.title.toLowerCase().includes('development plan');
+                    return `
+                    <section class="pdf-section${isDevelopmentPlan ? ' pdf-section--plan' : ''}" style="--accent:${section.accent}">
                         <h3>${escapeHtml(section.title)}</h3>
                         <div class="pdf-section-body">${formatMarkdownForPdf(section.content)}</div>
                     </section>
-                `).join('');
+                `;
+                }).join('');
 
                 const performanceHtml = categories.length ? categories.map(category => {
                     const score = gradeToScore(category.grade);
@@ -3409,10 +3436,11 @@ Do not include any text before or after the HTML table.
                         .pdf-brand { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.25em; color: #38bdf8; }
                         .pdf-title { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 600; color: #0b1120; margin: 0; }
                         .pdf-meta { font-size: 12px; color: #334155; margin-top: 6px; }
-                        .pdf-columns { display: flex; gap: 20px; }
-                        .pdf-left { width: 36%; display: flex; flex-direction: column; gap: 16px; }
-                        .pdf-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+                        .pdf-columns { display: flex; flex-direction: column; gap: 20px; }
+                        .pdf-left { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+                        .pdf-right { width: 100%; display: flex; flex-direction: column; gap: 16px; }
                         .pdf-card { background: #ffffff; border-radius: 18px; padding: 18px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08); }
+                        .pdf-card, .pdf-section { break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; }
                         .player-hero { width: 100%; border-radius: 14px; aspect-ratio: 4/3; object-fit: cover; border: 1px solid rgba(148, 163, 184, 0.25); }
                         .player-hero--placeholder { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.05)); color: #475569; font-weight: 500; }
                         .player-info { display: grid; gap: 4px; font-size: 12px; margin-top: 12px; }
@@ -3434,6 +3462,14 @@ Do not include any text before or after the HTML table.
                         .pdf-visuals figure { margin: 0; }
                         .pdf-visuals figcaption { margin-top: 4px; font-size: 11px; color: #475569; text-align: center; }
                         .pdf-section { position: relative; padding: 20px 24px; border-radius: 18px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08); }
+                        .pdf-section--plan { background: #0ea5e9; color: #0f172a; border-color: rgba(14, 165, 233, 0.35); box-shadow: 0 20px 44px rgba(14, 165, 233, 0.25); }
+                        .pdf-section--plan::before { background: rgba(15, 23, 42, 0.2); }
+                        .pdf-section--plan h3 { color: #0f172a; }
+                        .pdf-section--plan .pdf-section-body p,
+                        .pdf-section--plan .pdf-section-body li,
+                        .pdf-section--plan .pdf-section-body ul,
+                        .pdf-section--plan .pdf-section-body strong,
+                        .pdf-section--plan .pdf-section-body a { color: #0f172a; }
                         .pdf-section::before { content: ''; position: absolute; top: 0; left: 0; width: 8px; height: 100%; border-radius: 18px 0 0 18px; background: var(--accent, #38bdf8); }
                         .pdf-section h3 { margin: 0 0 12px 0; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 600; color: #0b1120; }
                         .pdf-section-body p { margin: 0 0 8px 0; font-size: 12px; line-height: 1.5; color: #1e293b; }
@@ -3485,32 +3521,70 @@ Do not include any text before or after the HTML table.
                     </div>
                 `;
 
+                wasHidden = pdfContent.classList.contains('hidden');
+                const styleRef = pdfContent.style;
+                previousInlineStyles = {
+                    position: styleRef.position,
+                    left: styleRef.left,
+                    top: styleRef.top,
+                    width: styleRef.width,
+                    maxWidth: styleRef.maxWidth,
+                    visibility: styleRef.visibility,
+                    pointerEvents: styleRef.pointerEvents,
+                    zIndex: styleRef.zIndex,
+                    display: styleRef.display,
+                    opacity: styleRef.opacity
+                };
+
+                if (wasHidden) {
+                    pdfContent.classList.remove('hidden');
+                }
+
+                Object.assign(styleRef, {
+                    position: 'fixed',
+                    top: '0',
+                    left: '-10000px',
+                    width: '794px',
+                    maxWidth: '794px',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: '1',
+                    pointerEvents: 'none',
+                    zIndex: '-1'
+                });
+
                 pdfContent.innerHTML = pdfHtml;
                 await new Promise(resolve => setTimeout(resolve, 50));
 
                 const canvas = await html2canvas(pdfContent, {
                     scale: 2,
                     useCORS: true,
-                    allowTaint: true
+                    allowTaint: true,
+                    backgroundColor: '#f8fafc'
                 });
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pageWidth = pdf.internal.pageSize.getWidth();
                 const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = pageWidth;
+                const margin = 10;
+                const usablePageWidth = Math.max(pageWidth - margin * 2, pageWidth * 0.8);
+                const usablePageHeight = Math.max(pageHeight - margin * 2, pageHeight * 0.8);
+                const imgWidth = usablePageWidth;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
                 let heightLeft = imgHeight;
-                let position = 0;
+                let pageIndex = 0;
 
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                pdf.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+                heightLeft -= usablePageHeight;
+                pageIndex++;
 
                 while (heightLeft > 0) {
-                    position = heightLeft - imgHeight;
+                    const position = margin - pageIndex * usablePageHeight;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+                    pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+                    heightLeft -= usablePageHeight;
+                    pageIndex++;
                 }
 
                 const pdfBlob = pdf.output('blob');
@@ -3523,6 +3597,23 @@ Do not include any text before or after the HTML table.
                 console.error("PDF Generation Failed:", e);
                 showError(`Error generating PDF: ${e.message}`);
             } finally {
+                if (previousInlineStyles) {
+                    Object.assign(pdfContent.style, {
+                        position: previousInlineStyles.position,
+                        left: previousInlineStyles.left,
+                        top: previousInlineStyles.top,
+                        width: previousInlineStyles.width,
+                        maxWidth: previousInlineStyles.maxWidth,
+                        visibility: previousInlineStyles.visibility,
+                        pointerEvents: previousInlineStyles.pointerEvents,
+                    zIndex: previousInlineStyles.zIndex,
+                    display: previousInlineStyles.display,
+                    opacity: previousInlineStyles.opacity
+                });
+                }
+                if (wasHidden) {
+                    pdfContent.classList.add('hidden');
+                }
                 pdfContent.innerHTML = '';
                 hideLoading();
             }
@@ -3546,6 +3637,7 @@ Do not include any text before or after the HTML table.
                     actions: getSection(/#+\s*4\. Key Actions[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*5\.|\n---\n|\n$)/),
                     tactical: getSection(/#+\s*5\. Tactical Awareness[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*6\.|\n---\n|\n$)/),
                     mentality: getSection(/#+\s*6\. Mentality[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*7\.|\n---\n|\n$)/),
+                    development: getSection(/#+\s*(?:\d+\.\s*)?Suggested Development Plan[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*\d+\.|\n---|\n$)/),
                     conclusion: getSection(/#+\s*7\. Conclusion & Recommendation[\s\S]*?\n+([\s\S]*?)(?=\n#+\s*8\.|\n---\n|\n$)/),
                     similar: getSection(/#+\s*8\. Similar Player Matrix[\s\S]*?\n+([\s\S]*?)(?=\n---|\n$)/)
                 };
