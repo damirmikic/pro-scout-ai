@@ -721,27 +721,25 @@
                         </div>
 
                         <!-- Analysis Output -->
-                        <div class="analysis-theme theme-default bg-slate-900/80 border border-slate-700 rounded-2xl p-4 space-y-4">
-                            <div class="grid gap-4 lg:grid-cols-5">
-                                <div class="lg:col-span-3">
+                        <div class="analysis-theme theme-default bg-slate-900/80 border border-slate-700 rounded-2xl p-4">
+                            <div class="flex flex-col gap-4">
+                                <div class="space-y-4">
                                     <div id="analysisOutput" class="analysis-view h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 prose prose-invert prose-slate max-w-none prose-h3:text-sky-300 prose-strong:text-white">
                                         <p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>
                                     </div>
                                     <div id="analysisDataView" class="analysis-view hidden h-[40vh] lg:h-[50vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-800 p-4 text-sm text-slate-200"></div>
                                 </div>
-                                <div class="lg:col-span-2 flex flex-col gap-4">
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
-                                            <i data-lucide="images" class="h-4 w-4 text-sky-400"></i>Visual Preview
-                                        </h3>
-                                        <div id="analysisVisuals" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                                        <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
-                                            <i data-lucide="notebook-text" class="h-4 w-4 text-emerald-400"></i>Highlights
-                                        </h3>
-                                        <div id="analysisSummary" class="text-sm text-slate-300 space-y-2"></div>
-                                    </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                        <i data-lucide="images" class="h-4 w-4 text-sky-400"></i>Visual Preview
+                                    </h3>
+                                    <div id="analysisVisuals" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+                                </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-2">
+                                        <i data-lucide="notebook-text" class="h-4 w-4 text-emerald-400"></i>Highlights
+                                    </h3>
+                                    <div id="analysisSummary" class="text-sm text-slate-300 space-y-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -3322,6 +3320,9 @@ Do not include any text before or after the HTML table.
             const { jsPDF } = window.jspdf;
             showLoading("Generating PDF preview...", 'download');
 
+            let wasHidden = false;
+            let previousInlineStyles = null;
+
             try {
                 const rawReportText = analysisOutput?.dataset?.rawMarkdown || '';
 
@@ -3485,13 +3486,46 @@ Do not include any text before or after the HTML table.
                     </div>
                 `;
 
+                wasHidden = pdfContent.classList.contains('hidden');
+                const styleRef = pdfContent.style;
+                previousInlineStyles = {
+                    position: styleRef.position,
+                    left: styleRef.left,
+                    top: styleRef.top,
+                    width: styleRef.width,
+                    maxWidth: styleRef.maxWidth,
+                    visibility: styleRef.visibility,
+                    pointerEvents: styleRef.pointerEvents,
+                    zIndex: styleRef.zIndex,
+                    display: styleRef.display,
+                    opacity: styleRef.opacity
+                };
+
+                if (wasHidden) {
+                    pdfContent.classList.remove('hidden');
+                }
+
+                Object.assign(styleRef, {
+                    position: 'fixed',
+                    top: '0',
+                    left: '-10000px',
+                    width: '794px',
+                    maxWidth: '794px',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: '1',
+                    pointerEvents: 'none',
+                    zIndex: '-1'
+                });
+
                 pdfContent.innerHTML = pdfHtml;
                 await new Promise(resolve => setTimeout(resolve, 50));
 
                 const canvas = await html2canvas(pdfContent, {
                     scale: 2,
                     useCORS: true,
-                    allowTaint: true
+                    allowTaint: true,
+                    backgroundColor: '#f8fafc'
                 });
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
@@ -3523,6 +3557,23 @@ Do not include any text before or after the HTML table.
                 console.error("PDF Generation Failed:", e);
                 showError(`Error generating PDF: ${e.message}`);
             } finally {
+                if (previousInlineStyles) {
+                    Object.assign(pdfContent.style, {
+                        position: previousInlineStyles.position,
+                        left: previousInlineStyles.left,
+                        top: previousInlineStyles.top,
+                        width: previousInlineStyles.width,
+                        maxWidth: previousInlineStyles.maxWidth,
+                        visibility: previousInlineStyles.visibility,
+                        pointerEvents: previousInlineStyles.pointerEvents,
+                    zIndex: previousInlineStyles.zIndex,
+                    display: previousInlineStyles.display,
+                    opacity: previousInlineStyles.opacity
+                });
+                }
+                if (wasHidden) {
+                    pdfContent.classList.add('hidden');
+                }
                 pdfContent.innerHTML = '';
                 hideLoading();
             }
