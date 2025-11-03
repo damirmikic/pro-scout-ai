@@ -3496,7 +3496,9 @@ Do not include any text before or after the HTML table.
                     maxWidth: styleRef.maxWidth,
                     visibility: styleRef.visibility,
                     pointerEvents: styleRef.pointerEvents,
-                    zIndex: styleRef.zIndex
+                    zIndex: styleRef.zIndex,
+                    display: styleRef.display,
+                    opacity: styleRef.opacity
                 };
 
                 if (wasHidden) {
@@ -3509,7 +3511,9 @@ Do not include any text before or after the HTML table.
                     left: '-10000px',
                     width: '794px',
                     maxWidth: '794px',
-                    visibility: 'hidden',
+                    display: 'block',
+                    visibility: 'visible',
+                    opacity: '1',
                     pointerEvents: 'none',
                     zIndex: '-1'
                 });
@@ -3520,7 +3524,8 @@ Do not include any text before or after the HTML table.
                 const canvas = await html2canvas(pdfContent, {
                     scale: 2,
                     useCORS: true,
-                    allowTaint: true
+                    allowTaint: true,
+                    backgroundColor: '#f8fafc'
                 });
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
@@ -3561,8 +3566,10 @@ Do not include any text before or after the HTML table.
                         maxWidth: previousInlineStyles.maxWidth,
                         visibility: previousInlineStyles.visibility,
                         pointerEvents: previousInlineStyles.pointerEvents,
-                        zIndex: previousInlineStyles.zIndex
-                    });
+                    zIndex: previousInlineStyles.zIndex,
+                    display: previousInlineStyles.display,
+                    opacity: previousInlineStyles.opacity
+                });
                 }
                 if (wasHidden) {
                     pdfContent.classList.add('hidden');
