@@ -668,8 +668,14 @@
                                 <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Secure proxy</span>
                             </div>
                             <p class="text-sm text-slate-300 leading-relaxed">
-                                Gemini requests are routed through a Netlify Function so your API key stays on the server. Deployers should set the
-                                <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">GEMINI_API_KEY</code> environment variable in Netlify. No key entry is required in the browser.
+                                Gemini requests are routed through a Netlify Function so your API key stays on the server.
+                            </p>
+                            <ol class="list-decimal list-inside text-sm text-slate-300 space-y-1">
+                                <li>In Netlify &rarr; Site configuration &rarr; Environment variables, add <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">GEMINI_API_KEY</code>.</li>
+                                <li>Trigger a deploy (or run <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">netlify deploy</code>) so the function picks up the secret.</li>
+                            </ol>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Once configured, the browser automatically talks to <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">/.netlify/functions/gemini-proxy</code> and never stores the key locally.
                             </p>
                         </div>
 

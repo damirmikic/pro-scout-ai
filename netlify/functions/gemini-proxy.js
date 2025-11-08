@@ -3,21 +3,36 @@ const fetch = global.fetch;
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-09-2025';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
+const DEFAULT_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+};
+
+function jsonResponse(statusCode, body, extraHeaders = {}) {
+  return {
+    statusCode,
+    headers: { ...DEFAULT_HEADERS, ...extraHeaders },
+    body: JSON.stringify(body),
+  };
+}
+
 exports.handler = async function handler(event) {
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 405,
-      headers: { 'Allow': 'POST' },
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
+      statusCode: 204,
+      headers: DEFAULT_HEADERS,
+      body: '',
     };
+  }
+
+  if (event.httpMethod !== 'POST') {
+    return jsonResponse(405, { error: 'Method Not Allowed' }, { Allow: 'POST' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'GEMINI_API_KEY is not configured.' }),
-    };
+    return jsonResponse(500, { error: 'GEMINI_API_KEY is not configured.' });
   }
 
   let requestPayload;
@@ -37,17 +52,19 @@ exports.handler = async function handler(event) {
     };
   }
 
+  const endpoint = new URL(GEMINI_ENDPOINT);
+  endpoint.searchParams.set('key', apiKey);
+
   const requestInit = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
     },
     body: JSON.stringify(requestPayload),
   };
 
   try {
-    const response = await fetch(GEMINI_ENDPOINT, requestInit);
+    const response = await fetch(endpoint, requestInit);
     const text = await response.text();
 
     if (!response.ok) {
@@ -69,13 +86,11 @@ exports.handler = async function handler(event) {
 
     return {
       statusCode: 200,
+      headers: DEFAULT_HEADERS,
       body: text,
     };
   } catch (error) {
     console.error('Failed to proxy Gemini request:', error);
-    return {
-      statusCode: 502,
-      body: JSON.stringify({ error: 'Failed to reach Gemini API.' }),
-    };
+    return jsonResponse(502, { error: 'Failed to reach Gemini API.' });
   }
 };
