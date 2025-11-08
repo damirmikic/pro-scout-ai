@@ -664,17 +664,19 @@
                         <!-- API Key Input -->
                         <div id="apiKeySection" class="bg-slate-900/70 border border-slate-700 rounded-xl p-4 space-y-3">
                             <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-slate-200">Optional Gemini API Key</p>
-                                <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Personal key</span>
+                                <p class="text-sm font-medium text-slate-200">AI Service Status</p>
+                                <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Secure proxy</span>
                             </div>
-                            <div id="apiKeyInputGroup" class="flex flex-col sm:flex-row gap-2">
-                                <input type="password" id="apiKey" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Enter your Gemini API key">
-                                <button id="saveApiKeyBtn" class="bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2" title="Save Key">
-                                    <i data-lucide="save" class="h-5 w-5"></i>
-                                    Save
-                                </button>
-                            </div>
-                            <div id="apiKeyMessage" class="text-sm text-teal-400 hidden"></div>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Gemini requests are routed through a Netlify Function so your API key stays on the server.
+                            </p>
+                            <ol class="list-decimal list-inside text-sm text-slate-300 space-y-1">
+                                <li>In Netlify &rarr; Site configuration &rarr; Environment variables, add <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">GEMINI_API_KEY</code>.</li>
+                                <li>Trigger a deploy (or run <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">netlify deploy</code>) so the function picks up the secret.</li>
+                            </ol>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Once configured, the browser automatically talks to <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">/.netlify/functions/gemini-proxy</code> and never stores the key locally.
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1187,7 +1189,7 @@
                 </ol>
 
                 <h4>API Key</h4>
-                <p>The app will try to use a built-in key. If it fails, you can enter your own Google Gemini API key in the <strong>"Optional API Key"</strong> field. Click "Save Key" to save it to your browser for next time.</p>
+                <p>Gemini traffic is proxied through a Netlify Function. Configure the <strong>GEMINI_API_KEY</strong> environment variable in your Netlify site settings&mdash;no keys are stored in or entered via the browser.</p>
             </div>
         </div>
     </div>
@@ -1261,11 +1263,6 @@
         // --- DOM Elements ---
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
-        const apiKeyInput = document.getElementById('apiKey');
-        const apiKeyInputGroup = document.getElementById('apiKeyInputGroup');
-        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-        const apiKeyMessage = document.getElementById('apiKeyMessage');
-        const apiKeySection = document.getElementById('apiKeySection');
         
         // Modals
         const howToUseBtn = document.getElementById('howToUseBtn');
@@ -1418,9 +1415,10 @@
         const newChatBtn = document.getElementById('newChatBtn');
         let chatHistory = [];
 
+        const GEMINI_PROXY_ENDPOINT = '/.netlify/functions/gemini-proxy';
+
         // --- State ---
         let currentTab = 'dashboard';
-        let userApiKey = "";
         const LS_REPORT_KEY = 'proScoutSingleReports';
         const STAGE_ORDER = ['upload', 'analysis', 'summary', 'download'];
         const STAGE_TITLES = {
@@ -2179,55 +2177,6 @@
             }
         }
 
-        // --- API Key Management ---
-        function loadApiKey() {
-            try {
-                const savedKey = localStorage.getItem('geminiApiKey');
-                if (savedKey) {
-                    userApiKey = savedKey;
-                    apiKeyInputGroup.classList.add('hidden');
-                    apiKeyMessage.innerHTML = 'API Key saved. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
-                    apiKeyMessage.classList.remove('hidden');
-                    
-                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                        localStorage.removeItem('geminiApiKey');
-                        userApiKey = "";
-                        apiKeyInput.value = "";
-                        apiKeyInputGroup.classList.remove('hidden');
-                        apiKeyMessage.classList.add('hidden');
-                    });
-                }
-            } catch (e) {
-                console.error("Could not load API key from LocalStorage:", e);
-            }
-        }
-
-        function saveApiKey() {
-            try {
-                const key = apiKeyInput.value.trim();
-                if (key) {
-                    userApiKey = key;
-                    localStorage.setItem('geminiApiKey', key);
-                    apiKeyInputGroup.classList.add('hidden');
-                    apiKeyMessage.innerHTML = 'API Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
-                    apiKeyMessage.classList.remove('hidden');
-                    
-                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                        localStorage.removeItem('geminiApiKey');
-                        userApiKey = "";
-                        apiKeyInput.value = "";
-                        apiKeyInputGroup.classList.remove('hidden');
-                        apiKeyMessage.classList.add('hidden');
-                    });
-                } else {
-                    showError("Please enter an API key to save.");
-                }
-            } catch (e) {
-                console.error("Could not save API key to LocalStorage:", e);
-                showError("Could not save API key. Your browser might be blocking LocalStorage.");
-            }
-        }
-
         // --- Image Upload Handling ---
         
         function setupUploadListeners(dropZone, fileInput, previewEl, imageArray) {
@@ -2410,6 +2359,45 @@
             if(downloadCsvBtn) downloadCsvBtn.classList.add('hidden');
         }
 
+        async function invokeGemini(payload) {
+            let response;
+            try {
+                response = await fetch(GEMINI_PROXY_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (networkError) {
+                console.error('Network error contacting Gemini proxy:', networkError);
+                const error = new Error('Network error contacting AI service.');
+                error.isNetworkError = true;
+                throw error;
+            }
+
+            if (!response.ok) {
+                let errorBody;
+                try {
+                    errorBody = await response.json();
+                } catch (_) {
+                    // ignore parse error
+                }
+                const message = errorBody?.error || errorBody?.details?.error?.message || `Gemini proxy error (${response.status})`;
+                const error = new Error(message);
+                error.status = response.status;
+                error.details = errorBody;
+                throw error;
+            }
+
+            try {
+                return await response.json();
+            } catch (parseError) {
+                console.error('Failed to parse Gemini proxy response:', parseError);
+                const error = new Error('Failed to parse AI response.');
+                error.isParseError = true;
+                throw error;
+            }
+        }
+
         // --- Main Analysis Logic ---
         
         /**
@@ -2419,11 +2407,6 @@
          * @returns {Promise<string>} - The generated text response.
          */
         async function callGeminiApi(parts, useGrounding = false) {
-            const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
-            
-            // Use the non-streaming endpoint
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
             const payload = {
                 contents: [{
                     role: "user",
@@ -2443,28 +2426,12 @@
             let attempt = 0;
             const maxAttempts = 5;
             const baseDelay = 1000; // 1 second
+            let lastError = null;
 
             while (attempt < maxAttempts) {
                 try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    const result = await invokeGemini(payload);
 
-                    if (!response.ok) {
-                        if (response.status === 429 || response.status >= 500) {
-                            // Rate limit or server error, time to back off
-                            throw new Error(`APIError ${response.status}: ${response.statusText}`);
-                        }
-                        // Other client-side error
-                        const errorBody = await response.json();
-                        console.error("API Error Body:", errorBody);
-                        throw new Error(errorBody.error?.message || "An unknown API error occurred.");
-                    }
-
-                    const result = await response.json();
-                    
                     if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
                         return result.candidates[0].content.parts[0].text;
                     } else if (result.candidates && result.candidates[0].finishReason === "SAFETY") {
@@ -2475,20 +2442,20 @@
                     }
 
                 } catch (error) {
+                    lastError = error;
                     attempt++;
-                    if (error.message.startsWith("APIError") && attempt < maxAttempts) {
+                    const retriable = (error.status && (error.status === 429 || error.status >= 500)) || error.isNetworkError;
+                    if (retriable && attempt < maxAttempts) {
                         const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-                        console.warn(`API error, retrying in ${Math.round(delay/1000)}s... (Attempt ${attempt}/${maxAttempts})`);
+                        console.warn(`AI service error, retrying in ${Math.round(delay/1000)}s... (Attempt ${attempt}/${maxAttempts})`);
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        // Final attempt failed or it's not a retriable error
                         console.error("Failed to call Gemini API:", error);
-                        throw error; // Re-throw the last error
+                        throw error;
                     }
                 }
             }
-            // This line should not be reachable, but as a fallback:
-            throw new Error("Failed to get a response from the AI after multiple attempts.");
+            throw lastError || new Error("Failed to get a response from the AI after multiple attempts.");
         }
         
         /**
@@ -2850,7 +2817,7 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userText);;
+                const resultText = await callChatbotApi();
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
@@ -2868,10 +2835,7 @@ Do not include any text before or after the HTML table.
             }
         }
 
-        async function callChatbotApi(userQuery) {
-            const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
+        async function callChatbotApi() {
             const payload = {
                 contents: chatHistory, // Send the whole history
                 tools: [{ "google_search": {} }], // Use grounding
@@ -2879,40 +2843,13 @@ Do not include any text before or after the HTML table.
                     parts: [{ text: "You are a professional football scout and tactical analyst. Answer the user's questions with this persona. Use Google Search to find up-to-date information. Format your answers clearly with headings, lists, and bold text." }]
                 }
             };
-            
-            let response;
-            try {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (fetchError) {
-                console.error("Network error calling Chatbot API:", fetchError);
-                throw new Error("Network error. Please check your connection.");
-            }
-
-            if (!response.ok) {
-                let errorBody;
-                try {
-                    errorBody = await response.json();
-                } catch(e) {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}. Could not parse error response.`);
-                }
-                console.error("Chatbot API Error Body:", errorBody);
-                throw new Error(errorBody.error?.message || "An unknown API error occurred.");
-            }
 
             let result;
             try {
-                const rawText = await response.text(); // Read as text first
-                if (!rawText) {
-                    throw new Error("Received empty response from API.");
-                }
-                result = JSON.parse(rawText); // Then parse
-            } catch (e) {
-                console.error("Failed to parse Chatbot API response:", e);
-                throw new Error("Failed to parse AI response. " + e.message);
+                result = await invokeGemini(payload);
+            } catch (error) {
+                console.error('Chatbot request failed:', error);
+                throw new Error(error.message || 'Failed to contact the AI service.');
             }
 
             if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
@@ -3857,8 +3794,6 @@ Do not include any text before or after the HTML table.
             });
 
             // API Key management
-            if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveApiKey);
-            loadApiKey();
 
             // --- Main Controls ---
             if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeSinglePlayer);
