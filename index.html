@@ -25,6 +25,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+    <!-- Load DOMPurify for sanitizing AI-generated HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js" integrity="sha512-fbJbJ4yHzrHP6WxxQfHx9H9+AtFwGM9nB6M7qagYT+++9cKj9V3aL39slsl/2q53J36Me4O7O+qGj8S9Q6pknQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <style>
         /* Custom scrollbar for webkit browsers */
         ::-webkit-scrollbar {
@@ -664,17 +667,19 @@
                         <!-- API Key Input -->
                         <div id="apiKeySection" class="bg-slate-900/70 border border-slate-700 rounded-xl p-4 space-y-3">
                             <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-slate-200">Optional Gemini API Key</p>
-                                <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Personal key</span>
+                                <p class="text-sm font-medium text-slate-200">AI Service Status</p>
+                                <span class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Secure proxy</span>
                             </div>
-                            <div id="apiKeyInputGroup" class="flex flex-col sm:flex-row gap-2">
-                                <input type="password" id="apiKey" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Enter your Gemini API key">
-                                <button id="saveApiKeyBtn" class="bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2" title="Save Key">
-                                    <i data-lucide="save" class="h-5 w-5"></i>
-                                    Save
-                                </button>
-                            </div>
-                            <div id="apiKeyMessage" class="text-sm text-teal-400 hidden"></div>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Gemini requests are routed through a Netlify Function so your API key stays on the server.
+                            </p>
+                            <ol class="list-decimal list-inside text-sm text-slate-300 space-y-1">
+                                <li>In Netlify &rarr; Site configuration &rarr; Environment variables, add <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">GEMINI_API_KEY</code>.</li>
+                                <li>Trigger a deploy (or run <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">netlify deploy</code>) so the function picks up the secret.</li>
+                            </ol>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Once configured, the browser automatically talks to <code class="bg-slate-800 text-slate-200 px-1 py-0.5 rounded">/.netlify/functions/gemini-proxy</code> and never stores the key locally.
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1187,7 +1192,7 @@
                 </ol>
 
                 <h4>API Key</h4>
-                <p>The app will try to use a built-in key. If it fails, you can enter your own Google Gemini API key in the <strong>"Optional API Key"</strong> field. Click "Save Key" to save it to your browser for next time.</p>
+                <p>Gemini traffic is proxied through a Netlify Function. Configure the <strong>GEMINI_API_KEY</strong> environment variable in your Netlify site settings&mdash;no keys are stored in or entered via the browser.</p>
             </div>
         </div>
     </div>
@@ -1261,11 +1266,6 @@
         // --- DOM Elements ---
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
-        const apiKeyInput = document.getElementById('apiKey');
-        const apiKeyInputGroup = document.getElementById('apiKeyInputGroup');
-        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-        const apiKeyMessage = document.getElementById('apiKeyMessage');
-        const apiKeySection = document.getElementById('apiKeySection');
         
         // Modals
         const howToUseBtn = document.getElementById('howToUseBtn');
@@ -1418,9 +1418,10 @@
         const newChatBtn = document.getElementById('newChatBtn');
         let chatHistory = [];
 
+        const GEMINI_PROXY_ENDPOINT = '/.netlify/functions/gemini-proxy';
+
         // --- State ---
         let currentTab = 'dashboard';
-        let userApiKey = "";
         const LS_REPORT_KEY = 'proScoutSingleReports';
         const STAGE_ORDER = ['upload', 'analysis', 'summary', 'download'];
         const STAGE_TITLES = {
@@ -1444,6 +1445,64 @@
             "Checking contract clauses... mostly the buyout one.",
             "Re-watching the match... at 2x speed."
         ];
+
+        const BASE_SANITIZE_CONFIG = {
+            ALLOWED_TAGS: [
+                'a', 'article', 'blockquote', 'br', 'code', 'div', 'em', 'figure', 'figcaption', 'h1', 'h2', 'h3', 'h4', 'h5',
+                'h6', 'hr', 'li', 'ol', 'p', 'pre', 'section', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'thead',
+                'th', 'tr', 'ul'
+            ],
+            ALLOWED_ATTR: [
+                'aria-label', 'class', 'colspan', 'data-accent-color', 'data-highlight-ignore', 'data-text-color', 'href', 'rel',
+                'role', 'rowspan', 'scope', 'target'
+            ]
+        };
+
+        function sanitizeHtmlContent(dirty = '', overrides = {}) {
+            if (!dirty) return '';
+            if (typeof DOMPurify === 'undefined') return dirty;
+
+            const config = { ...BASE_SANITIZE_CONFIG };
+            if (overrides.ALLOWED_TAGS) {
+                config.ALLOWED_TAGS = Array.from(new Set([
+                    ...BASE_SANITIZE_CONFIG.ALLOWED_TAGS,
+                    ...overrides.ALLOWED_TAGS
+                ]));
+            }
+            if (overrides.ALLOWED_ATTR) {
+                config.ALLOWED_ATTR = Array.from(new Set([
+                    ...BASE_SANITIZE_CONFIG.ALLOWED_ATTR,
+                    ...overrides.ALLOWED_ATTR
+                ]));
+            }
+
+            return DOMPurify.sanitize(dirty, config);
+        }
+
+        function applySectionAccents(root) {
+            if (!root) return;
+            root.querySelectorAll('[data-accent-color]').forEach(node => {
+                const accent = node.getAttribute('data-accent-color');
+                if (accent) {
+                    node.style.backgroundColor = accent;
+                }
+            });
+            root.querySelectorAll('[data-text-color]').forEach(node => {
+                const color = node.getAttribute('data-text-color');
+                if (color) {
+                    node.style.color = color;
+                }
+            });
+        }
+
+        function renderSafeContent(element, html, options = {}) {
+            if (!element) return;
+            const safeHtml = sanitizeHtmlContent(html || '');
+            element.innerHTML = safeHtml;
+            if (options.applyAccents) {
+                applySectionAccents(element);
+            }
+        }
 
         // --- Utility Functions ---
 
@@ -1613,7 +1672,8 @@
         function prepareAnalysisViews(html, markdown) {
             analysisViews = buildAnalysisSections(html, markdown);
             if (analysisDataView) {
-                analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500">No structured data tables detected.</p>';
+                const dataHtml = analysisViews.data || '<p class="text-slate-500">No structured data tables detected.</p>';
+                renderSafeContent(analysisDataView, dataHtml);
             }
             showAnalysisView('summary');
             updateHighlights();
@@ -1658,13 +1718,14 @@
         }
 
         function buildAnalysisSections(html) {
-            const views = { summary: '', detailed: html, tactical: '', data: '' };
+            const sanitizedHtml = sanitizeHtmlContent(html);
+            const views = { summary: '', detailed: sanitizedHtml, tactical: '', data: '' };
             const parser = new DOMParser();
-            const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+            const doc = parser.parseFromString(`<div>${sanitizedHtml}</div>`, 'text/html');
             const container = doc.body.firstElementChild;
             if (!container) {
-                views.summary = html;
-                views.tactical = html;
+                views.summary = sanitizedHtml;
+                views.tactical = sanitizedHtml;
                 views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
                 return views;
             }
@@ -1680,13 +1741,14 @@
                 }
                 sections.push({
                     title: heading.textContent || '',
-                    html: sectionContent.innerHTML.trim()
+                    html: sanitizeHtmlContent(sectionContent.innerHTML.trim())
                 });
             });
 
             const tables = container.querySelectorAll('table');
             if (tables.length) {
-                views.data = Array.from(tables).map(table => table.outerHTML).join('');
+                const tablesHtml = Array.from(tables).map(table => sanitizeHtmlContent(table.outerHTML)).join('');
+                views.data = tablesHtml || '<p class="text-slate-500">No structured data tables detected.</p>';
             } else {
                 views.data = '<p class="text-slate-500">No structured data tables detected.</p>';
             }
@@ -1695,15 +1757,15 @@
                 const palette = getSectionPalette(section.title);
                 const safeTitle = escapeHtml(section.title || 'Untitled Section');
                 const body = section.html && section.html.trim()
-                    ? section.html
+                    ? sanitizeHtmlContent(section.html)
                     : '<p class="text-slate-500 text-sm">No insights provided.</p>';
                 return `
                     <article class="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-lg shadow-slate-900/30">
-                        <span class="absolute inset-y-0 left-0 w-1.5" style="background:${palette.accent};"></span>
+                        <span class="absolute inset-y-0 left-0 w-1.5" data-accent-color="${palette.accent}"></span>
                         <div class="pl-4">
                             <div class="flex items-center gap-2">
                                 <span class="text-base">${palette.icon || '📊'}</span>
-                                <h4 class="text-lg font-semibold" style="color:${palette.text};">${safeTitle}</h4>
+                                <h4 class="text-lg font-semibold" data-text-color="${palette.text}">${safeTitle}</h4>
                             </div>
                             <div class="mt-3 prose prose-sm prose-invert max-w-none leading-relaxed space-y-3">${body}</div>
                         </div>
@@ -1713,7 +1775,8 @@
 
             const renderGrid = (list) => {
                 if (!list.length) return '';
-                return `<div class="grid gap-4 lg:grid-cols-2 auto-rows-fr">${list.map(renderCard).join('')}</div>`;
+                const gridHtml = `<div class="grid gap-4 lg:grid-cols-2 auto-rows-fr">${list.map(renderCard).join('')}</div>`;
+                return sanitizeHtmlContent(gridHtml, { ALLOWED_TAGS: ['article'] });
             };
 
             const summarySections = sections.filter(section => /summary|overview|highlights|rating|conclusion|recommendation/i.test(section.title));
@@ -1722,9 +1785,9 @@
             const summarySelection = summarySections.length ? summarySections : sections.slice(0, Math.min(sections.length, 3));
             const tacticalSelection = tacticalSections.length ? tacticalSections : sections.filter(section => /tactic|position|action|mentality|phase/i.test(section.title)).slice(0, 4);
 
-            views.summary = summarySelection.length ? renderGrid(summarySelection) : html;
-            views.tactical = tacticalSelection.length ? renderGrid(tacticalSelection) : (sections.length ? renderGrid(sections.slice(1, Math.min(sections.length, 4))) : html);
-            views.detailed = sections.length ? renderGrid(sections) : html;
+            views.summary = summarySelection.length ? renderGrid(summarySelection) : sanitizedHtml;
+            views.tactical = tacticalSelection.length ? renderGrid(tacticalSelection) : (sections.length ? renderGrid(sections.slice(1, Math.min(sections.length, 4))) : sanitizedHtml);
+            views.detailed = sections.length ? renderGrid(sections) : sanitizedHtml;
 
             return views;
         }
@@ -1738,14 +1801,15 @@
             if (view === 'data') {
                 analysisOutput.classList.add('hidden');
                 if (analysisDataView) {
-                    analysisDataView.innerHTML = analysisViews.data || '<p class="text-slate-500 text-sm">No structured data tables detected.</p>';
+                    const dataContent = analysisViews.data || '<p class="text-slate-500 text-sm">No structured data tables detected.</p>';
+                    renderSafeContent(analysisDataView, dataContent);
                     analysisDataView.classList.remove('hidden');
                 }
             } else {
                 analysisOutput.classList.remove('hidden');
                 if (analysisDataView) analysisDataView.classList.add('hidden');
                 const content = analysisViews[view] || '<p class="text-slate-400">Run an analysis to populate this view.</p>';
-                analysisOutput.innerHTML = content;
+                renderSafeContent(analysisOutput, content, { applyAccents: true });
             }
         }
 
@@ -1753,7 +1817,7 @@
             if (!analysisSummary) return;
             const summaryHtml = analysisViews.summary;
             if (!summaryHtml) {
-                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Generate a scouting report to see instant highlights.</p>';
+                renderSafeContent(analysisSummary, '<p class="text-xs text-slate-500">Generate a scouting report to see instant highlights.</p>');
                 return;
             }
 
@@ -1774,24 +1838,25 @@
                 analysisSummary.innerHTML = '';
                 analysisSummary.appendChild(list);
             } else if (paragraphs.length) {
-                analysisSummary.innerHTML = paragraphs.slice(0, 3).map(text => `<p>${text}</p>`).join('');
+                const paragraphHtml = paragraphs.slice(0, 3).map(text => `<p>${escapeHtml(text)}</p>`).join('');
+                renderSafeContent(analysisSummary, paragraphHtml);
             } else {
-                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>';
+                renderSafeContent(analysisSummary, '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>');
             }
         }
 
         function resetAnalysisViews() {
             analysisViews = { summary: '', detailed: '', tactical: '', data: '' };
             if (analysisOutput) {
-                analysisOutput.innerHTML = '<p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>';
+                renderSafeContent(analysisOutput, '<p class="text-slate-400">Your analysis will appear here. Start by filling out the fields on the left and click "Analyze Player".</p>');
                 analysisOutput.classList.remove('hidden');
             }
             if (analysisDataView) {
-                analysisDataView.innerHTML = '<p class="text-slate-500 text-sm">Switch back after running an analysis to view data tables here.</p>';
+                renderSafeContent(analysisDataView, '<p class="text-slate-500 text-sm">Switch back after running an analysis to view data tables here.</p>');
                 analysisDataView.classList.add('hidden');
             }
             if (analysisSummary) {
-                analysisSummary.innerHTML = '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>';
+                renderSafeContent(analysisSummary, '<p class="text-xs text-slate-500">Highlights will appear once the AI generates a report.</p>');
             }
             updateViewButtons('summary');
             currentAnalysisView = 'summary';
@@ -1821,7 +1886,7 @@
             if (savedReportsEmptyState) savedReportsEmptyState.classList.add('hidden');
 
             if (!savedReports.length) {
-                savedReportsList.innerHTML = '<p class="text-slate-400">No saved reports yet.</p>';
+                renderSafeContent(savedReportsList, '<p class="text-slate-400">No saved reports yet.</p>');
                 if (savedReportsGrid) savedReportsGrid.innerHTML = '';
                 if (savedReportsEmptyState) savedReportsEmptyState.classList.remove('hidden');
                 if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -2095,7 +2160,7 @@
                 return `<${listTag} class="${listClass} pl-4 space-y-2 text-sm text-slate-200">${items.map(item => `<li>${item}</li>`).join('')}</${listTag}>`;
             };
 
-            builder.storyboard.innerHTML = `
+            renderSafeContent(builder.storyboard, `
                 <div class="grid gap-3 lg:grid-cols-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <h4 class="text-xs uppercase tracking-[0.25em] text-slate-500 mb-2">${config.labels[0]}</h4>
@@ -2110,7 +2175,7 @@
                         ${buildList(visualItems)}
                     </div>
                 </div>
-            `;
+            `);
         }
 
         async function generateNarrativeVideo(builderKey) {
@@ -2129,7 +2194,7 @@
                 const theme = reportTheme?.value || 'default';
                 showLoading('Generating narrative storyboard...', 'analysis');
                 if (builder.storyboard) {
-                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                    renderSafeContent(builder.storyboard, '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>');
                 }
 
                 const prompt = `You are a creative football storyteller. Using the following scouting report, craft a ${duration}-second voice-over script with scene cues. Tone: ${tone}. Theme: ${theme}.\n\nReport:\n${analysisOutput.dataset.rawMarkdown}\n\nReturn Markdown with sections: \n## Voice-Over Script (2-3 paragraphs)\n## On-Screen Prompts (bullet list)\n## Recommended B-Roll (bullet list).`;
@@ -2138,7 +2203,7 @@
                     const narrative = await callGeminiApi([{ text: prompt }], false);
                     const formatted = formatChatText(narrative);
                     if (builder.script) {
-                        builder.script.innerHTML = formatted;
+                        renderSafeContent(builder.script, formatted);
                     }
                     renderNarrativeStoryboard(narrative, builderKey);
                     speakNarrative(narrative, builderKey);
@@ -2157,7 +2222,7 @@
 
                 showLoading('Drafting opposition briefing...', 'analysis');
                 if (builder.storyboard) {
-                    builder.storyboard.innerHTML = '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>';
+                    renderSafeContent(builder.storyboard, '<p class="text-xs text-slate-500">Drafting storyboard beats...</p>');
                 }
 
                 const prompt = `You are an elite tactical presenter. Summarize the following opposition scouting report into a ${duration}-second voice-over script with actionable cues. Tone: ${tone}.\n\nReport:\n${opponentContent}\n\nReturn Markdown with sections: \n## Briefing Script (2-3 paragraphs)\n## Key Slides (bullet list)\n## Final Reminder (1-2 bullet points).`;
@@ -2166,7 +2231,7 @@
                     const narrative = await callGeminiApi([{ text: prompt }], false);
                     const formatted = formatChatText(narrative);
                     if (builder.script) {
-                        builder.script.innerHTML = formatted;
+                        renderSafeContent(builder.script, formatted);
                     }
                     renderNarrativeStoryboard(narrative, builderKey);
                     speakNarrative(narrative, builderKey);
@@ -2176,55 +2241,6 @@
                 } finally {
                     hideLoading();
                 }
-            }
-        }
-
-        // --- API Key Management ---
-        function loadApiKey() {
-            try {
-                const savedKey = localStorage.getItem('geminiApiKey');
-                if (savedKey) {
-                    userApiKey = savedKey;
-                    apiKeyInputGroup.classList.add('hidden');
-                    apiKeyMessage.innerHTML = 'API Key saved. <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
-                    apiKeyMessage.classList.remove('hidden');
-                    
-                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                        localStorage.removeItem('geminiApiKey');
-                        userApiKey = "";
-                        apiKeyInput.value = "";
-                        apiKeyInputGroup.classList.remove('hidden');
-                        apiKeyMessage.classList.add('hidden');
-                    });
-                }
-            } catch (e) {
-                console.error("Could not load API key from LocalStorage:", e);
-            }
-        }
-
-        function saveApiKey() {
-            try {
-                const key = apiKeyInput.value.trim();
-                if (key) {
-                    userApiKey = key;
-                    localStorage.setItem('geminiApiKey', key);
-                    apiKeyInputGroup.classList.add('hidden');
-                    apiKeyMessage.innerHTML = 'API Key saved! <button id="clearApiKeyBtn" class="text-red-400 hover:underline">[Clear Key]</button>';
-                    apiKeyMessage.classList.remove('hidden');
-                    
-                    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-                        localStorage.removeItem('geminiApiKey');
-                        userApiKey = "";
-                        apiKeyInput.value = "";
-                        apiKeyInputGroup.classList.remove('hidden');
-                        apiKeyMessage.classList.add('hidden');
-                    });
-                } else {
-                    showError("Please enter an API key to save.");
-                }
-            } catch (e) {
-                console.error("Could not save API key to LocalStorage:", e);
-                showError("Could not save API key. Your browser might be blocking LocalStorage.");
             }
         }
 
@@ -2357,7 +2373,7 @@
             resetAnalysisViews();
             renderAnalysisVisuals();
             stopNarrativePlayback();
-            if(narrativeScript) narrativeScript.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
+            if(narrativeScript) renderSafeContent(narrativeScript, '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>');
             if (statsChart) {
                 statsChart.destroy();
                 statsChart = null;
@@ -2382,7 +2398,7 @@
             if(imagePreviewCompare2) imagePreviewCompare2.innerHTML = '';
             compare2Images = [];
             if(textStatsCompare2) textStatsCompare2.value = '';
-            if(analysisOutputCompare) analysisOutputCompare.innerHTML = '<p class="text-slate-400">Comparison cleared.</p>';
+            if(analysisOutputCompare) renderSafeContent(analysisOutputCompare, '<p class="text-slate-400">Comparison cleared.</p>');
         }
 
         function clearOpponentInputs() {
@@ -2390,7 +2406,7 @@
             if(imagePreviewOpponent) imagePreviewOpponent.innerHTML = '';
             opponentImages = [];
             if(textStatsOpponent) textStatsOpponent.value = '';
-            if(analysisOutputOpponent) analysisOutputOpponent.innerHTML = '<p class="text-slate-400">Opposition analysis cleared.</p>';
+            if(analysisOutputOpponent) renderSafeContent(analysisOutputOpponent, '<p class="text-slate-400">Opposition analysis cleared.</p>');
         }
 
         function clearSearchInputs() {
@@ -2405,9 +2421,48 @@
             if(searchStats) searchStats.value = '';
             if(searchSimilar) searchSimilar.value = '';
             if(suggestStatsBtn) suggestStatsBtn.disabled = true;
-            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Your search results will appear here.</p>';
+            if(searchResults) renderSafeContent(searchResults, '<p class="text-slate-400">Your search results will appear here.</p>');
             if(searchError) searchError.classList.add('hidden');
             if(downloadCsvBtn) downloadCsvBtn.classList.add('hidden');
+        }
+
+        async function invokeGemini(payload) {
+            let response;
+            try {
+                response = await fetch(GEMINI_PROXY_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (networkError) {
+                console.error('Network error contacting Gemini proxy:', networkError);
+                const error = new Error('Network error contacting AI service.');
+                error.isNetworkError = true;
+                throw error;
+            }
+
+            if (!response.ok) {
+                let errorBody;
+                try {
+                    errorBody = await response.json();
+                } catch (_) {
+                    // ignore parse error
+                }
+                const message = errorBody?.error || errorBody?.details?.error?.message || `Gemini proxy error (${response.status})`;
+                const error = new Error(message);
+                error.status = response.status;
+                error.details = errorBody;
+                throw error;
+            }
+
+            try {
+                return await response.json();
+            } catch (parseError) {
+                console.error('Failed to parse Gemini proxy response:', parseError);
+                const error = new Error('Failed to parse AI response.');
+                error.isParseError = true;
+                throw error;
+            }
         }
 
         // --- Main Analysis Logic ---
@@ -2419,11 +2474,6 @@
          * @returns {Promise<string>} - The generated text response.
          */
         async function callGeminiApi(parts, useGrounding = false) {
-            const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
-            
-            // Use the non-streaming endpoint
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
             const payload = {
                 contents: [{
                     role: "user",
@@ -2443,28 +2493,12 @@
             let attempt = 0;
             const maxAttempts = 5;
             const baseDelay = 1000; // 1 second
+            let lastError = null;
 
             while (attempt < maxAttempts) {
                 try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    const result = await invokeGemini(payload);
 
-                    if (!response.ok) {
-                        if (response.status === 429 || response.status >= 500) {
-                            // Rate limit or server error, time to back off
-                            throw new Error(`APIError ${response.status}: ${response.statusText}`);
-                        }
-                        // Other client-side error
-                        const errorBody = await response.json();
-                        console.error("API Error Body:", errorBody);
-                        throw new Error(errorBody.error?.message || "An unknown API error occurred.");
-                    }
-
-                    const result = await response.json();
-                    
                     if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
                         return result.candidates[0].content.parts[0].text;
                     } else if (result.candidates && result.candidates[0].finishReason === "SAFETY") {
@@ -2475,20 +2509,20 @@
                     }
 
                 } catch (error) {
+                    lastError = error;
                     attempt++;
-                    if (error.message.startsWith("APIError") && attempt < maxAttempts) {
+                    const retriable = (error.status && (error.status === 429 || error.status >= 500)) || error.isNetworkError;
+                    if (retriable && attempt < maxAttempts) {
                         const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-                        console.warn(`API error, retrying in ${Math.round(delay/1000)}s... (Attempt ${attempt}/${maxAttempts})`);
+                        console.warn(`AI service error, retrying in ${Math.round(delay/1000)}s... (Attempt ${attempt}/${maxAttempts})`);
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        // Final attempt failed or it's not a retriable error
                         console.error("Failed to call Gemini API:", error);
-                        throw error; // Re-throw the last error
+                        throw error;
                     }
                 }
             }
-            // This line should not be reachable, but as a fallback:
-            throw new Error("Failed to get a response from the AI after multiple attempts.");
+            throw lastError || new Error("Failed to get a response from the AI after multiple attempts.");
         }
         
         /**
@@ -2710,7 +2744,7 @@
         async function handleSearch() {
             showLoading("Searching for players...");
             if(searchError) searchError.classList.add('hidden');
-            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Searching...</p>';
+            if(searchResults) renderSafeContent(searchResults, '<p class="text-slate-400">Searching...</p>');
             if(downloadCsvBtn) downloadCsvBtn.classList.add('hidden');
             
             const queryParts = [];
@@ -2748,21 +2782,22 @@ Do not include any text before or after the HTML table.
             if(searchButton) searchButton.disabled = true;
             try {
                 const resultHtml = await callGeminiApi([{ text: fullQuery }], true); // Use grounding
-                
+                const sanitizedTable = sanitizeHtmlContent(resultHtml);
+
                 // Style the HTML table with Tailwind
-                let styledHtml = resultHtml
+                let styledHtml = sanitizedTable
                     .replace(/<table>/g, '<table class="w-full text-left border-collapse">')
                     .replace(/<thead>/g, '<thead class="bg-slate-700">')
                     .replace(/<th>/g, '<th class="p-3 border-b border-slate-600 text-sm font-semibold text-white">')
                     .replace(/<tbody>/g, '<tbody class="divide-y divide-slate-700">')
                     .replace(/<tr>/g, '<tr class="hover:bg-slate-800">')
                     .replace(/<td>/g, '<td class="p-3 border-b border-slate-700 text-sm">');
-                
-                if(searchResults) searchResults.innerHTML = styledHtml;
+
+                if(searchResults) renderSafeContent(searchResults, styledHtml);
                 
                 // Prepare CSV content
                 csvContent = "Name,Age,Club,Nationality,Position,Market Value (Est.),Contract Expires,Latest News\n";
-                const table = new DOMParser().parseFromString(resultHtml, 'text/html').querySelector('table');
+                const table = new DOMParser().parseFromString(sanitizedTable, 'text/html').querySelector('table');
                 if (table) {
                     table.querySelectorAll('tbody tr').forEach(row => {
                         const rowData = [];
@@ -2819,7 +2854,7 @@ Do not include any text before or after the HTML table.
                 searchError.textContent = message;
                 searchError.classList.remove('hidden');
             }
-            if(searchResults) searchResults.innerHTML = '<p class="text-slate-400">Search failed. Please try again.</p>';
+            if(searchResults) renderSafeContent(searchResults, '<p class="text-slate-400">Search failed. Please try again.</p>');
             hideLoading();
         }
         
@@ -2850,7 +2885,7 @@ Do not include any text before or after the HTML table.
             const loadingEl = addChatMessage('Scout AI', '...');
 
             try {
-                const resultText = await callChatbotApi(userText);;
+                const resultText = await callChatbotApi();
                 
                 // Add model message to history
                 chatHistory.push({ role: 'model', parts: [{ text: resultText }] });
@@ -2859,7 +2894,10 @@ Do not include any text before or after the HTML table.
                 if(loadingEl) loadingEl.querySelector('.chat-content').innerHTML = formatChatText(resultText);
 
             } catch (error) {
-                if(loadingEl) loadingEl.querySelector('.chat-content').innerHTML = `<p class="text-red-400">Error: ${error.message}</p>`;
+                if (loadingEl) {
+                    const safeError = escapeHtml(error.message || 'An unexpected error occurred.');
+                    loadingEl.querySelector('.chat-content').innerHTML = `<p class="text-red-400">Error: ${safeError}</p>`;
+                }
             } finally {
                 chatInput.disabled = false;
                 chatSendBtn.disabled = false;
@@ -2868,10 +2906,7 @@ Do not include any text before or after the HTML table.
             }
         }
 
-        async function callChatbotApi(userQuery) {
-            const apiKey = userApiKey || (typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '');
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
+        async function callChatbotApi() {
             const payload = {
                 contents: chatHistory, // Send the whole history
                 tools: [{ "google_search": {} }], // Use grounding
@@ -2879,40 +2914,13 @@ Do not include any text before or after the HTML table.
                     parts: [{ text: "You are a professional football scout and tactical analyst. Answer the user's questions with this persona. Use Google Search to find up-to-date information. Format your answers clearly with headings, lists, and bold text." }]
                 }
             };
-            
-            let response;
-            try {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (fetchError) {
-                console.error("Network error calling Chatbot API:", fetchError);
-                throw new Error("Network error. Please check your connection.");
-            }
-
-            if (!response.ok) {
-                let errorBody;
-                try {
-                    errorBody = await response.json();
-                } catch(e) {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}. Could not parse error response.`);
-                }
-                console.error("Chatbot API Error Body:", errorBody);
-                throw new Error(errorBody.error?.message || "An unknown API error occurred.");
-            }
 
             let result;
             try {
-                const rawText = await response.text(); // Read as text first
-                if (!rawText) {
-                    throw new Error("Received empty response from API.");
-                }
-                result = JSON.parse(rawText); // Then parse
-            } catch (e) {
-                console.error("Failed to parse Chatbot API response:", e);
-                throw new Error("Failed to parse AI response. " + e.message);
+                result = await invokeGemini(payload);
+            } catch (error) {
+                console.error('Chatbot request failed:', error);
+                throw new Error(error.message || 'Failed to contact the AI service.');
             }
 
             if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
@@ -2944,7 +2952,7 @@ Do not include any text before or after the HTML table.
 
         function formatChatText(text) {
              // Basic markdown-to-HTML
-            return text
+            const html = text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
                 .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italics
                 .replace(/^# (.*)/gm, '<h3 class="text-xl font-semibold text-white mt-3 mb-2">$1</h3>') // H1 -> H3
@@ -2953,6 +2961,8 @@ Do not include any text before or after the HTML table.
                 .replace(/^- (.*)/gm, '<li class="ml-4">$1</li>') // List items
                 .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>') // Wrap lists
                 .replace(/\n/g, '<br>'); // Newlines
+
+            return sanitizeHtmlContent(html);
         }
 
         function newChat() {
@@ -3007,12 +3017,16 @@ Do not include any text before or after the HTML table.
                 .replace(/<\/p><p>/g, '</p><p class="mt-2">')
                 .replace(/---/g, '<hr class="border-slate-700 my-4">'); // Add horizontal rules
 
-            element.dataset.rawMarkdown = rawText;
+            if (element.id === 'analysisOutput') {
+                element.dataset.rawMarkdown = rawText;
+            }
+
+            const safeHtml = sanitizeHtmlContent(html);
 
             if (element.id === 'analysisOutput') {
-                prepareAnalysisViews(html, rawText);
+                prepareAnalysisViews(safeHtml, rawText);
             } else {
-                element.innerHTML = html;
+                renderSafeContent(element, safeHtml);
             }
         }
 
@@ -3699,7 +3713,7 @@ Do not include any text before or after the HTML table.
 
         function saveOpponentAnalysis() {
             const name = opponentName.value.trim();
-            const content = analysisOutputOpponent.innerHTML;
+            const content = sanitizeHtmlContent(analysisOutputOpponent.innerHTML);
             if (!name) {
                 showError("Please enter an opponent name to save the analysis.");
                 return;
@@ -3712,7 +3726,7 @@ Do not include any text before or after the HTML table.
             try {
                 let analyses = getSavedOpponentAnalyses();
                 const existingIndex = analyses.findIndex(a => a.name === name);
-                
+
                 const analysisData = { name, content, savedAt: new Date().toISOString() };
 
                 if (existingIndex > -1) {
@@ -3799,7 +3813,7 @@ Do not include any text before or after the HTML table.
             const analysis = analyses.find(a => a.name === name);
             if (analysis) {
                 opponentName.value = analysis.name;
-                analysisOutputOpponent.innerHTML = analysis.content;
+                renderSafeContent(analysisOutputOpponent, analysis.content);
                 closeLoadOpponentModal();
             } else {
                 showError("Could not find the saved analysis to load.");
@@ -3825,7 +3839,7 @@ Do not include any text before or after the HTML table.
             renderAnalysisVisuals();
             Object.values(narrativeBuilders).forEach(builder => {
                 if (builder?.script) {
-                    builder.script.innerHTML = '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>';
+                    renderSafeContent(builder.script, '<p class="text-xs text-slate-500">Run a report to generate a narrative storyboard.</p>');
                 }
             });
 
@@ -3857,8 +3871,6 @@ Do not include any text before or after the HTML table.
             });
 
             // API Key management
-            if (saveApiKeyBtn) saveApiKeyBtn.addEventListener('click', saveApiKey);
-            loadApiKey();
 
             // --- Main Controls ---
             if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeSinglePlayer);
